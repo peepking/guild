@@ -1,0 +1,372 @@
+export const MONSTER_DATA = {
+    "CENTRAL": {
+        "E": [
+            { "name": "巨大ネズミ", "category": "雑魚1", "mainType": "beast", "subType": "rodent", "rank": "E", "region": "CENTRAL" },
+            { "name": "スライム", "category": "雑魚2", "mainType": "slime", "subType": "neutral", "rank": "E", "region": "CENTRAL" },
+            { "name": "一角ウサギ", "category": "中堅1", "mainType": "beast", "subType": "myth", "rank": "E", "region": "CENTRAL" },
+            { "name": "野盗の斥候", "category": "中堅2", "mainType": "humanoid", "subType": "bandit", "rank": "E", "region": "CENTRAL" },
+            { "name": "飢えた野犬", "category": "強敵1", "mainType": "beast", "subType": "wolf", "rank": "E", "region": "CENTRAL" },
+            { "name": "ゴブリン", "category": "強敵2", "mainType": "humanoid", "subType": "goblin", "rank": "E", "region": "CENTRAL" },
+            { "name": "ピクシー", "category": "特殊", "mainType": "spirit", "subType": "fairy", "rank": "E", "region": "CENTRAL" },
+            { "name": "野盗団長", "category": "ボス1", "mainType": "humanoid", "subType": "bandit", "rank": "E", "region": "CENTRAL" },
+            { "name": "ゴブリンリーダー", "category": "ボス2", "mainType": "humanoid", "subType": "goblin", "rank": "E", "region": "CENTRAL" },
+            { "name": "巨大イノシシ", "category": "ボス3", "mainType": "beast", "subType": "boar", "rank": "E", "region": "CENTRAL" }
+        ],
+        "D": [
+            { "name": "強酸スライム", "category": "雑魚1", "mainType": "slime", "subType": "acid", "rank": "D", "region": "CENTRAL" },
+            { "name": "マイコニド", "category": "雑魚2", "mainType": "fungus", "subType": "spore", "rank": "D", "region": "CENTRAL" },
+            { "name": "コボルト", "category": "中堅1", "mainType": "humanoid", "subType": "kobold", "rank": "D", "region": "CENTRAL" },
+            { "name": "野盗の弓兵", "category": "中堅2", "mainType": "humanoid", "subType": "bandit", "rank": "D", "region": "CENTRAL" },
+            { "name": "森林タイガー", "category": "強敵1", "mainType": "beast", "subType": "feline", "rank": "D", "region": "CENTRAL" },
+            { "name": "オーク", "category": "強敵2", "mainType": "humanoid", "subType": "orc", "rank": "D", "region": "CENTRAL" },
+            { "name": "ブラウニー", "category": "特殊", "mainType": "spirit", "subType": "fairy", "rank": "D", "region": "CENTRAL" },
+            { "name": "賞金首の剣士", "category": "ボス1", "mainType": "humanoid", "subType": "bandit", "rank": "D", "region": "CENTRAL" },
+            { "name": "オークチーフ", "category": "ボス2", "mainType": "humanoid", "subType": "orc", "rank": "D", "region": "CENTRAL" },
+            { "name": "山鬼", "category": "ボス3", "mainType": "humanoid", "subType": "oni", "rank": "D", "region": "CENTRAL" }
+        ],
+        "C": [
+            { "name": "コボルト狩人", "category": "雑魚1", "mainType": "humanoid", "subType": "kobold", "rank": "C", "region": "CENTRAL" },
+            { "name": "オークソルジャー", "category": "雑魚2", "mainType": "humanoid", "subType": "orc", "rank": "C", "region": "CENTRAL" },
+            { "name": "サーベルタイガー", "category": "中堅1", "mainType": "beast", "subType": "feline", "rank": "C", "region": "CENTRAL" },
+            { "name": "武装野盗", "category": "中堅2", "mainType": "humanoid", "subType": "bandit", "rank": "C", "region": "CENTRAL" },
+            { "name": "グリフォン", "category": "強敵1", "mainType": "beast", "subType": "myth", "rank": "C", "region": "CENTRAL" },
+            { "name": "トロル", "category": "強敵2", "mainType": "humanoid", "subType": "giant", "rank": "C", "region": "CENTRAL" },
+            { "name": "ノーム", "category": "特殊", "mainType": "humanoid", "subType": "myth", "rank": "C", "region": "CENTRAL" },
+            { "name": "野盗王", "category": "ボス1", "mainType": "humanoid", "subType": "bandit", "rank": "C", "region": "CENTRAL" },
+            { "name": "オークキング", "category": "ボス2", "mainType": "humanoid", "subType": "orc", "rank": "C", "region": "CENTRAL" },
+            { "name": "ゴーレム", "category": "ボス3", "mainType": "construct", "subType": "stone", "rank": "C", "region": "CENTRAL" }
+        ],
+        "B": [
+            { "name": "鋼殻ビートル", "category": "雑魚1", "mainType": "insect", "subType": "carapace", "rank": "B", "region": "CENTRAL" },
+            { "name": "オークバーサーカー", "category": "雑魚2", "mainType": "humanoid", "subType": "orc", "rank": "B", "region": "CENTRAL" },
+            { "name": "ワイバーン", "category": "中堅1", "mainType": "dragon", "subType": "wyvern", "rank": "B", "region": "CENTRAL" },
+            { "name": "オーガ", "category": "中堅2", "mainType": "humanoid", "subType": "giant", "rank": "B", "region": "CENTRAL" },
+            { "name": "キマイラ", "category": "強敵1", "mainType": "beast", "subType": "myth", "rank": "B", "region": "CENTRAL" },
+            { "name": "サイクロプス", "category": "強敵2", "mainType": "humanoid", "subType": "giant", "rank": "B", "region": "CENTRAL" },
+            { "name": "ドッペルゲンガー", "category": "特殊", "mainType": "humanoid", "subType": "shapeshifter", "rank": "B", "region": "CENTRAL" },
+            { "name": "堕ちた騎士", "category": "ボス1", "mainType": "humanoid", "subType": "knight", "rank": "B", "region": "CENTRAL" },
+            { "name": "バジリスク", "category": "ボス2", "mainType": "dragon", "subType": "petrify", "rank": "B", "region": "CENTRAL" },
+            { "name": "キングバブーン", "category": "ボス3", "mainType": "beast", "subType": "primate", "rank": "B", "region": "CENTRAL" }
+        ],
+        "A": [
+            { "name": "アークデーモン", "category": "雑魚1", "mainType": "humanoid", "subType": "demon", "rank": "A", "region": "CENTRAL" },
+            { "name": "ヴァンパイアロード", "category": "雑魚2", "mainType": "undead", "subType": "vampire", "rank": "A", "region": "CENTRAL" },
+            { "name": "デュラハン", "category": "中堅1", "mainType": "undead", "subType": "knight", "rank": "A", "region": "CENTRAL" },
+            { "name": "ドラゴンゾンビ", "category": "中堅2", "mainType": "dragon", "subType": "undead", "rank": "A", "region": "CENTRAL" },
+            { "name": "アークエンジェル", "category": "強敵1", "mainType": "spirit", "subType": "angel", "rank": "A", "region": "CENTRAL" },
+            { "name": "リッチキング", "category": "強敵2", "mainType": "undead", "subType": "mage", "rank": "A", "region": "CENTRAL" },
+            { "name": "古代の機械兵", "category": "特殊", "mainType": "construct", "subType": "ancient", "rank": "A", "region": "CENTRAL" },
+            { "name": "魔王の幻影", "category": "ボス1", "mainType": "god", "subType": "demon", "rank": "A", "region": "CENTRAL" },
+            { "name": "エンシェントドラゴン", "category": "ボス2", "mainType": "dragon", "subType": "ancient", "rank": "A", "region": "CENTRAL" },
+            { "name": "ベヒモス", "category": "ボス3", "mainType": "beast", "subType": "myth", "rank": "A", "region": "CENTRAL" }
+        ],
+        "S": [
+            { "name": "混沌の使者", "category": "雑魚1", "mainType": "god", "subType": "chaos", "rank": "S", "region": "CENTRAL" },
+            { "name": "虚無の影", "category": "雑魚2", "mainType": "god", "subType": "void", "rank": "S", "region": "CENTRAL" },
+            { "name": "異界の支配者", "category": "中堅1", "mainType": "god", "subType": "alien", "rank": "S", "region": "CENTRAL" },
+            { "name": "神殺しの狼", "category": "中堅2", "mainType": "beast", "subType": "wolf,god", "rank": "S", "region": "CENTRAL" },
+            { "name": "終焉の黒竜", "category": "強敵1", "mainType": "dragon", "subType": "ancient", "rank": "S", "region": "CENTRAL" },
+            { "name": "時空の歪み", "category": "強敵2", "mainType": "elemental", "subType": "time", "rank": "S", "region": "CENTRAL" },
+            { "name": "創造神の化身", "category": "特殊", "mainType": "god", "subType": "creation", "rank": "S", "region": "CENTRAL" },
+            { "name": "絶対神", "category": "ボス1", "mainType": "god", "subType": "absolute", "rank": "S", "region": "CENTRAL" },
+            { "name": "混沌の王", "category": "ボス2", "mainType": "god", "subType": "chaos", "rank": "S", "region": "CENTRAL" },
+            { "name": "世界の意志", "category": "ボス3", "mainType": "god", "subType": "world", "rank": "S", "region": "CENTRAL" }
+        ]
+    },
+    "EAST": {
+        "E": [
+            { "name": "巨大ネズミ", "category": "雑魚1", "mainType": "beast", "subType": "rodent", "rank": "E", "region": "EAST" },
+            { "name": "スライム", "category": "雑魚2", "mainType": "slime", "subType": "neutral", "rank": "E", "region": "EAST" },
+            { "name": "一角ウサギ", "category": "中堅1", "mainType": "beast", "subType": "myth", "rank": "E", "region": "EAST" },
+            { "name": "巨大スズメバチ", "category": "中堅2", "mainType": "insect", "subType": "venom", "rank": "E", "region": "EAST" },
+            { "name": "牙オオカミ", "category": "強敵1", "mainType": "beast", "subType": "wolf", "rank": "E", "region": "EAST" },
+            { "name": "樹上カマキリ", "category": "強敵2", "mainType": "insect", "subType": "ambush", "rank": "E", "region": "EAST" },
+            { "name": "ピクシー", "category": "特殊", "mainType": "spirit", "subType": "fairy", "rank": "E", "region": "EAST" },
+            { "name": "巨大イノシシ", "category": "ボス1", "mainType": "beast", "subType": "boar", "rank": "E", "region": "EAST" },
+            { "name": "トレント", "category": "ボス2", "mainType": "plant", "subType": "tree", "rank": "E", "region": "EAST" },
+            { "name": "巨大エルク", "category": "ボス3", "mainType": "beast", "subType": "cervid", "rank": "E", "region": "EAST" }
+        ],
+        "D": [
+            { "name": "強酸スライム", "category": "雑魚1", "mainType": "slime", "subType": "acid", "rank": "D", "region": "EAST" },
+            { "name": "マイコニド", "category": "雑魚2", "mainType": "fungus", "subType": "spore", "rank": "D", "region": "EAST" },
+            { "name": "コボルト", "category": "中堅1", "mainType": "humanoid", "subType": "kobold", "rank": "D", "region": "EAST" },
+            { "name": "ブラウニー", "category": "中堅2", "mainType": "spirit", "subType": "fairy", "rank": "D", "region": "EAST" },
+            { "name": "森林タイガー", "category": "強敵1", "mainType": "beast", "subType": "feline", "rank": "D", "region": "EAST" },
+            { "name": "リザード", "category": "強敵2", "mainType": "beast", "subType": "reptile", "rank": "D", "region": "EAST" },
+            { "name": "オーク", "category": "特殊", "mainType": "humanoid", "subType": "orc", "rank": "D", "region": "EAST" },
+            { "name": "バグベア", "category": "ボス1", "mainType": "humanoid", "subType": "goblinoid", "rank": "D", "region": "EAST" },
+            { "name": "トラップスパイダー", "category": "ボス2", "mainType": "insect", "subType": "web", "rank": "D", "region": "EAST" },
+            { "name": "山鬼", "category": "ボス3", "mainType": "humanoid", "subType": "oni", "rank": "D", "region": "EAST" }
+        ],
+        "C": [
+            { "name": "巨大ワシ", "category": "雑魚1", "mainType": "beast", "subType": "avian", "rank": "C", "region": "EAST" },
+            { "name": "魔化リス", "category": "雑魚2", "mainType": "beast", "subType": "beast", "rank": "C", "region": "EAST" },
+            { "name": "コボルト狩人", "category": "中堅1", "mainType": "humanoid", "subType": "kobold", "rank": "C", "region": "EAST" },
+            { "name": "サテュロス", "category": "中堅2", "mainType": "humanoid", "subType": "myth", "rank": "C", "region": "EAST" },
+            { "name": "森林ベア", "category": "強敵1", "mainType": "beast", "subType": "bear", "rank": "C", "region": "EAST" },
+            { "name": "ノーム", "category": "強敵2", "mainType": "humanoid", "subType": "myth", "rank": "C", "region": "EAST" },
+            { "name": "オーク戦士長", "category": "特殊", "mainType": "humanoid", "subType": "orc", "rank": "C", "region": "EAST" },
+            { "name": "オークキング", "category": "ボス1", "mainType": "humanoid", "subType": "orc", "rank": "C", "region": "EAST" },
+            { "name": "エルダートレント", "category": "ボス2", "mainType": "plant", "subType": "tree", "rank": "C", "region": "EAST" },
+            { "name": "ドライアド", "category": "ボス3", "mainType": "spirit", "subType": "fairy,plant", "rank": "C", "region": "EAST" }
+        ],
+        "B": [
+            { "name": "鋼殻ビートル", "category": "雑魚1", "mainType": "insect", "subType": "carapace", "rank": "B", "region": "EAST" },
+            { "name": "毒霧マイコニド", "category": "雑魚2", "mainType": "fungus", "subType": "poison", "rank": "B", "region": "EAST" },
+            { "name": "コボルト精鋭斥候", "category": "中堅1", "mainType": "humanoid", "subType": "kobold", "rank": "B", "region": "EAST" },
+            { "name": "レッドキャップ", "category": "中堅2", "mainType": "humanoid", "subType": "fairy", "rank": "B", "region": "EAST" },
+            { "name": "サーベルタイガー", "category": "強敵1", "mainType": "beast", "subType": "feline", "rank": "B", "region": "EAST" },
+            { "name": "トロル", "category": "強敵2", "mainType": "humanoid", "subType": "giant", "rank": "B", "region": "EAST" },
+            { "name": "人食いモス", "category": "特殊", "mainType": "insect", "subType": "moth", "rank": "B", "region": "EAST" },
+            { "name": "バジリスク", "category": "ボス1", "mainType": "dragon", "subType": "petrify", "rank": "B", "region": "EAST" },
+            { "name": "ゴーレム", "category": "ボス2", "mainType": "construct", "subType": "stone", "rank": "B", "region": "EAST" },
+            { "name": "キングバブーン", "category": "ボス3", "mainType": "beast", "subType": "primate", "rank": "B", "region": "EAST" }
+        ],
+        "A": [
+            { "name": "腐樹ワーム", "category": "雑魚1", "mainType": "plant", "subType": "parasite", "rank": "A", "region": "EAST" },
+            { "name": "魔樹寄生体", "category": "雑魚2", "mainType": "plant", "subType": "parasite", "rank": "A", "region": "EAST" },
+            { "name": "ケンタウロス", "category": "中堅1", "mainType": "humanoid", "subType": "myth", "rank": "A", "region": "EAST" },
+            { "name": "ヘラクロスビートル", "category": "中堅2", "mainType": "insect", "subType": "beetle", "rank": "A", "region": "EAST" },
+            { "name": "人食いマンドラゴラ", "category": "強敵1", "mainType": "plant", "subType": "myth", "rank": "A", "region": "EAST" },
+            { "name": "アルラウネ", "category": "強敵2", "mainType": "plant", "subType": "myth", "rank": "A", "region": "EAST" },
+            { "name": "エルダーノーム", "category": "特殊", "mainType": "humanoid", "subType": "myth", "rank": "A", "region": "EAST" },
+            { "name": "ユニコーン", "category": "ボス1", "mainType": "beast", "subType": "myth", "rank": "A", "region": "EAST" },
+            { "name": "古代魔装ゴーレム", "category": "ボス2", "mainType": "construct", "subType": "ancient", "rank": "A", "region": "EAST" },
+            { "name": "ティターニア", "category": "ボス3", "mainType": "spirit", "subType": "fairy,myth", "rank": "A", "region": "EAST" }
+        ],
+        "S": [
+            { "name": "カーバンクル", "category": "雑魚1", "mainType": "beast", "subType": "myth", "rank": "S", "region": "EAST" },
+            { "name": "星喰いシード", "category": "雑魚2", "mainType": "plant", "subType": "cosmic", "rank": "S", "region": "EAST" },
+            { "name": "ミノタウロス", "category": "中堅1", "mainType": "humanoid", "subType": "myth", "rank": "S", "region": "EAST" },
+            { "name": "アラクネー", "category": "中堅2", "mainType": "humanoid", "subType": "myth", "rank": "S", "region": "EAST" },
+            { "name": "世界樹の番竜", "category": "強敵1", "mainType": "dragon", "subType": "guardian", "rank": "S", "region": "EAST" },
+            { "name": "ヒュドラ", "category": "強敵2", "mainType": "dragon", "subType": "myth", "rank": "S", "region": "EAST" },
+            { "name": "ロック鳥", "category": "特殊", "mainType": "beast", "subType": "myth,avian", "rank": "S", "region": "EAST" },
+            { "name": "妖精王オベロン", "category": "ボス1", "mainType": "spirit", "subType": "fairy,myth", "rank": "S", "region": "EAST" },
+            { "name": "世界樹", "category": "ボス2", "mainType": "god", "subType": "plant,myth", "rank": "S", "region": "EAST" },
+            { "name": "ウロボロス", "category": "ボス3", "mainType": "god", "subType": "myth", "rank": "S", "region": "EAST" }
+        ]
+    },
+    "NORTH": {
+        "E": [
+            { "name": "スノーラット", "category": "雑魚1", "mainType": "beast", "subType": "rodent,ice", "rank": "E", "region": "NORTH" },
+            { "name": "氷スライム", "category": "雑魚2", "mainType": "slime", "subType": "ice", "rank": "E", "region": "NORTH" },
+            { "name": "巨大氷結花", "category": "中堅1", "mainType": "plant", "subType": "ice", "rank": "E", "region": "NORTH" },
+            { "name": "スノーバット", "category": "中堅2", "mainType": "beast", "subType": "bat,ice", "rank": "E", "region": "NORTH" },
+            { "name": "雪オオカミ", "category": "強敵1", "mainType": "beast", "subType": "wolf,ice", "rank": "E", "region": "NORTH" },
+            { "name": "雪エルク", "category": "強敵2", "mainType": "beast", "subType": "cervid,ice", "rank": "E", "region": "NORTH" },
+            { "name": "霜妖精", "category": "特殊", "mainType": "spirit", "subType": "fairy,ice", "rank": "E", "region": "NORTH" },
+            { "name": "雪グマ", "category": "ボス1", "mainType": "beast", "subType": "bear,ice", "rank": "E", "region": "NORTH" },
+            { "name": "アイストレント", "category": "ボス2", "mainType": "plant", "subType": "ice", "rank": "E", "region": "NORTH" },
+            { "name": "アイスエレメンタル", "category": "ボス3", "mainType": "elemental", "subType": "ice", "rank": "E", "region": "NORTH" }
+        ],
+        "D": [
+            { "name": "氷柱スライム", "category": "雑魚1", "mainType": "slime", "subType": "ice", "rank": "D", "region": "NORTH" },
+            { "name": "ブリザードイーグル", "category": "雑魚2", "mainType": "beast", "subType": "avian,ice", "rank": "D", "region": "NORTH" },
+            { "name": "アイスコボルト", "category": "中堅1", "mainType": "humanoid", "subType": "kobold,ice", "rank": "D", "region": "NORTH" },
+            { "name": "スノーゴブリン", "category": "中堅2", "mainType": "humanoid", "subType": "goblin,ice", "rank": "D", "region": "NORTH" },
+            { "name": "フロストタイガー", "category": "強敵1", "mainType": "beast", "subType": "feline,ice", "rank": "D", "region": "NORTH" },
+            { "name": "氷甲トカゲ", "category": "強敵2", "mainType": "beast", "subType": "reptile,ice", "rank": "D", "region": "NORTH" },
+            { "name": "ブルーウィスプ", "category": "特殊", "mainType": "spirit", "subType": "ice", "rank": "D", "region": "NORTH" },
+            { "name": "フロストオーガ", "category": "ボス1", "mainType": "humanoid", "subType": "giant,ice", "rank": "D", "region": "NORTH" },
+            { "name": "巨大マンモス", "category": "ボス2", "mainType": "beast", "subType": "mammoth,ice", "rank": "D", "region": "NORTH" },
+            { "name": "氷山トロル", "category": "ボス3", "mainType": "humanoid", "subType": "giant,ice", "rank": "D", "region": "NORTH" }
+        ],
+        "C": [
+            { "name": "霜骨スケルトン", "category": "雑魚1", "mainType": "undead", "subType": "ice", "rank": "C", "region": "NORTH" },
+            { "name": "氷晶フェアリー", "category": "雑魚2", "mainType": "spirit", "subType": "fairy,ice", "rank": "C", "region": "NORTH" },
+            { "name": "スノーオーク", "category": "中堅1", "mainType": "humanoid", "subType": "orc,ice", "rank": "C", "region": "NORTH" },
+            { "name": "アイスレンジャー", "category": "中堅2", "mainType": "humanoid", "subType": "humanlike,ice", "rank": "C", "region": "NORTH" },
+            { "name": "氷牙ベア", "category": "強敵1", "mainType": "beast", "subType": "bear,ice", "rank": "C", "region": "NORTH" },
+            { "name": "フロストワイバーン", "category": "強敵2", "mainType": "dragon", "subType": "ice", "rank": "C", "region": "NORTH" },
+            { "name": "雪女", "category": "特殊", "mainType": "spirit", "subType": "myth,ice", "rank": "C", "region": "NORTH" },
+            { "name": "スノージャイアント", "category": "ボス1", "mainType": "humanoid", "subType": "giant,ice", "rank": "C", "region": "NORTH" },
+            { "name": "氷殻ドラゴン", "category": "ボス2", "mainType": "dragon", "subType": "ice", "rank": "C", "region": "NORTH" },
+            { "name": "暴走イエティ", "category": "ボス3", "mainType": "beast", "subType": "myth,ice", "rank": "C", "region": "NORTH" }
+        ],
+        "B": [
+            { "name": "レイス", "category": "雑魚1", "mainType": "undead", "subType": "wraith", "rank": "B", "region": "NORTH" },
+            { "name": "スプライト", "category": "雑魚2", "mainType": "spirit", "subType": "sprite", "rank": "B", "region": "NORTH" },
+            { "name": "ガーゴイル", "category": "中堅1", "mainType": "construct", "subType": "stone,myth", "rank": "B", "region": "NORTH" },
+            { "name": "ナイトメア", "category": "中堅2", "mainType": "spirit", "subType": "myth", "rank": "B", "region": "NORTH" },
+            { "name": "スノーライオン", "category": "強敵1", "mainType": "beast", "subType": "feline,ice", "rank": "B", "region": "NORTH" },
+            { "name": "グレンデル", "category": "強敵2", "mainType": "humanoid", "subType": "myth", "rank": "B", "region": "NORTH" },
+            { "name": "エルダーウィスプ", "category": "特殊", "mainType": "spirit", "subType": "elder", "rank": "B", "region": "NORTH" },
+            { "name": "ギガース", "category": "ボス1", "mainType": "humanoid", "subType": "giant,myth", "rank": "B", "region": "NORTH" },
+            { "name": "アイスゴーレム", "category": "ボス2", "mainType": "construct", "subType": "ice", "rank": "B", "region": "NORTH" },
+            { "name": "ガルム", "category": "ボス3", "mainType": "beast", "subType": "myth,wolf", "rank": "B", "region": "NORTH" }
+        ],
+        "A": [
+            { "name": "レヴナント", "category": "雑魚1", "mainType": "undead", "subType": "revenant", "rank": "A", "region": "NORTH" },
+            { "name": "ファントム", "category": "雑魚2", "mainType": "undead", "subType": "phantom", "rank": "A", "region": "NORTH" },
+            { "name": "氷塊マンモス", "category": "中堅1", "mainType": "beast", "subType": "mammoth,ice", "rank": "A", "region": "NORTH" },
+            { "name": "ハルピュイア", "category": "中堅2", "mainType": "humanoid", "subType": "myth,avian", "rank": "A", "region": "NORTH" },
+            { "name": "スレイプニル", "category": "強敵1", "mainType": "beast", "subType": "myth", "rank": "A", "region": "NORTH" },
+            { "name": "タロース", "category": "強敵2", "mainType": "construct", "subType": "myth", "rank": "A", "region": "NORTH" },
+            { "name": "ジャックフロスト", "category": "特殊", "mainType": "spirit", "subType": "myth,ice", "rank": "A", "region": "NORTH" },
+            { "name": "雪崩ゴーレム", "category": "ボス1", "mainType": "construct", "subType": "ice", "rank": "A", "region": "NORTH" },
+            { "name": "フロストドラゴン", "category": "ボス2", "mainType": "dragon", "subType": "ice", "rank": "A", "region": "NORTH" },
+            { "name": "マナガルム", "category": "ボス3", "mainType": "beast", "subType": "myth,wolf,ice", "rank": "A", "region": "NORTH" }
+        ],
+        "S": [
+            { "name": "フロストデスワーム", "category": "雑魚1", "mainType": "beast", "subType": "worm,ice", "rank": "S", "region": "NORTH" },
+            { "name": "アイスフェニックス", "category": "雑魚2", "mainType": "beast", "subType": "myth,avian,ice", "rank": "S", "region": "NORTH" },
+            { "name": "ティターン", "category": "中堅1", "mainType": "god", "subType": "myth,giant", "rank": "S", "region": "NORTH" },
+            { "name": "ヴァルキリー", "category": "中堅2", "mainType": "spirit", "subType": "myth,angel", "rank": "S", "region": "NORTH" },
+            { "name": "ニーズヘッグ", "category": "強敵1", "mainType": "dragon", "subType": "myth", "rank": "S", "region": "NORTH" },
+            { "name": "ヨルムンガンド", "category": "強敵2", "mainType": "dragon", "subType": "myth", "rank": "S", "region": "NORTH" },
+            { "name": "シルフィード", "category": "特殊", "mainType": "elemental", "subType": "wind", "rank": "S", "region": "NORTH" },
+            { "name": "ヘル", "category": "ボス1", "mainType": "god", "subType": "myth", "rank": "S", "region": "NORTH" },
+            { "name": "スルト", "category": "ボス2", "mainType": "god", "subType": "myth,fire", "rank": "S", "region": "NORTH" },
+            { "name": "フェンリル", "category": "ボス3", "mainType": "god", "subType": "myth,wolf", "rank": "S", "region": "NORTH" }
+        ]
+    },
+    "SOUTH": {
+        "E": [
+            { "name": "巨大アルマジロ", "category": "雑魚1", "mainType": "beast", "subType": "desert", "rank": "E", "region": "SOUTH" },
+            { "name": "火炎スライム", "category": "雑魚2", "mainType": "slime", "subType": "fire", "rank": "E", "region": "SOUTH" },
+            { "name": "巨大ハゲタカ", "category": "中堅1", "mainType": "beast", "subType": "avian,desert", "rank": "E", "region": "SOUTH" },
+            { "name": "火吹き花", "category": "中堅2", "mainType": "plant", "subType": "fire", "rank": "E", "region": "SOUTH" },
+            { "name": "デザートウルフ", "category": "強敵1", "mainType": "beast", "subType": "wolf,desert", "rank": "E", "region": "SOUTH" },
+            { "name": "溶岩ガメ", "category": "強敵2", "mainType": "beast", "subType": "reptile,fire", "rank": "E", "region": "SOUTH" },
+            { "name": "火精霊", "category": "特殊", "mainType": "elemental", "subType": "fire", "rank": "E", "region": "SOUTH" },
+            { "name": "火炎トカゲ", "category": "ボス1", "mainType": "beast", "subType": "reptile,fire", "rank": "E", "region": "SOUTH" },
+            { "name": "巨大溶岩魚", "category": "ボス2", "mainType": "sea", "subType": "fire", "rank": "E", "region": "SOUTH" },
+            { "name": "デススコーピオン", "category": "ボス3", "mainType": "insect", "subType": "desert", "rank": "E", "region": "SOUTH" }
+        ],
+        "D": [
+            { "name": "溶岩スライム", "category": "雑魚1", "mainType": "slime", "subType": "fire", "rank": "D", "region": "SOUTH" },
+            { "name": "巨大スカラベ", "category": "雑魚2", "mainType": "insect", "subType": "desert", "rank": "D", "region": "SOUTH" },
+            { "name": "砂漠コボルト", "category": "中堅1", "mainType": "humanoid", "subType": "kobold,desert", "rank": "D", "region": "SOUTH" },
+            { "name": "火山ゴブリン", "category": "中堅2", "mainType": "humanoid", "subType": "goblin,fire", "rank": "D", "region": "SOUTH" },
+            { "name": "ファイアジャッカル", "category": "強敵1", "mainType": "beast", "subType": "desert,fire", "rank": "D", "region": "SOUTH" },
+            { "name": "溶岩リザード", "category": "強敵2", "mainType": "beast", "subType": "reptile,fire", "rank": "D", "region": "SOUTH" },
+            { "name": "ファイヤウィスプ", "category": "特殊", "mainType": "spirit", "subType": "fire", "rank": "D", "region": "SOUTH" },
+            { "name": "巨大砂サメ", "category": "ボス1", "mainType": "sea", "subType": "desert", "rank": "D", "region": "SOUTH" },
+            { "name": "ファイヤトレント", "category": "ボス2", "mainType": "plant", "subType": "fire", "rank": "D", "region": "SOUTH" },
+            { "name": "砂獄ワーム", "category": "ボス3", "mainType": "beast", "subType": "worm,desert", "rank": "D", "region": "SOUTH" }
+        ],
+        "C": [
+            { "name": "ミイラ", "category": "雑魚1", "mainType": "undead", "subType": "egypt", "rank": "C", "region": "SOUTH" },
+            { "name": "ファイヤホーク", "category": "雑魚2", "mainType": "beast", "subType": "avian,fire", "rank": "C", "region": "SOUTH" },
+            { "name": "砂ワニ", "category": "中堅1", "mainType": "beast", "subType": "reptile,desert", "rank": "C", "region": "SOUTH" },
+            { "name": "煉獄ムカデ", "category": "中堅2", "mainType": "insect", "subType": "fire", "rank": "C", "region": "SOUTH" },
+            { "name": "マンティコア", "category": "強敵1", "mainType": "beast", "subType": "myth", "rank": "C", "region": "SOUTH" },
+            { "name": "ファイヤワイバーン", "category": "強敵2", "mainType": "dragon", "subType": "fire", "rank": "C", "region": "SOUTH" },
+            { "name": "フレイムエレメンタル", "category": "特殊", "mainType": "elemental", "subType": "fire", "rank": "C", "region": "SOUTH" },
+            { "name": "フレイムオーガ", "category": "ボス1", "mainType": "humanoid", "subType": "giant,fire", "rank": "C", "region": "SOUTH" },
+            { "name": "太陽神像", "category": "ボス2", "mainType": "construct", "subType": "myth", "rank": "C", "region": "SOUTH" },
+            { "name": "マグマサーペント", "category": "ボス3", "mainType": "dragon", "subType": "fire", "rank": "C", "region": "SOUTH" }
+        ],
+        "B": [
+            { "name": "マミー", "category": "雑魚1", "mainType": "undead", "subType": "egypt", "rank": "B", "region": "SOUTH" },
+            { "name": "マグマワーム", "category": "雑魚2", "mainType": "beast", "subType": "worm,fire", "rank": "B", "region": "SOUTH" },
+            { "name": "火山グリズリー", "category": "中堅1", "mainType": "beast", "subType": "bear,fire", "rank": "B", "region": "SOUTH" },
+            { "name": "ピッポグリフ", "category": "中堅2", "mainType": "beast", "subType": "myth", "rank": "B", "region": "SOUTH" },
+            { "name": "キマイラ", "category": "強敵1", "mainType": "beast", "subType": "myth", "rank": "B", "region": "SOUTH" },
+            { "name": "ヘルハウンド", "category": "強敵2", "mainType": "beast", "subType": "myth,fire", "rank": "B", "region": "SOUTH" },
+            { "name": "火車", "category": "特殊", "mainType": "spirit", "subType": "myth,fire", "rank": "B", "region": "SOUTH" },
+            { "name": "コカトリス", "category": "ボス1", "mainType": "beast", "subType": "myth", "rank": "B", "region": "SOUTH" },
+            { "name": "マグマゴーレム", "category": "ボス2", "mainType": "construct", "subType": "fire", "rank": "B", "region": "SOUTH" },
+            { "name": "オルトロス", "category": "ボス3", "mainType": "beast", "subType": "myth,fire", "rank": "B", "region": "SOUTH" }
+        ],
+        "A": [
+            { "name": "カースマミー", "category": "雑魚1", "mainType": "undead", "subType": "curse,egypt", "rank": "A", "region": "SOUTH" },
+            { "name": "フレイムファントム", "category": "雑魚2", "mainType": "undead", "subType": "fire", "rank": "A", "region": "SOUTH" },
+            { "name": "カローン", "category": "中堅1", "mainType": "spirit", "subType": "myth", "rank": "A", "region": "SOUTH" },
+            { "name": "炎翼ガルーダ", "category": "中堅2", "mainType": "beast", "subType": "myth,avian,fire", "rank": "A", "region": "SOUTH" },
+            { "name": "グリフォン", "category": "強敵1", "mainType": "beast", "subType": "myth", "rank": "A", "region": "SOUTH" },
+            { "name": "ネフィリム", "category": "強敵2", "mainType": "god", "subType": "myth", "rank": "A", "region": "SOUTH" },
+            { "name": "ジャック・オー・ランタン", "category": "特殊", "mainType": "spirit", "subType": "fire", "rank": "A", "region": "SOUTH" },
+            { "name": "ファイヤドラゴン", "category": "ボス1", "mainType": "dragon", "subType": "fire", "rank": "A", "region": "SOUTH" },
+            { "name": "アヌビス", "category": "ボス2", "mainType": "god", "subType": "egypt", "rank": "A", "region": "SOUTH" },
+            { "name": "ケルベロス", "category": "ボス3", "mainType": "beast", "subType": "myth,fire", "rank": "A", "region": "SOUTH" }
+        ],
+        "S": [
+            { "name": "フェニックス", "category": "雑魚1", "mainType": "beast", "subType": "myth,avian,fire", "rank": "S", "region": "SOUTH" },
+            { "name": "砂塵デスワーム", "category": "雑魚2", "mainType": "beast", "subType": "worm,desert", "rank": "S", "region": "SOUTH" },
+            { "name": "リントヴルム", "category": "中堅1", "mainType": "dragon", "subType": "myth", "rank": "S", "region": "SOUTH" },
+            { "name": "イフリート", "category": "中堅2", "mainType": "elemental", "subType": "myth,fire", "rank": "S", "region": "SOUTH" },
+            { "name": "スフィンクス", "category": "強敵1", "mainType": "beast", "subType": "myth,egypt", "rank": "S", "region": "SOUTH" },
+            { "name": "アポピス", "category": "強敵2", "mainType": "dragon", "subType": "egypt", "rank": "S", "region": "SOUTH" },
+            { "name": "サラマンダー", "category": "特殊", "mainType": "elemental", "subType": "fire", "rank": "S", "region": "SOUTH" },
+            { "name": "太陽神ラー", "category": "ボス1", "mainType": "god", "subType": "egypt", "rank": "S", "region": "SOUTH" },
+            { "name": "バハムート", "category": "ボス2", "mainType": "dragon", "subType": "myth", "rank": "S", "region": "SOUTH" },
+            { "name": "ファフニール", "category": "ボス3", "mainType": "dragon", "subType": "myth", "rank": "S", "region": "SOUTH" }
+        ]
+    },
+    "WEST": {
+        "E": [
+            { "name": "ポイズンスライム", "category": "雑魚1", "mainType": "slime", "subType": "poison,swamp", "rank": "E", "region": "WEST" },
+            { "name": "巨大ヒル", "category": "雑魚2", "mainType": "beast", "subType": "swamp", "rank": "E", "region": "WEST" },
+            { "name": "リザードマン", "category": "中堅1", "mainType": "humanoid", "subType": "reptile,swamp", "rank": "E", "region": "WEST" },
+            { "name": "スケルトン", "category": "中堅2", "mainType": "undead", "subType": "bone", "rank": "E", "region": "WEST" },
+            { "name": "巨大ヤドカリ", "category": "強敵1", "mainType": "sea", "subType": "shell", "rank": "E", "region": "WEST" },
+            { "name": "リーパーフロッグ", "category": "強敵2", "mainType": "beast", "subType": "swamp", "rank": "E", "region": "WEST" },
+            { "name": "ウィル・オ・ウィスプ", "category": "特殊", "mainType": "spirit", "subType": "swamp", "rank": "E", "region": "WEST" },
+            { "name": "大食いトド", "category": "ボス1", "mainType": "sea", "subType": "beast", "rank": "E", "region": "WEST" },
+            { "name": "殺人泥人形", "category": "ボス2", "mainType": "construct", "subType": "swamp", "rank": "E", "region": "WEST" },
+            { "name": "アナコンダ", "category": "ボス3", "mainType": "beast", "subType": "snake,swamp", "rank": "E", "region": "WEST" }
+        ],
+        "D": [
+            { "name": "ボーンフィッシュ", "category": "雑魚1", "mainType": "sea", "subType": "undead", "rank": "D", "region": "WEST" },
+            { "name": "ゾンビ", "category": "雑魚2", "mainType": "undead", "subType": "rot", "rank": "D", "region": "WEST" },
+            { "name": "スワンプマーマン", "category": "中堅1", "mainType": "humanoid", "subType": "sea,swamp", "rank": "D", "region": "WEST" },
+            { "name": "人食いサメ", "category": "中堅2", "mainType": "sea", "subType": "shark", "rank": "D", "region": "WEST" },
+            { "name": "デッドリースライム", "category": "強敵1", "mainType": "slime", "subType": "undead,poison", "rank": "D", "region": "WEST" },
+            { "name": "2頭ワニ", "category": "強敵2", "mainType": "beast", "subType": "reptile,swamp", "rank": "D", "region": "WEST" },
+            { "name": "亡霊船長", "category": "特殊", "mainType": "undead", "subType": "sea", "rank": "D", "region": "WEST" },
+            { "name": "要塞巻貝", "category": "ボス1", "mainType": "sea", "subType": "shell", "rank": "D", "region": "WEST" },
+            { "name": "ラミア", "category": "ボス2", "mainType": "humanoid", "subType": "myth,swamp", "rank": "D", "region": "WEST" },
+            { "name": "シーサーペント", "category": "ボス3", "mainType": "dragon", "subType": "sea", "rank": "D", "region": "WEST" }
+        ],
+        "C": [
+            { "name": "グール", "category": "雑魚1", "mainType": "undead", "subType": "ghoul", "rank": "C", "region": "WEST" },
+            { "name": "帯電クラゲ", "category": "雑魚2", "mainType": "sea", "subType": "lightning", "rank": "C", "region": "WEST" },
+            { "name": "沼河童", "category": "中堅1", "mainType": "humanoid", "subType": "myth,swamp", "rank": "C", "region": "WEST" },
+            { "name": "死霊騎士", "category": "中堅2", "mainType": "undead", "subType": "knight", "rank": "C", "region": "WEST" },
+            { "name": "3頭サメ", "category": "強敵1", "mainType": "sea", "subType": "shark,myth", "rank": "C", "region": "WEST" },
+            { "name": "スキュラ", "category": "強敵2", "mainType": "sea", "subType": "myth", "rank": "C", "region": "WEST" },
+            { "name": "レプラコーン", "category": "特殊", "mainType": "spirit", "subType": "fairy", "rank": "C", "region": "WEST" },
+            { "name": "クラーケン", "category": "ボス1", "mainType": "sea", "subType": "myth", "rank": "C", "region": "WEST" },
+            { "name": "ヴァンパイア", "category": "ボス2", "mainType": "undead", "subType": "vampire", "rank": "C", "region": "WEST" },
+            { "name": "島亀", "category": "ボス3", "mainType": "sea", "subType": "myth", "rank": "C", "region": "WEST" }
+        ],
+        "B": [
+            { "name": "キョンシー", "category": "雑魚1", "mainType": "undead", "subType": "myth", "rank": "B", "region": "WEST" },
+            { "name": "巨大電気ナマズ", "category": "雑魚2", "mainType": "sea", "subType": "lightning", "rank": "B", "region": "WEST" },
+            { "name": "セイレーン", "category": "中堅1", "mainType": "spirit", "subType": "sea,myth", "rank": "B", "region": "WEST" },
+            { "name": "デルピュネー", "category": "中堅2", "mainType": "dragon", "subType": "sea,myth", "rank": "B", "region": "WEST" },
+            { "name": "ケルピー", "category": "強敵1", "mainType": "spirit", "subType": "myth,swamp", "rank": "B", "region": "WEST" },
+            { "name": "リッチ", "category": "強敵2", "mainType": "undead", "subType": "mage", "rank": "B", "region": "WEST" },
+            { "name": "アビスエレメンタル", "category": "特殊", "mainType": "elemental", "subType": "sea,abyss", "rank": "B", "region": "WEST" },
+            { "name": "ダゴン", "category": "ボス1", "mainType": "god", "subType": "sea,myth", "rank": "B", "region": "WEST" },
+            { "name": "マッドゴーレム", "category": "ボス2", "mainType": "construct", "subType": "swamp", "rank": "B", "region": "WEST" },
+            { "name": "カルキノス", "category": "ボス3", "mainType": "sea", "subType": "myth", "rank": "B", "region": "WEST" }
+        ],
+        "A": [
+            { "name": "ヒッポカムポス", "category": "雑魚1", "mainType": "sea", "subType": "myth", "rank": "A", "region": "WEST" },
+            { "name": "スケルトンシャーク", "category": "雑魚2", "mainType": "undead", "subType": "sea", "rank": "A", "region": "WEST" },
+            { "name": "ゴルゴン", "category": "中堅1", "mainType": "humanoid", "subType": "myth", "rank": "A", "region": "WEST" },
+            { "name": "死神", "category": "中堅2", "mainType": "spirit", "subType": "reaper", "rank": "A", "region": "WEST" },
+            { "name": "シードラゴン", "category": "強敵1", "mainType": "dragon", "subType": "sea", "rank": "A", "region": "WEST" },
+            { "name": "デュラハン", "category": "強敵2", "mainType": "undead", "subType": "knight", "rank": "A", "region": "WEST" },
+            { "name": "メイルシュトローム", "category": "特殊", "mainType": "elemental", "subType": "sea", "rank": "A", "region": "WEST" },
+            { "name": "深海竜", "category": "ボス1", "mainType": "dragon", "subType": "sea,abyss", "rank": "A", "region": "WEST" },
+            { "name": "死霊王", "category": "ボス2", "mainType": "undead", "subType": "king", "rank": "A", "region": "WEST" },
+            { "name": "カリュブディス", "category": "ボス3", "mainType": "sea", "subType": "myth,abyss", "rank": "A", "region": "WEST" }
+        ],
+        "S": [
+            { "name": "ネレイス", "category": "雑魚1", "mainType": "spirit", "subType": "sea,myth", "rank": "S", "region": "WEST" },
+            { "name": "プレシオサウルス", "category": "雑魚2", "mainType": "sea", "subType": "beast", "rank": "S", "region": "WEST" },
+            { "name": "エルダーリッチ", "category": "中堅1", "mainType": "undead", "subType": "mage,elder", "rank": "S", "region": "WEST" },
+            { "name": "ケートス", "category": "中堅2", "mainType": "sea", "subType": "myth", "rank": "S", "region": "WEST" },
+            { "name": "エキドナ", "category": "強敵1", "mainType": "humanoid", "subType": "myth", "rank": "S", "region": "WEST" },
+            { "name": "デスドラゴン", "category": "強敵2", "mainType": "dragon", "subType": "undead", "rank": "S", "region": "WEST" },
+            { "name": "ウンディーネ", "category": "特殊", "mainType": "elemental", "subType": "water", "rank": "S", "region": "WEST" },
+            { "name": "ポセイドン", "category": "ボス1", "mainType": "god", "subType": "sea,myth", "rank": "S", "region": "WEST" },
+            { "name": "クトゥルフ", "category": "ボス2", "mainType": "god", "subType": "sea,old_one", "rank": "S", "region": "WEST" },
+            { "name": "リヴァイアサン", "category": "ボス3", "mainType": "dragon", "subType": "sea,myth", "rank": "S", "region": "WEST" }
+        ]
+    }
+};
