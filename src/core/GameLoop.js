@@ -3,6 +3,7 @@ import { RecruitmentService } from '../services/RecruitmentService.js';
 import { AssignmentService } from '../services/AssignmentService.js';
 import { LifeEventService } from '../services/LifeEventService.js'; // Added
 
+import { titleService } from '../services/TitleService.js';
 import { TYPE_ADVANTAGES, LEAVE_TYPES } from '../data/constants.js';
 
 export class GameLoop {
@@ -12,6 +13,11 @@ export class GameLoop {
         this.questService = questService || new QuestService();
         this.mailService = mailService;
         this.managementService = managementService;
+
+        // Initialize Title Service
+        if (this.mailService) {
+            titleService.setMailService(this.mailService);
+        }
         this.equipmentService = equipmentService; // Added
         this.recruitmentService = new RecruitmentService(guild);
         this.assignmentService = new AssignmentService(guild, this.questService, uiManager);

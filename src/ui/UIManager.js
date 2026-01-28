@@ -49,6 +49,7 @@ export class UIManager {
 
         if (screen && container) {
             container.innerHTML = ''; // Clear current
+            container.className = 'screen-container'; // Reset classes to base
             container.removeAttribute('style'); // Clear injected styles (grid, etc)
             screen.render(container, this.guild, this.state, this.logs);
         } else {

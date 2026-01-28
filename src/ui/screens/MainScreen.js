@@ -5,19 +5,15 @@ export class MainScreen {
 
     render(container, guild, state, logs = []) {
         // Layout: 2 columns (Summary / Notifications)
-        container.style.display = 'grid';
-        container.style.gridTemplateColumns = '1fr 1fr';
-        container.style.gap = '1rem';
-        container.style.height = '100%';
+        container.classList.add('grid-2-col-even');
 
         // 0. Management Status (New)
         const mgmtPanel = document.createElement('section');
-        mgmtPanel.className = 'panel';
-        mgmtPanel.style.marginBottom = '1rem';
+        mgmtPanel.className = 'panel mb-md';
         mgmtPanel.innerHTML = `<h2>現在の運営状況</h2>`;
 
         const mgmtContent = document.createElement('div');
-        mgmtContent.style.fontSize = '0.9em';
+        mgmtContent.className = 'text-sm';
 
         // Active Policy
         const pName = { BALANCED: '標準', AGGRESSIVE: '利益追求', SAFE: '安全第一', TRAINING: '新人育成', COMMERCIAL: '商業振興' };
@@ -34,10 +30,10 @@ export class MainScreen {
                     }
                 }
                 return `
-                    <div style="margin-top:4px; padding:4px; background:#fff3e0; border-left:3px solid #ff9800;">
-                        <div style="font-weight:bold; color:#e65100;">${evt.name} (残り${evt.remainingDays}日)</div>
-                        <div style="color:#5d4037;">${evt.description}</div>
-                        <div style="font-size:0.85em; color:#795548;">効果: ${modStr.join(', ')}</div>
+                    <div class="event-card-warning">
+                        <div class="text-event-title">${evt.name} (残り${evt.remainingDays}日)</div>
+                        <div class="text-event-desc">${evt.description}</div>
+                        <div class="text-event-meta">効果: ${modStr.join(', ')}</div>
                     </div>
                 `;
             }).join('');
@@ -61,9 +57,7 @@ export class MainScreen {
         // We want Summary + Mgmt on Left, Log on Right.
 
         const leftCol = document.createElement('div');
-        leftCol.style.display = 'flex';
-        leftCol.style.flexDirection = 'column';
-        leftCol.style.gap = '1rem';
+        leftCol.className = 'flex-col gap-md';
 
         leftCol.appendChild(mgmtPanel);
 
@@ -84,9 +78,9 @@ export class MainScreen {
         stats.innerHTML = `
             <div class="summary-item"><span>所属冒険者</span><span>${guild.adventurers.length}名</span></div>
             <div class="summary-item"><span>待機中</span><span>${idle}名</span></div>
-            <div class="summary-item"><span>準備中</span><span style="color:${planning > 0 ? '#4CAF50' : 'inherit'}">${planning}名</span></div>
+            <div class="summary-item"><span>準備中</span><span class="${planning > 0 ? 'text-status-safe' : ''}">${planning}名</span></div>
             <div class="summary-item"><span>遠征中</span><span>${questing}名</span></div>
-            <div class="summary-item"><span>療養中</span><span style="color:${injured > 0 ? 'red' : 'inherit'}">${injured}名</span></div>
+            <div class="summary-item"><span>療養中</span><span class="${injured > 0 ? 'text-status-danger' : ''}">${injured}名</span></div>
         `;
         summaryPanel.appendChild(stats);
         leftCol.appendChild(summaryPanel);

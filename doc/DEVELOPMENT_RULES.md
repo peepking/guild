@@ -38,3 +38,34 @@ render() {
 
 ## データ管理のルール
 - **Markdownをデータソースにしない**: 仕様書や辞書がMarkdownであっても、プログラムから読み込む際は必ず `.js` ファイル等の定数（CONSTANTS）としてハードコードしてください。Markdownのパースは禁止です。
+
+---
+
+## スタイル実装のルール (New)
+UIのスタイリングにおいて、保守性と一貫性を保つため以下のルールを遵守してください。
+
+### 1. 原則クラス指定（No Inline Styles）
+JavaScript内で `element.style.xxx = '...'` のように直接スタイルを当てることを**原則禁止**とします。
+代わりに `style.css` に適切なクラスを定義し、`classList.add('classname')` を使用してください。
+
+**悪い例:**
+```javascript
+div.style.display = 'flex';
+div.style.justifyContent = 'space-between';
+div.style.padding = '10px';
+div.style.background = '#fff';
+```
+
+**良い例:**
+```javascript
+// style.css
+// .card-panel { display: flex; justify-content: space-between; padding: 10px; background: #fff; }
+
+div.classList.add('card-panel');
+```
+
+### 2. 例外
+以下のケースに限り、インラインスタイルの使用を許可します。
+*   動的に値が変動するプロパティ（進捗バーの `width: ${percent}%` や、ドラッグ＆ドロップの座標など）。
+*   特定の要素の表示/非表示の一時的な切り替え（`style.display = 'none'`）。
+*   どうしても既存CSSの優先度（詳細度）の問題で上書きが必要な場合（ただし、可能な限りクラス設計で解決すること）。

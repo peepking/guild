@@ -8,7 +8,7 @@ export class Layout {
     setupStructure() {
         this.appContainer.innerHTML = `
             <header id="top-bar" class="top-bar">
-                <div class="stats-wrapper" style="display:flex; gap:1.5rem; align-items:center;">
+                <div class="stats-wrapper">
                     <div class="stat-group">
                         <span class="stat-label">Day</span>
                         <span id="display-day" class="stat-value">1</span>
@@ -24,12 +24,12 @@ export class Layout {
                     
                     <div class="stat-group">
                         <span class="stat-label">方針</span>
-                        <span id="display-policy" class="stat-value" style="font-size:0.9rem; min-width:auto;">Balanced</span>
+                        <span id="display-policy" class="stat-value text-sm" style="min-width:auto;">Balanced</span>
                     </div>
                     
                     <div id="display-event-container" class="stat-group hidden" style="color:#ffcc80;">
                         <span style="font-size:1.2em;">⚠️</span>
-                        <span id="display-event" style="font-weight:bold; font-size:0.9em; margin-left:0.2rem;">Event</span>
+                        <span id="display-event" class="event-notice">Event</span>
                     </div>
                 </div>
 

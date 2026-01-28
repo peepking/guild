@@ -3,6 +3,7 @@ import { CONSTANTS, QUEST_DIFFICULTY, QUEST_TYPES, TYPE_ADVANTAGES, TRAITS, QUES
 import { AdventureSimulator } from './AdventureSimulator.js';
 import { REGIONS, QUEST_SPECS } from '../data/QuestSpecs.js';
 import { ADVENTURE_LOG_DATA } from '../data/AdventureLogData.js';
+import { titleService } from './TitleService.js';
 
 export class QuestService {
     constructor() {
@@ -443,21 +444,24 @@ export class QuestService {
                 }
 
                 // Title Check
-                if (this.titleService) {
+                if (titleService) {
                     // Determine if any boss was killed
                     const bossKill = combinedResults.monstersKilled.find(m => m.isBoss);
+                    // Use bossKill.id or bossKill.name. Fallback to quest.bossTarget if logic requires it.
+                    const bossId = bossKill ? (bossKill.id || bossKill.name) : quest.bossTarget;
+
                     const context = {
                         questType: quest.type,
                         rank: quest.difficulty.rank,
                         result: 'SUCCESS',
-                        isBoss: !!bossKill,
-                        bossId: bossKill ? (bossKill.id || bossKill.name) : null,
+                        isBoss: !!bossId, // Treat as boss context if we have a bossId from kill or target
+                        bossId: bossId,
                         questId: quest.id,
                         region: quest.region,
                         day: quest.createdDay + totalDays
                     };
 
-                    const newTitle = this.titleService.tryGenerateTitle(adv, context);
+                    const newTitle = titleService.tryGenerateTitle(adv, context);
                     if (newTitle) {
                         adv.addHistory(quest.createdDay + totalDays, `二つ名「${newTitle}」を習得`);
                         // Log locally to day log? Or return in result?

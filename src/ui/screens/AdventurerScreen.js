@@ -19,16 +19,12 @@ export class AdventurerScreen {
         container.innerHTML = '';
 
         // Layout: List full width for now (or split if detail wanted)
-        container.style.display = 'grid';
-        container.style.gridTemplateColumns = '1.2fr 1fr';
-        container.style.gap = '1rem';
-        container.style.height = '100%';
+        // Layout
+        container.classList.add('grid-2-col-fixed-right');
 
         // --- Left: List ---
         const listPanel = document.createElement('section');
-        listPanel.className = 'panel adventurer-list-panel';
-        listPanel.style.display = 'flex';
-        listPanel.style.flexDirection = 'column';
+        listPanel.className = 'panel adventurer-list-panel flex-col';
 
         // Header & Toolbar
         const header = document.createElement('div');
@@ -38,21 +34,27 @@ export class AdventurerScreen {
         this._renderToolbar(listPanel, guild);
 
         const listContainer = document.createElement('div');
-        listContainer.className = 'scroll-list';
-        listContainer.style.flex = '1';
-        listContainer.style.overflowY = 'auto'; // Ensure scroll logic works
+        listContainer.className = 'scroll-list flex-1 scroll-y';
         listPanel.appendChild(listContainer);
 
         container.appendChild(listPanel);
 
         // --- Right: Detail ---
         const detailPanel = document.createElement('section');
-        detailPanel.className = 'panel detail-panel';
-        detailPanel.style.display = 'flex';
-        detailPanel.style.flexDirection = 'column';
+        detailPanel.className = 'panel detail-panel flex-col';
 
         // Render List Logic (Now detailPanel is defined)
         this._renderList(listContainer, guild, detailPanel);
+
+        // Restore Selection (Buffer Fix)
+        if (this.state.selectedAdventurerId) {
+            const adv = guild.adventurers.find(a => a.id === this.state.selectedAdventurerId);
+            if (adv) {
+                this._renderDetail(detailPanel, adv);
+            } else {
+                this.state.selectedAdventurerId = null; // Reset if gone
+            }
+        }
 
         container.appendChild(detailPanel);
     }
@@ -138,36 +140,12 @@ export class AdventurerScreen {
 
     _renderToolbar(container, guild) {
         const toolbar = document.createElement('div');
-        // Framed Panel Style (matches .list-item / .summary-item)
-        toolbar.style.background = '#fff';
-        toolbar.style.border = '1px solid #d7ccc8';
-        toolbar.style.borderRadius = '4px';
-        toolbar.style.padding = '0.5rem';
-        toolbar.style.marginBottom = '0.5rem';
-
-        toolbar.style.display = 'flex';
-        toolbar.style.justifyContent = 'space-between';
-        toolbar.style.alignItems = 'center';
-        toolbar.style.fontFamily = '"Crimson Text", "YuMincho", serif';
-        toolbar.style.fontSize = '0.85em';
-        toolbar.style.gap = '8px';
-        toolbar.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+        toolbar.className = 'panel-frame flex-between gap-sm font-header text-sm';
 
         // Helper for Selects
         const createSelect = (options, value, onChange, width = 'auto') => {
             const sel = document.createElement('select');
-            sel.style.boxSizing = 'border-box'; // Explicit sizing
-            sel.style.margin = '0'; // Reset margin
-            sel.style.padding = '1px 4px';
-            sel.style.border = '1px solid #a1887f';
-            sel.style.borderRadius = '3px';
-            sel.style.background = '#fff';
-            sel.style.color = '#3e2723';
-            sel.style.fontFamily = 'inherit';
-            sel.style.fontSize = 'inherit';
-            sel.style.cursor = 'pointer';
-            sel.style.height = '26px'; // Consistent height
-            sel.style.verticalAlign = 'middle';
+            sel.className = 'select-sm';
             if (width !== 'auto') sel.style.width = width;
 
             options.forEach(opt => {
@@ -184,9 +162,7 @@ export class AdventurerScreen {
 
         // --- Left Group: Filters ---
         const leftGroup = document.createElement('div');
-        leftGroup.style.display = 'flex';
-        leftGroup.style.gap = '4px';
-        leftGroup.style.flexWrap = 'wrap';
+        leftGroup.className = 'flex-wrap gap-xs';
 
         // Class Filter
         const classOpts = [{ val: 'ALL', label: '全部署' }];
@@ -225,9 +201,7 @@ export class AdventurerScreen {
 
         // --- Right Group: Sorting ---
         const rightGroup = document.createElement('div');
-        rightGroup.style.display = 'flex';
-        rightGroup.style.gap = '4px';
-        rightGroup.style.alignItems = 'center';
+        rightGroup.className = 'flex-row gap-xs';
 
         // Sort Key
         rightGroup.appendChild(createSelect([
@@ -242,21 +216,7 @@ export class AdventurerScreen {
 
         // Sort Order Button
         const orderBtn = document.createElement('button');
-        orderBtn.className = 'btn';
-        orderBtn.style.padding = '0';
-        orderBtn.style.boxSizing = 'border-box'; // Explicit sizing
-        orderBtn.style.margin = '0'; // Reset margin
-        orderBtn.style.width = '26px'; // Match select height
-        orderBtn.style.height = '26px';
-        orderBtn.style.border = '1px solid #5d4037';
-        orderBtn.style.borderRadius = '3px';
-        orderBtn.style.background = '#5d4037';
-        orderBtn.style.color = '#fff';
-        orderBtn.style.cursor = 'pointer';
-        orderBtn.style.display = 'flex';
-        orderBtn.style.alignItems = 'center';
-        orderBtn.style.justifyContent = 'center';
-        orderBtn.style.verticalAlign = 'middle';
+        orderBtn.className = 'btn-icon-sm';
 
         const updateBtnText = () => {
             orderBtn.innerText = this.state.sortOrder === 'ASC' ? '▲' : '▼';
@@ -287,13 +247,11 @@ export class AdventurerScreen {
 
     _createAdventurerItem(adv) {
         const div = document.createElement('div');
-        div.className = 'list-item';
-        // Preserve the distinct look (Leather stripe)
-        div.style.borderLeft = '4px solid #8d6e63';
+        div.className = 'list-item list-item-adventure';
 
         // Highlight if selected
         if (this.state.selectedAdventurerId === adv.id) {
-            div.className += ' selected';
+            div.classList.add('selected');
         }
 
         // Ranks
@@ -311,13 +269,13 @@ export class AdventurerScreen {
         let statusText = `状態: ${adv.state}`;
         if (adv.recoveryDays > 0) {
             statusText = `療養中 (あと${adv.recoveryDays}日)`;
-            div.className += ' bg-reckless';
+            div.classList.add('bg-reckless');
         } else if (adv.state === 'QUESTING') {
             statusText = `遠征中`;
-            div.className += ' bg-safe';
+            div.classList.add('bg-safe');
         } else {
             // Idle state
-            div.className += ' bg-parchment';
+            div.classList.add('bg-parchment');
         }
 
         const traitsHtml = adv.traits.map(tKey => {
@@ -326,7 +284,7 @@ export class AdventurerScreen {
         }).join('');
 
         // Title formatting
-        const titleStr = adv.title ? ` <span style="color:#d84315; font-size:0.85em;">《${adv.title}》</span>` : '';
+        const titleStr = adv.title ? ` <span class="text-accent-orange text-sm">《${adv.title}》</span>` : '';
 
         div.innerHTML = `
             <div class="list-item-header">
@@ -348,15 +306,14 @@ export class AdventurerScreen {
         const titlePart = adv.title ? `<span style="font-size:0.8em; color:#ffcc80;">《${adv.title}》</span>` : '';
 
         panel.innerHTML = `
-            <div class="panel-header" style="flex-shrink:0;">
+            <div class="panel-header flex-no-shrink">
                 ${titlePart}${adv.name} の詳細
             </div>
         `;
 
         // Tabs
         const tabs = document.createElement('div');
-        tabs.className = 'tabs';
-        tabs.style.flexShrink = '0';
+        tabs.className = 'tabs flex-no-shrink';
         tabs.innerHTML = `
             <button class="tab ${this.state.currentTab === 'STATUS' ? 'active' : ''}" data-tab="STATUS">ステータス</button>
             <button class="tab ${this.state.currentTab === 'HISTORY' ? 'active' : ''}" data-tab="HISTORY">経歴</button>
@@ -366,9 +323,7 @@ export class AdventurerScreen {
         // Content Area
         const content = document.createElement('div');
         content.id = 'detail-content';
-        content.style.overflowY = 'auto';
-        content.style.flex = '1';
-        content.style.padding = '0.5rem';
+        content.className = 'scroll-y flex-1 p-sm';
         panel.appendChild(content);
 
         // Render Initial Tab
@@ -420,13 +375,13 @@ export class AdventurerScreen {
         for (const [key, val] of Object.entries(adv.stats)) {
             const barWidth = Math.min(100, (val / 120) * 100);
             statsDiv.innerHTML += `
-                <div style="margin-bottom:4px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                <div class="stat-bar-container">
+                    <div class="stat-bar-header">
                         <span>${key}</span>
                         <span>${val.toFixed(1)}</span>
                     </div>
-                    <div style="background:#ddd; height:8px; border-radius:4px; overflow:hidden;">
-                        <div style="background:#5d4037; width:${barWidth}%; height:100%;"></div>
+                    <div class="stat-bar-bg">
+                        <div class="stat-bar-fill" style="width:${barWidth}%;"></div>
                     </div>
                 </div>
             `;
@@ -457,13 +412,13 @@ export class AdventurerScreen {
         equipDiv.innerHTML = `<div class="sub-header">装備品</div>`;
         if (adv.equipment && adv.equipment.length > 0) {
             const listHtml = adv.equipment.map(eq => {
-                return `<div style="font-size:0.9em; margin-bottom:2px;">
-                    <span style="color:#555;">[${eq.rank}]</span> ${eq.name}
+                return `<div class="text-sm mb-xs">
+                    <span class="text-sub-color">[${eq.rank}]</span> ${eq.name}
                 </div>`;
             }).join('');
             equipDiv.innerHTML += `<div>${listHtml}</div>`;
         } else {
-            equipDiv.innerHTML += `<div style="font-size:0.9em; color:#888;">なし</div>`;
+            equipDiv.innerHTML += `<div class="text-sm text-muted">なし</div>`;
         }
         container.appendChild(equipDiv);
 

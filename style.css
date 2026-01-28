@@ -178,7 +178,7 @@ body {
     padding: 1rem;
     position: relative;
     /* Add inner shadow for depth against bars */
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.4);
 }
 
 /* --- Panel Styles (Shared) --- */
@@ -300,6 +300,193 @@ h2 {
     border-bottom: 2px solid var(--accent-red);
 }
 
+.list-item-adventure {
+    border-left: 4px solid #8d6e63;
+}
+
+/* Text Utils */
+.text-accent-orange {
+    color: #d84315;
+}
+
+/* --- Refactoring Utility Classes --- */
+.grid-2-col-fixed-right {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1rem;
+    height: 100%;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    align-items: center;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.gap-xs {
+    gap: 4px;
+}
+
+.gap-sm {
+    gap: 8px;
+}
+
+.gap-md {
+    gap: 1rem;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.scroll-y {
+    overflow-y: auto;
+}
+
+/* Panels */
+.panel-frame {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid #d7ccc8;
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sub-header {
+    border-bottom: 1px solid #a1887f;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.2rem;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #4e342e;
+}
+
+/* Form Elements */
+.select-sm {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1px 4px;
+    border: 1px solid #a1887f;
+    border-radius: 3px;
+    background: #fff;
+    color: #3e2723;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    height: 26px;
+    vertical-align: middle;
+}
+
+.btn-icon-sm {
+    padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    width: 26px;
+    height: 26px;
+    border: 1px solid #5d4037;
+    border-radius: 3px;
+    background: #5d4037;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+
+/* Specific Component Styles */
+.trait-tag {
+    display: inline-block;
+    padding: 1px 4px;
+    background: #efebe9;
+    border: 1px solid #d7ccc8;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: #4e342e;
+    margin-right: 4px;
+    margin-bottom: 2px;
+}
+
+.stat-bar-container {
+    margin-bottom: 4px;
+}
+
+.stat-bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+}
+
+.stat-bar-bg {
+    background: #ddd;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    background: #5d4037;
+    height: 100%;
+}
+
+.tab-container {
+    flex-shrink: 0;
+    border-bottom: 1px solid #d7ccc8;
+    margin-bottom: 0.5rem;
+}
+
+.flex-no-shrink {
+    flex-shrink: 0;
+}
+
+.p-sm {
+    padding: 0.5rem;
+}
+
+.mb-xs {
+    margin-bottom: 2px;
+}
+
+.mb-sm {
+    margin-bottom: 4px;
+}
+
+.text-sub-color {
+    color: #555;
+}
+
+.text-muted {
+    color: #888;
+}
+
+.font-mono {
+    font-family: monospace;
+}
+
+.mt-md {
+    margin-top: 1rem;
+}
+
 /* Quest Items */
 .quest-item {
     background: #fff;
@@ -320,6 +507,82 @@ h2 {
     border-left-color: #d32f2f;
 }
 
+/* Quest Detail & Badges */
+.status-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+.status-badge-manual {
+    background: #bf360c;
+    color: #efebe9;
+}
+
+.status-badge-special {
+    background: #263238;
+    color: #efebe9;
+}
+
+.status-badge-rank {
+    background: #efebe9;
+    border: 1px solid #d7ccc8;
+    color: #3e2723;
+}
+
+.quest-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.quest-reward-box {
+    background: #efebe9;
+    padding: 0.8rem;
+    border-radius: 4px;
+    border: 1px solid #d7ccc8;
+    font-size: 0.95rem;
+}
+
+.text-desc {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+
+/* Adventurer Selection List (Manual Assign) */
+.adv-select-list {
+    height: 250px;
+    overflow-y: auto;
+    border: 1px solid #a1887f;
+    background: #fff;
+    padding: 0.5rem;
+}
+
+.adv-select-row {
+    padding: 8px;
+    border-bottom: 1px dashed #d7ccc8;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.adv-select-row:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.bg-selected-row {
+    background-color: #c8e6c9 !important;
+    font-weight: bold;
+}
+
 .quest-item[data-type="MAGIC"] {
     border-left-color: #7b1fa2;
 }
@@ -335,6 +598,450 @@ h2 {
 .quest-title {
     font-weight: bold;
     margin-bottom: 0.2rem;
+}
+
+/* Layout Components */
+.stats-wrapper {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.event-notice {
+    color: #ffcc80;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-left: 0.2rem;
+}
+
+.grid-2-col-even {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    height: 100%;
+}
+
+/* Main Screen Events */
+.event-card-warning {
+    margin-top: 4px;
+    padding: 4px;
+    background: #fff3e0;
+    border-left: 3px solid #ff9800;
+}
+
+.text-status-safe {
+    color: #4CAF50;
+}
+
+.text-status-danger {
+    color: #f44336;
+}
+
+.text-event-title {
+    font-weight: bold;
+    color: #e65100;
+}
+
+.text-event-desc {
+    color: #5d4037;
+}
+
+.text-event-meta {
+    font-size: 0.85em;
+    color: #795548;
+}
+
+/* Operation Screen */
+.h-full {
+    height: 100%;
+}
+
+.p-md {
+    padding: 1rem;
+}
+
+.mb-lg {
+    margin-bottom: 2rem;
+}
+
+.flex-col-end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.mt-auto {
+    margin-top: auto;
+}
+
+.w-full {
+    width: 100%;
+}
+
+/* Mail Screen */
+.mail-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.mail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--wood-light);
+    padding-bottom: 0.5rem;
+}
+
+.mail-layout {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+    overflow: hidden;
+}
+
+.mail-list {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #d7ccc8;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+}
+
+.mail-detail {
+    flex: 1.5;
+    overflow-y: auto;
+    border: 1px solid #d7ccc8;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.mail-item {
+    padding: 0.8rem;
+    border-bottom: 1px solid #efebe9;
+    cursor: pointer;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    transition: background 0.2s;
+}
+
+.mail-item:hover {
+    background: #fff8e1;
+}
+
+.mail-item.selected {
+    background: #ffe0b2;
+    border-left: 4px solid var(--accent-gold);
+}
+
+.mail-item.unread {
+    background: #fff;
+    font-weight: bold;
+}
+
+.mail-item.read {
+    background: #f5f5f5;
+    color: #5d4037;
+}
+
+.mail-icon {
+    font-size: 1.2rem;
+    color: var(--wood-light);
+}
+
+.mail-info {
+    flex: 1;
+}
+
+.mail-title-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 0.2rem;
+}
+
+.mail-type-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #d7ccc8;
+    color: #3e2723;
+    margin-right: 0.5rem;
+}
+
+.mail-type-badge.system {
+    background: #cfd8dc;
+}
+
+.mail-type-badge.event {
+    background: #fff9c4;
+    color: #f57f17;
+}
+
+.mail-type-badge.important {
+    background: #ffccbc;
+    color: #bf360c;
+}
+
+.mail-preview {
+    font-size: 0.85rem;
+    color: #795548;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unread-dot {
+    color: var(--accent-red);
+    font-size: 0.8rem;
+}
+
+/* Mail Detail Content */
+.detail-header {
+    border-bottom: 1px dashed #d7ccc8;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.detail-meta {
+    font-size: 0.85rem;
+    color: #8d6e63;
+    margin-bottom: 0.2rem;
+}
+
+.detail-title {
+    font-size: 1.1rem;
+    color: var(--wood-dark);
+}
+
+.detail-body {
+    line-height: 1.6;
+    color: #3e2723;
+}
+
+.empty-detail {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+}
+
+
+
+/* Archives Screen */
+.archives-layout {
+    display: flex;
+    gap: 1rem;
+    height: 100%;
+}
+
+.finance-detail {
+    flex: 1;
+    border: 1px solid #d7ccc8;
+    border-radius: 4px;
+    padding: 1rem;
+    background: #fff;
+    overflow-y: auto;
+}
+
+.finance-list-wrapper {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+}
+
+.finance-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.finance-table-container {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #d7ccc8;
+    border-radius: 4px;
+}
+
+.finance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.finance-table thead {
+    background: #d7ccc8;
+    color: #3e2723;
+    position: sticky;
+    top: 0;
+}
+
+.finance-table th,
+.finance-table td {
+    padding: 0.4rem;
+}
+
+.finance-table th {
+    text-align: right;
+}
+
+.finance-table th:first-child {
+    text-align: left;
+}
+
+.finance-row {
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background 0.1s;
+}
+
+.finance-row:hover {
+    background: #fffde7 !important;
+}
+
+.finance-income {
+    color: #2e7d32;
+    text-align: right;
+}
+
+.finance-expense {
+    color: #c62828;
+    text-align: right;
+}
+
+.finance-balance {
+    font-weight: bold;
+    text-align: right;
+}
+
+.sub-header {
+    font-weight: bold;
+    border-bottom: 2px solid var(--accent-gold);
+    margin-bottom: 0.5rem;
+    color: var(--wood-dark);
+}
+
+.finance-summary-box {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: #fff8e1;
+    border-radius: 4px;
+}
+
+.finance-summary-item {
+    flex: 1;
+    text-align: center;
+}
+
+.finance-detail-row {
+    padding: 0.4rem 0;
+    border-bottom: 1px dashed #efebe9;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Market Tab */
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.market-item {
+    border: 1px solid #d7ccc8;
+    padding: 0.5rem;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.market-item-header {
+    font-weight: bold;
+    color: #3e2723;
+}
+
+.market-item-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #5d4037;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.text-lg {
+    font-size: 1.1em;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.py-xs {
+    padding: 0.2rem 0.8rem;
+}
+
+.bg-accent {
+    background: var(--accent-gold);
+}
+
+.text-wood {
+    color: var(--wood-dark);
+}
+
+.section-header {
+    margin-bottom: 0.5rem;
+    color: var(--wood-dark);
+    border-bottom: 2px solid var(--wood-light);
+}
+
+.operation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.operation-card {
+    background: #fff;
+    border: 1px solid #d7ccc8;
+    border-radius: 4px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.operation-card.hero {
+    background: #fff8e1;
+    border-color: #ffd54f;
+}
+
+.operation-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.policy-desc {
+    font-size: 0.9em;
+    color: #5d4037;
+    margin-bottom: 0.5rem;
+}
+
+.policy-effects {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
 }
 
 .quest-info {
@@ -618,6 +1325,14 @@ h2 {
     text-shadow: none;
     transform: none;
     filter: grayscale(0.8);
+}
+
+.btn-sm {
+    width: auto;
+    margin: 0;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.9rem;
+    height: 2.2rem;
 }
 
 /* --- Utilities --- */

@@ -31,7 +31,7 @@ export class MailScreen {
                 <div class="mail-header">
                     <h2>郵便受け</h2>
                     <div class="mail-actions">
-                        <button id="mark-all-read-btn" class="btn btn-secondary" style="width:auto; margin:0; padding:0.4rem 1rem; font-size:0.9rem;">全て既読にする</button>
+                        <button id="mark-all-read-btn" class="btn btn-secondary btn-sm">全て既読にする</button>
                     </div>
                 </div>
 

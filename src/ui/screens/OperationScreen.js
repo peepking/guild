@@ -1,4 +1,3 @@
-
 import { POLICIES, FACILITIES } from '../../data/ManagementData.js';
 
 export class OperationScreen {
@@ -6,6 +5,7 @@ export class OperationScreen {
         this.gameLoop = gameLoop;
         this.container = null;
         this.currentTab = 'FACILITY'; // FACILITY | POLICY | PERSONNEL | PR
+        this.scrollPositions = {}; // Persist scroll per tab
     }
 
     render(container, guild, state, logs) {
@@ -13,7 +13,7 @@ export class OperationScreen {
         this.guild = guild; // Cache guild
 
         container.innerHTML = `
-            <div class="panel" style="height:100%;">
+            <div class="panel h-full">
                 <div class="panel-header">運営メニュー</div>
                 
                 <div class="tabs">
@@ -23,13 +23,27 @@ export class OperationScreen {
                     <button class="tab ${this.currentTab === 'PR' ? 'active' : ''}" data-tab="PR">広報活動</button>
                 </div>
                 
-                <div id="operation-content" class="operation-layout" style="flex:1; overflow-y:auto; padding:1rem;">
+                <div id="operation-content" class="operation-layout flex-1 scroll-y p-md">
                     <!-- Content Injected -->
                 </div>
             </div>
         `;
 
         this._renderContent(guild);
+
+        // Restore & Track Scroll Logic
+        const newContentEl = container.querySelector('#operation-content');
+        if (newContentEl) {
+            // Restore
+            if (this.scrollPositions[this.currentTab]) {
+                newContentEl.scrollTop = this.scrollPositions[this.currentTab];
+            }
+
+            // Track
+            newContentEl.addEventListener('scroll', () => {
+                this.scrollPositions[this.currentTab] = newContentEl.scrollTop;
+            });
+        }
 
         // Bind Tabs
         container.querySelectorAll('.tab').forEach(btn => {
@@ -61,25 +75,25 @@ export class OperationScreen {
         const hqCost = softCap * 100;
 
         container.innerHTML = `
-            <h3 style="margin-bottom:0.5rem; color:var(--wood-dark); border-bottom:2px solid var(--wood-light);">ギルド本部</h3>
-            <div class="operation-grid" style="margin-bottom:2rem;">
+            <h3 class="section-header">ギルド本部</h3>
+            <div class="operation-grid mb-lg">
                 <div class="operation-card hero">
                     <h3>本部施設</h3>
                     <div class="operation-header-row">
                         <span>収容目安</span>
-                        <span class="font-bold" style="font-size:1.2rem;">${softCap}名</span>
+                        <span class="font-bold text-xl">${softCap}名</span>
                     </div>
                     <div class="policy-desc">
                         冒険者の拠点。規模を大きくすることで、より多くの冒険者を受け入れ可能。
                     </div>
-                     <div style="margin-top:auto; display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem;">
-                        <span style="font-weight:bold; color:${guild.money >= hqCost ? 'var(--wood-dark)' : '#d32f2f'}">増築: ${hqCost} G</span>
-                        <button id="btn-expand" class="btn btn-primary" style="width:100%;" ${guild.money < hqCost ? 'disabled' : ''}>実行</button>
+                     <div class="flex-col-end gap-sm mt-auto">
+                        <span class="font-bold text-status-${guild.money >= hqCost ? 'safe' : 'danger'}">増築: ${hqCost} G</span>
+                        <button id="btn-expand" class="btn btn-primary w-full" ${guild.money < hqCost ? 'disabled' : ''}>実行</button>
                     </div>
                 </div>
             </div>
             
-            <h3 style="margin-bottom:0.5rem; color:var(--wood-dark); border-bottom:2px solid var(--wood-light);">拡張施設</h3>
+            <h3 class="section-header">拡張施設</h3>
             <div id="facility-list" class="operation-grid">
                 <!-- Facilities Injected Here -->
             </div>
@@ -124,22 +138,21 @@ export class OperationScreen {
 
             const el = document.createElement('div');
             el.className = `operation-card ${currentLv > 0 ? '' : 'inactive'}`;
-            // maybe distinct style for not built yet?
 
             el.innerHTML = `
                 <div class="operation-header-row">
-                    <div style="font-weight:bold;">${def.name}</div>
+                    <div class="font-bold">${def.name}</div>
                     <span class="text-sm">Lv.${currentLv} / ${def.maxLevel}</span>
                 </div>
                 <div class="policy-desc" style="min-height:3em;">${def.description}</div>
-                <div class="policy-effects" style="color:var(--accent-gold); font-weight:bold;">${def.effectDesc}</div>
+                <div class="policy-effects">${def.effectDesc}</div>
                 
-                <div style="margin-top:auto; display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem;">
+                <div class="flex-col-end gap-sm mt-auto">
                     ${isMax
                     ? '<span style="color:var(--text-main);">最大レベル</span>'
-                    : `<span style="font-weight:bold; color:${guild.money >= cost ? 'var(--wood-dark)' : '#d32f2f'}">改良: ${cost} G</span>`
+                    : `<span class="font-bold text-status-${guild.money >= cost ? 'safe' : 'danger'}">改良: ${cost} G</span>`
                 }
-                    ${!isMax ? `<button class="btn-build btn btn-primary" data-id="${def.id}" style="width:100%;" ${guild.money < cost ? 'disabled' : ''}>${currentLv === 0 ? '建設' : '強化'}</button>` : ''}
+                    ${!isMax ? `<button class="btn-build btn btn-primary w-full" data-id="${def.id}" ${guild.money < cost ? 'disabled' : ''}>${currentLv === 0 ? '建設' : '強化'}</button>` : ''}
                 </div>
             `;
 
@@ -176,7 +189,7 @@ export class OperationScreen {
         const activePolicyId = guild.activePolicy || 'BALANCED';
 
         container.innerHTML = `
-            <div style="margin-bottom:1rem;">
+            <div class="mb-md">
                 <div class="policy-desc">
                     週に一度（7の倍数日）、ギルド全体の方針を変更できます。<br>
                     方針は依頼の危険度、報酬計算、冒険者の成長率に影響します。
@@ -203,14 +216,14 @@ export class OperationScreen {
 
             item.innerHTML = `
                 <div class="operation-header-row">
-                    <div style="font-weight:bold; font-size:1.1em;">${p.name}</div>
-                    ${isActive ? '<span class="status-badge" style="background:var(--accent-gold); color:var(--wood-dark);">適用中</span>' : ''}
+                    <div class="font-bold text-lg">${p.name}</div>
+                    ${isActive ? '<span class="status-badge bg-accent text-wood">適用中</span>' : ''}
                 </div>
                 <div class="policy-desc">${p.description}</div>
                 <div class="policy-effects">効果: ${modStr.join(', ') || 'なし'}</div>
                 
                 ${!isActive ? `
-                    <div style="text-align:right; margin-top:auto;">
+                    <div class="text-right mt-auto">
                          <button class="btn-change-policy btn btn-primary" data-id="${p.id}" ${canChange ? '' : 'disabled'}>変更</button>
                     </div>
                 ` : ''}
@@ -231,7 +244,7 @@ export class OperationScreen {
         });
 
         if (!canChange) {
-            container.innerHTML += `<div style="text-align:center; color:#d32f2f; margin-top:1rem; font-size:0.9rem;">方針変更は週の初め(7の倍数日)にのみ可能です。</div>`;
+            container.innerHTML += `<div class="text-center text-danger mt-md text-sm">方針変更は週の初め(7の倍数日)にのみ可能です。</div>`;
         }
     }
 
@@ -241,7 +254,7 @@ export class OperationScreen {
         // Header
         const header = document.createElement('div');
         header.innerHTML = `
-            <div class="policy-desc" style="margin-bottom:1rem;">
+            <div class="policy-desc mb-md">
                 上位ランクで引退した冒険者を「顧問」として雇用できます。<br>
                 顧問は名声や育成などにボーナスを与えますが、日給が必要です。
             </div>
@@ -260,7 +273,7 @@ export class OperationScreen {
         }
 
         advisorSection.innerHTML = `
-            <h3 style="margin-bottom:0.5rem; color:var(--wood-dark); border-bottom:2px solid var(--wood-light); display:inline-block;">契約中の顧問</h3>
+            <h3 class="section-header inline-block">契約中の顧問</h3>
             ${advisorListHtml}
         `;
         container.appendChild(advisorSection);
@@ -282,9 +295,9 @@ export class OperationScreen {
                         <span>${adv.roleName}</span>
                     </div>
                     <div class="policy-effects">効果: ${effStr.join(', ')}</div>
-                    <div class="operation-header-row" style="margin-top:auto;">
-                        <span style="font-size:0.9rem;">日給: ${adv.salary} G</span>
-                        <button class="btn-fire btn-danger" style="padding:0.2rem 0.8rem; font-size:0.8rem;">解任</button>
+                    <div class="operation-header-row mt-auto">
+                        <span class="text-sm">日給: ${adv.salary} G</span>
+                        <button class="btn-fire btn-danger py-xs text-sm">解任</button>
                     </div>
                 `;
                 el.querySelector('.btn-fire').addEventListener('click', () => {
@@ -300,7 +313,7 @@ export class OperationScreen {
         // Candidates
         const candidateSection = document.createElement('div');
         candidateSection.innerHTML = `
-            <h3 style="margin-bottom:0.5rem; color:var(--wood-dark); border-bottom:2px solid var(--wood-light); display:inline-block;">顧問候補 (引退者)</h3>
+            <h3 class="section-header inline-block">顧問候補 (引退者)</h3>
         `;
 
         if (!guild.advisorCandidates || guild.advisorCandidates.length === 0) {
@@ -324,9 +337,9 @@ export class OperationScreen {
                         <span class="text-sm">Rank ${cand.rankLabel} / ${cand.roleName}</span>
                     </div>
                     <div class="policy-effects">効果: ${effStr.join(', ')}</div>
-                    <div class="operation-header-row" style="margin-top:auto;">
-                        <span style="font-size:0.9rem;">日給: ${cand.salary}G</span>
-                        <button class="btn-hire btn btn-primary" style="padding:0.2rem 0.8rem;">雇用</button>
+                    <div class="operation-header-row mt-auto">
+                        <span class="text-sm">日給: ${cand.salary}G</span>
+                        <button class="btn-hire btn btn-primary py-xs">雇用</button>
                     </div>
                 `;
 
@@ -354,13 +367,13 @@ export class OperationScreen {
                         <h3>現在実施中のキャンペーン</h3>
                         <div class="operation-header-row">
                             <span>新規加入率アップ (効果1.5倍)</span>
-                            <span class="status-badge" style="background:var(--accent-gold); color:var(--wood-dark);">実施中</span>
+                            <span class="status-badge bg-accent text-wood">実施中</span>
                         </div>
-                        <div style="text-align:right; margin-top:1rem;">残り ${activePR.expiresDay - guild.day} 日</div>
+                        <div class="text-right mt-md">残り ${activePR.expiresDay - guild.day} 日</div>
                     </div>
                 ` : `
                      <div class="operation-card" style="background:var(--bg-light); border-style:dashed;">
-                        <h3 style="color:var(--text-sub);">キャンペーン未実施</h3>
+                        <h3 class="text-sub">キャンペーン未実施</h3>
                         <div class="policy-desc">現在実施中の広報キャンペーンはありません。</div>
                     </div>
                 `}
@@ -372,9 +385,9 @@ export class OperationScreen {
                         7日間、冒険者の加入希望率が大幅に上昇します。
                     </div>
                     
-                    <div style="margin-top:auto; display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem;">
-                        <span style="font-weight:bold; color:${guild.money >= cost ? 'var(--wood-dark)' : '#d32f2f'}">${cost} G</span>
-                        <button id="btn-pr" class="btn btn-primary" style="width:100%;"
+                    <div class="flex-col-end gap-sm mt-auto">
+                        <span class="font-bold text-status-${guild.money >= cost ? 'safe' : 'danger'}">${cost} G</span>
+                        <button id="btn-pr" class="btn btn-primary w-full"
                         ${guild.money < cost || activePR ? 'disabled' : ''}>
                         ${activePR ? '実施中' : '実施'}
                         </button>

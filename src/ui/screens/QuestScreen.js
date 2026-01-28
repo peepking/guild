@@ -27,20 +27,15 @@ export class QuestScreen {
         }
 
         container.innerHTML = '';
-        container.className = 'screen-container';
-        container.style.display = 'grid';
-        container.style.gridTemplateColumns = '1.3fr 1fr';
-        container.style.gap = '1.5rem';
+        container.classList.add('grid-2-col-fixed-right', 'gap-md');
 
         // --- Left: Quest Board ---
         const listPanel = document.createElement('section');
-        listPanel.className = 'panel';
-        listPanel.style.padding = '0.5rem';
+        listPanel.className = 'panel p-sm';
 
         // Tabs
         const tabsContainer = document.createElement('div');
-        tabsContainer.className = 'tabs';
-        tabsContainer.style.marginBottom = '0.5rem';
+        tabsContainer.className = 'tabs mb-sm';
 
         const createTab = (id, label) => {
             const btn = document.createElement('button');
@@ -227,13 +222,13 @@ export class QuestScreen {
         let statusHtml = '';
         if (assignment) {
             if (isPlanning) {
-                statusHtml = `<span style="color:#2e7d32; font-weight:bold;">準備中 (担当${assignment.members.length}名)</span>`;
+                statusHtml = `<span class="text-safe font-bold">準備中 (担当${assignment.members.length}名)</span>`;
             } else {
-                statusHtml = `<span style="color:#1565c0; font-weight:bold;">遂行中 (残り${assignment.remainingDays}日)</span>`;
+                statusHtml = `<span class="text-primary font-bold">遂行中 (残り${assignment.remainingDays}日)</span>`;
             }
         } else {
-            const manualBadge = quest.manualOnly ? '<span class="status-badge" style="background:#bf360c; color:#efebe9;">手動</span> ' : '';
-            const specialBadge = quest.isSpecial ? '<span class="status-badge" style="background:#263238; color:#efebe9;">特務</span> ' : '';
+            const manualBadge = quest.manualOnly ? '<span class="status-badge status-badge-manual">手動</span> ' : '';
+            const specialBadge = quest.isSpecial ? '<span class="status-badge status-badge-special">特務</span> ' : '';
 
             statusHtml = `
                  <div>
@@ -250,7 +245,7 @@ export class QuestScreen {
             </div>
             <div class="list-item-meta">
                 ${statusHtml}
-                <span class="status-badge" style="background:#efebe9; border:1px solid #d7ccc8;">Rank ${quest.difficulty.rank}</span>
+                <span class="status-badge status-badge-rank">Rank ${quest.difficulty.rank}</span>
             </div>
         `;
 
@@ -263,20 +258,20 @@ export class QuestScreen {
         let html = `<div class="panel-header">${quest.title}</div>`;
 
         let badgesHtml = '';
-        if (quest.isSpecial) badgesHtml += `<span class="status-badge" style="background:#263238; color:#efebe9; margin-right:4px;">特殊依頼</span>`;
-        if (quest.manualOnly) badgesHtml += `<span class="status-badge" style="background:#bf360c; color:#efebe9;">手動必須</span>`;
+        if (quest.isSpecial) badgesHtml += `<span class="status-badge status-badge-special" style="margin-right:4px;">特殊依頼</span>`;
+        if (quest.manualOnly) badgesHtml += `<span class="status-badge status-badge-manual">手動必須</span>`;
 
         if (badgesHtml) {
-            html += `<div style="margin-bottom:1rem;">${badgesHtml}</div>`;
+            html += `<div class="mb-md">${badgesHtml}</div>`;
         }
 
         html += `<hr style="border:0; border-top:1px dashed #a1887f; margin:1rem 0;">`;
 
         html += `
-            <div class="text-base text-sub" style="margin-bottom:0.8rem; font-style:italic;">
+            <div class="text-desc">
                 ${quest.description || "詳細不明"}
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;" class="text-base text-sub">
+            <div class="quest-detail-grid">
                 <div>種別: ${quest.type}</div>
                 <div>ランク: <b>${quest.difficulty.rank}</b></div>
                 <div>期間: ${quest.days}日</div>
@@ -285,9 +280,9 @@ export class QuestScreen {
                 <div>期限: あと${quest.expiresInDays || '?'}日</div>
             </div>
             <br>
-            <div style="background:#efebe9; padding:0.8rem; border-radius:4px; border:1px solid #d7ccc8;" class="text-base">
+            <div class="quest-reward-box">
                 <b>報酬:</b> ${quest.rewards.money}G + α / 評判 +${quest.rewards.reputation}<br>
-                <span style="font-size:0.9em; color:#bf360c;">失敗時: 違約金${quest.penalty.money}G / 評判 -${quest.penalty.reputation}</span>
+                <span class="text-sm text-accent-red">失敗時: 違約金${quest.penalty.money}G / 評判 -${quest.penalty.reputation}</span>
             </div>
         `;
 
@@ -349,13 +344,13 @@ export class QuestScreen {
         const currentCount = this.state.selectedAdventurerIds.length;
 
         panel.innerHTML += `
-            <div style="margin-bottom:0.5rem;">
+            <div class="mb-sm">
                 必要人数: <b>${currentCount} / ${reqSize}</b>
             </div>
-            <div id="adv-select-list" style="height:250px; overflow-y:auto; border:1px solid #a1887f; background:#fff; padding:0.5rem;">
+            <div id="adv-select-list" class="adv-select-list">
                 <!-- List -->
             </div>
-            <div style="margin-top:1rem;">
+            <div class="mt-md">
                 <button id="btn-confirm" class="btn btn-primary" ${currentCount < reqSize ? 'disabled' : ''}>計画に追加</button>
                 <button id="btn-back" class="btn btn-secondary">戻る</button>
             </div>
@@ -372,34 +367,28 @@ export class QuestScreen {
         });
 
         if (avail.length === 0) {
-            listDiv.innerHTML = `<div style="padding:1rem;">派遣可能な冒険者がいません</div>`;
+            listDiv.innerHTML = '<div class="p-md text-sub">派遣可能な冒険者がいません</div>';
         }
 
         avail.forEach(adv => {
             const row = document.createElement('div');
-            // Use local styling for compact list or reuse .list-item? 
-            // This is a sub-list. Let's keep it simple mostly but consistent fonts.
-            row.style.padding = '8px';
-            row.style.borderBottom = '1px dashed #d7ccc8';
-            row.style.display = 'flex';
-            row.style.justifyContent = 'space-between';
-            row.style.cursor = 'pointer';
+            row.className = 'adv-select-row';
 
             const isSelected = this.state.selectedAdventurerIds.includes(adv.id);
             if (isSelected) {
-                row.style.backgroundColor = '#c8e6c9';
-                row.style.fontWeight = 'bold';
+                row.classList.add('bg-selected-row');
             }
 
             const score = Math.floor(this.gameLoop.questService.calculateScore(quest, adv));
 
             row.innerHTML = `
-                <span>${adv.name} <span style="font-size:0.8em; color:#777;">(${adv.type}/${adv.rankLabel})</span></span>
-                <span style="font-family:monospace;">適性:${score}</span>
-            `;
+            < span > ${adv.name} <span class="text-sm text-sub-color">(${adv.type}/${adv.rankLabel})</span></span >
+                <span class="font-mono">適性:${score}</span>
+        `;
 
             row.onclick = () => {
-                if (isSelected) {
+                const toggled = !this.state.selectedAdventurerIds.includes(adv.id);
+                if (!toggled) {
                     this.state.selectedAdventurerIds = this.state.selectedAdventurerIds.filter(id => id !== adv.id);
                 } else {
                     if (this.state.selectedAdventurerIds.length < reqSize) {

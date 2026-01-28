@@ -6,6 +6,10 @@ export class TitleService {
         this.mailService = null;
     }
 
+    setMailService(service) {
+        this.mailService = service;
+    }
+
     /**
      * Try to generate and assign a title.
      * @param {Object} adventurer
