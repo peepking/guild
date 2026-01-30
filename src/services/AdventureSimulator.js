@@ -3,6 +3,7 @@ import { ItemDataLoader } from '../data/ItemDataLoader.js';
 import { QUEST_SPECS } from '../data/QuestSpecs.js';
 import { TRAITS } from '../data/constants.js';
 import { ADVENTURE_LOG_DATA } from '../data/AdventureLogData.js';
+import { NORMAL_ACTION_LOGS } from '../data/ArtsData.js';
 
 export class AdventureSimulator {
     constructor() {
@@ -156,7 +157,7 @@ export class AdventureSimulator {
             const context = { monster: encounter.name, area: this._getRegionName(region) };
             logs.push(this._generateLog('ENCOUNTER', null, context));
 
-            const battleResult = this._resolveBattle(party, encounter, modifiers);
+            const battleResult = this._resolveBattle(party, encounter, modifiers, logs);
 
             results.battles++;
 
@@ -377,10 +378,36 @@ export class AdventureSimulator {
             // Fallback
             cp *= (1 + adv.equipmentLevel * 0.02);
         }
+
+        // Arts Bonus (1 Art = C Rank Equip = +6%)
+        if (adv.arts && adv.arts.length > 0) {
+            cp *= (1 + adv.arts.length * 0.06);
+        }
+
         return cp;
     }
 
-    _resolveBattle(party, monster, modifiers = {}) {
+    _resolveBattle(party, monster, modifiers = {}, logs = []) {
+        // --- Action Logs ---
+        party.forEach(adv => {
+            let template = '';
+            // 30% Art Chance
+            if (adv.arts && adv.arts.length > 0 && Math.random() < 0.3) {
+                const art = adv.arts[Math.floor(Math.random() * adv.arts.length)];
+                if (art.logs && art.logs.length > 0) {
+                    template = art.logs[Math.floor(Math.random() * art.logs.length)];
+                }
+            }
+
+            // Normal Action
+            if (!template) {
+                const normalLogs = NORMAL_ACTION_LOGS[adv.type] || ['{name}は果敢に戦った！'];
+                template = normalLogs[Math.floor(Math.random() * normalLogs.length)];
+            }
+
+            if (logs) logs.push(template.replace(/{name}/g, adv.name));
+        });
+
         // 1. Calculate Party CP
         let totalCP = 0;
         party.forEach(p => totalCP += this._getAdventurerPower(p));

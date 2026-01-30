@@ -76,6 +76,15 @@ export const RANK_THRESHOLDS = [
     { threshold: 0, label: 'E' }
 ];
 
+export const GUILD_RANK_THRESHOLDS = [
+    { threshold: 12000, label: 'S', name: '伝説のギルド' },
+    { threshold: 4500, label: 'A', name: '英雄級ギルド' },
+    { threshold: 1500, label: 'B', name: '上級ギルド' },
+    { threshold: 500, label: 'C', name: '有力ギルド' },
+    { threshold: 100, label: 'D', name: '地方ギルド' },
+    { threshold: 0, label: 'E', name: '駆け出しギルド' }
+];
+
 export const BASE_STATS = {
     [ADVENTURER_TYPES.WARRIOR]: { STR: 60, VIT: 55, MAG: 20, DEX: 30, INT: 25, CHA: 25 },
     [ADVENTURER_TYPES.KNIGHT]: { STR: 50, VIT: 50, MAG: 25, DEX: 30, INT: 35, CHA: 40 },
@@ -147,10 +156,10 @@ export const QUEST_RANK_VALUE = {
 };
 
 export const QUEST_DIFFICULTY = {
-    E: { rank: 'E', powerReq: 5, baseReward: 50 },
-    D: { rank: 'D', powerReq: 10, baseReward: 100 },
-    C: { rank: 'C', powerReq: 20, baseReward: 250 },
-    B: { rank: 'B', powerReq: 40, baseReward: 500 },
-    A: { rank: 'A', powerReq: 70, baseReward: 1000 },
-    S: { rank: 'S', powerReq: 100, baseReward: 2500 }
+    E: { rank: 'E', powerReq: 5, baseReward: 10, baseRep: 1.0 },
+    D: { rank: 'D', powerReq: 10, baseReward: 20, baseRep: 1.5 },
+    C: { rank: 'C', powerReq: 20, baseReward: 30, baseRep: 2.0 },
+    B: { rank: 'B', powerReq: 40, baseReward: 50, baseRep: 3.0 },
+    A: { rank: 'A', powerReq: 70, baseReward: 80, baseRep: 4.0 },
+    S: { rank: 'S', powerReq: 100, baseReward: 100, baseRep: 5.0 }
 };

@@ -4,7 +4,7 @@ import { AssignmentService } from '../services/AssignmentService.js';
 import { LifeEventService } from '../services/LifeEventService.js'; // Added
 
 import { titleService } from '../services/TitleService.js';
-import { TYPE_ADVANTAGES, LEAVE_TYPES } from '../data/constants.js';
+import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS } from '../data/constants.js';
 
 export class GameLoop {
     constructor(guild, uiManager, questService, mailService, managementService, equipmentService) {
@@ -37,6 +37,9 @@ export class GameLoop {
     }
 
     nextDay() {
+        // Capture previous Rank for notification
+        const prevRankObj = GUILD_RANK_THRESHOLDS.find(r => this.guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+
         this.guild.day++;
         this.uiManager.log(`--- ${this.guild.day}日目 開始 ---`, 'day-start');
 
@@ -217,6 +220,19 @@ export class GameLoop {
         if (this.plannedQuests.length > 0) {
             // Move to "Planned" list. Remove from "Available".
             this.activeQuests = this.activeQuests.filter(q => !plannedIds.includes(q.id));
+        }
+
+        // --- Rank Up Check ---
+        const newRankObj = GUILD_RANK_THRESHOLDS.find(r => this.guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+        if (newRankObj.threshold > prevRankObj.threshold) {
+            this.uiManager.log(`ギルドランクが【${newRankObj.label}】に昇格しました！`, 'event');
+            if (this.mailService) {
+                this.mailService.send(
+                    'ギルドランク昇格のお知らせ',
+                    `おめでとうございます。\nギルドの評判が高まり、ランクが【${newRankObj.label}: ${newRankObj.name}】に昇格しました。\n\nより高難易度の依頼が舞い込むようになるでしょう。\n今後ともギルドの発展に尽力してください。`,
+                    'IMPORTANT'
+                );
+            }
         }
 
         // --- 7. Update UI ---

@@ -70,41 +70,61 @@ export class OperationScreen {
     }
 
     _renderFacilities(container, guild) {
-        // 1. Guild HQ (Special Handling)
+        container.innerHTML = `
+            <h3 class="section-header">ギルド本部</h3>
+            <div id="hq-list" class="operation-grid mb-lg"></div>
+            
+            <h3 class="section-header">拡張施設</h3>
+            <div id="facility-list" class="operation-grid"></div>
+        `;
+
+        const hqList = container.querySelector('#hq-list');
+        const facilityList = container.querySelector('#facility-list');
+
+        // 1. Capacity (HQ)
+        this._renderCapacityCard(hqList, guild);
+
+        // 2. HQ Facilities (PR & Admin)
+        const hqIds = ['PUBLIC_RELATIONS', 'ADMINISTRATION'];
+        hqIds.forEach(id => {
+            if (FACILITIES[id]) {
+                this._renderSingleFacility(FACILITIES[id], hqList, guild);
+            }
+        });
+
+        // 3. Other Facilities
+        Object.values(FACILITIES).forEach(def => {
+            if (!hqIds.includes(def.id)) {
+                this._renderSingleFacility(def, facilityList, guild);
+            }
+        });
+    }
+
+    _renderCapacityCard(container, guild) {
         const softCap = guild.softCap || 10;
         const hqCost = softCap * 100;
 
-        container.innerHTML = `
-            <h3 class="section-header">ギルド本部</h3>
-            <div class="operation-grid mb-lg">
-                <div class="operation-card hero">
-                    <h3>本部施設</h3>
-                    <div class="operation-header-row">
-                        <span>収容目安</span>
-                        <span class="font-bold text-xl">${softCap}名</span>
-                    </div>
-                    <div class="policy-desc">
-                        冒険者の拠点。規模を大きくすることで、より多くの冒険者を受け入れ可能。
-                    </div>
-                     <div class="flex-col-end gap-sm mt-auto">
-                        <span class="font-bold text-status-${guild.money >= hqCost ? 'safe' : 'danger'}">増築: ${hqCost} G</span>
-                        <button id="btn-expand" class="btn btn-primary w-full" ${guild.money < hqCost ? 'disabled' : ''}>実行</button>
-                    </div>
-                </div>
+        const el = document.createElement('div');
+        el.className = 'operation-card hero';
+        el.innerHTML = `
+            <h3>本部施設 (収容拡張)</h3>
+            <div class="operation-header-row">
+                <span>収容目安</span>
+                <span class="font-bold text-xl">${softCap}名</span>
             </div>
-            
-            <h3 class="section-header">拡張施設</h3>
-            <div id="facility-list" class="operation-grid">
-                <!-- Facilities Injected Here -->
+            <div class="policy-desc">
+                冒険者の拠点。規模を大きくすることで、より多くの冒険者を受け入れ可能。
+            </div>
+             <div class="flex-col-end gap-sm mt-auto">
+                <span class="font-bold text-status-${guild.money >= hqCost ? 'safe' : 'danger'}">増築: ${hqCost} G</span>
+                <button id="btn-expand" class="btn btn-primary w-full" ${guild.money < hqCost ? 'disabled' : ''}>実行</button>
             </div>
         `;
 
-        // Bind HQ Button
-        container.querySelector('#btn-expand')?.addEventListener('click', () => {
+        el.querySelector('#btn-expand')?.addEventListener('click', () => {
             if (guild.money >= hqCost) {
                 guild.money -= hqCost;
 
-                // Log
                 if (guild.todayFinance) {
                     guild.todayFinance.expense += hqCost;
                     guild.todayFinance.balance = guild.money;
@@ -123,23 +143,23 @@ export class OperationScreen {
                 this.gameLoop.uiManager.render();
             }
         });
+        container.appendChild(el);
+    }
 
-        // 2. Other Facilities
-        const list = container.querySelector('#facility-list');
-        Object.values(FACILITIES).forEach(def => {
-            const currentLv = (guild.facilities && guild.facilities[def.id.toLowerCase()]) || 0;
-            const nextLv = currentLv + 1;
-            const isMax = currentLv >= def.maxLevel;
+    _renderSingleFacility(def, container, guild) {
+        const currentLv = (guild.facilities && guild.facilities[def.id.toLowerCase()]) || 0;
+        const nextLv = currentLv + 1;
+        const isMax = currentLv >= def.maxLevel;
 
-            let cost = 0;
-            if (!isMax) {
-                cost = (def.costMult === 0) ? def.baseCost : def.baseCost * nextLv;
-            }
+        let cost = 0;
+        if (!isMax) {
+            cost = (def.costMult === 0) ? def.baseCost : def.baseCost * nextLv;
+        }
 
-            const el = document.createElement('div');
-            el.className = `operation-card ${currentLv > 0 ? '' : 'inactive'}`;
+        const el = document.createElement('div');
+        el.className = `operation-card ${currentLv > 0 ? '' : 'inactive'}`;
 
-            el.innerHTML = `
+        el.innerHTML = `
                 <div class="operation-header-row">
                     <div class="font-bold">${def.name}</div>
                     <span class="text-sm">Lv.${currentLv} / ${def.maxLevel}</span>
@@ -149,40 +169,40 @@ export class OperationScreen {
                 
                 <div class="flex-col-end gap-sm mt-auto">
                     ${isMax
-                    ? '<span style="color:var(--text-main);">最大レベル</span>'
-                    : `<span class="font-bold text-status-${guild.money >= cost ? 'safe' : 'danger'}">改良: ${cost} G</span>`
-                }
+                ? '<span style="color:var(--text-main);">最大レベル</span>'
+                : `<span class="font-bold text-status-${guild.money >= cost ? 'safe' : 'danger'}">改良: ${cost} G</span>`
+            }
                     ${!isMax ? `<button class="btn-build btn btn-primary w-full" data-id="${def.id}" ${guild.money < cost ? 'disabled' : ''}>${currentLv === 0 ? '建設' : '強化'}</button>` : ''}
                 </div>
             `;
 
-            // Bind Build Button
-            el.querySelector('.btn-build')?.addEventListener('click', () => {
-                if (guild.money >= cost) {
-                    guild.money -= cost;
+        // Bind Build Button
+        el.querySelector('.btn-build')?.addEventListener('click', () => {
+            if (guild.money >= cost) {
+                guild.money -= cost;
 
-                    // Log
-                    if (guild.todayFinance) {
-                        guild.todayFinance.expense += cost;
-                        guild.todayFinance.balance = guild.money;
-                        guild.todayFinance.details.push({
-                            reason: `${def.name} ${currentLv === 0 ? '建設' : '強化'} (Lv.${nextLv})`,
-                            amount: -cost
-                        });
-                    }
-
-                    // Update Level
-                    const key = def.id.toLowerCase();
-                    if (!guild.facilities[key]) guild.facilities[key] = 0;
-                    guild.facilities[key]++;
-
-                    this.gameLoop.uiManager.log(`${def.name}を Lv.${guild.facilities[key]} に強化しました。`, 'success');
-                    this.gameLoop.uiManager.render();
+                // Log
+                if (guild.todayFinance) {
+                    guild.todayFinance.expense += cost;
+                    guild.todayFinance.balance = guild.money;
+                    guild.todayFinance.details.push({
+                        reason: `${def.name} ${currentLv === 0 ? '建設' : '強化'} (Lv.${nextLv})`,
+                        amount: -cost
+                    });
                 }
-            });
 
-            list.appendChild(el);
+                // Update Level
+                const key = def.id.toLowerCase();
+                if (!guild.facilities) guild.facilities = {}; // Safety
+                if (!guild.facilities[key]) guild.facilities[key] = 0;
+                guild.facilities[key]++;
+
+                this.gameLoop.uiManager.log(`${def.name}を Lv.${guild.facilities[key]} に強化しました。`, 'success');
+                this.gameLoop.uiManager.render();
+            }
         });
+
+        container.appendChild(el);
     }
 
     _renderPolicy(container, guild) {

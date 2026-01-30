@@ -1,3 +1,5 @@
+import { GUILD_RANK_THRESHOLDS } from '../data/constants.js';
+
 export class Layout {
     constructor(uiManager) {
         this.uiManager = uiManager;
@@ -76,7 +78,9 @@ export class Layout {
     renderTopBar(guild) {
         document.getElementById('display-day').textContent = guild.day;
         document.getElementById('display-money').textContent = `${guild.money} G`;
-        document.getElementById('display-reputation').textContent = guild.reputation;
+
+        const rankObj = GUILD_RANK_THRESHOLDS.find(r => guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+        document.getElementById('display-reputation').innerHTML = `${guild.reputation} <span style="font-size:0.8em; color:#ddd;">(Rank ${rankObj.label})</span>`;
 
         // Policy
         const pName = { BALANCED: '標準', AGGRESSIVE: '利益', SAFE: '安全', TRAINING: '育成', COMMERCIAL: '商業' };

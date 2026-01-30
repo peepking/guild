@@ -1,3 +1,5 @@
+import { GUILD_RANK_THRESHOLDS } from '../../data/constants.js';
+
 export class MainScreen {
     constructor() {
         // No dependency on Renderer needed if logs are passed in
@@ -40,6 +42,12 @@ export class MainScreen {
         }
 
         mgmtContent.innerHTML = `
+            <div style="margin-bottom:0.5rem;">
+                <strong>ギルドランク:</strong> ${(() => {
+                const r = GUILD_RANK_THRESHOLDS.find(r => guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+                return `<span class="text-status-safe">${r.name}</span> (Rank ${r.label})`;
+            })()}
+            </div>
             <div style="margin-bottom:0.5rem;">
                 <strong>現在の方針:</strong> ${policyName}
             </div>

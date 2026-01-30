@@ -132,5 +132,25 @@ export const FACILITIES = {
         description: '過去の文献や地図を保管する。失われた知識への手掛かりとなる。',
         effectDesc: '古代・特殊系依頼の出現率アップ +10% × Lv',
         type: 'EXPLORATION'
+    },
+    PUBLIC_RELATIONS: {
+        id: 'PUBLIC_RELATIONS',
+        name: '広報部',
+        maxLevel: 5,
+        baseCost: 1000,
+        costMult: 1,
+        description: 'ギルドの宣伝活動を行い、新たな冒険者を勧誘する。',
+        effectDesc: '冒険者加入率向上 (Lvにより変動)',
+        type: 'RECRUIT'
+    },
+    ADMINISTRATION: {
+        id: 'ADMINISTRATION',
+        name: '管理部',
+        maxLevel: 5,
+        baseCost: 1000,
+        costMult: 1,
+        description: '依頼の受付・管理体制を強化し、より多くの依頼を処理する。',
+        effectDesc: '1日の依頼発生数増加 (Count = 2 + Lv)',
+        type: 'QUEST'
     }
 };

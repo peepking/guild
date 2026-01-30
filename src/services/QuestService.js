@@ -1,5 +1,5 @@
 import { Quest } from '../models/Quest.js';
-import { CONSTANTS, QUEST_DIFFICULTY, QUEST_TYPES, TYPE_ADVANTAGES, TRAITS, QUEST_RANK_VALUE } from '../data/constants.js';
+import { CONSTANTS, QUEST_DIFFICULTY, QUEST_TYPES, TYPE_ADVANTAGES, TRAITS, QUEST_RANK_VALUE, GUILD_RANK_THRESHOLDS } from '../data/constants.js';
 import { AdventureSimulator } from './AdventureSimulator.js';
 import { REGIONS, QUEST_SPECS } from '../data/QuestSpecs.js';
 import { ADVENTURE_LOG_DATA } from '../data/AdventureLogData.js';
@@ -17,14 +17,20 @@ export class QuestService {
     }
 
     generateDailyQuests(day, reputation = 0, facilities = {}) {
-        const repBonus = Math.floor(reputation / 50);
-        let count = 5 + repBonus;
-        if (count < 3) count = 3;
-        if (count > 7) count = 7;
+        // Administration Level controls Count
+        const admLv = facilities.administration || 0;
+        let count = 2 + admLv;
+
+        // Cap safety? Maybe 10.
+        if (count > 10) count = 10;
+
+        // Determine Guild Rank
+        const guildRankObj = GUILD_RANK_THRESHOLDS.find(r => reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+        const maxRankLabel = guildRankObj.label;
 
         const quests = [];
         for (let i = 0; i < count; i++) {
-            quests.push(this._createRandomQuest(day));
+            quests.push(this._createRandomQuest(day, maxRankLabel));
         }
 
         // Phase 12: Special Quest Chance
@@ -33,6 +39,10 @@ export class QuestService {
         const specialChance = 0.15 + (libraryLv * 0.10);
 
         if (Math.random() < specialChance) {
+            // Special quests also need rank cap? Usually special = hard.
+            // Let's pass maxRankLabel to special too if needed, or allow special to exceed?
+            // "Guild Rank limits displayed quests". Special implies it appears. 
+            // I'll leave special as is for now, or clamp it inside.
             quests.push(this._createSpecialQuest(day));
         }
 
@@ -52,10 +62,20 @@ export class QuestService {
         return MAP[typeKey] || 'DEFAULT';
     }
 
-    _createRandomQuest(day) {
+    _createRandomQuest(day, maxRankLabel = 'S') {
         this.questCounter++;
         const region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
-        const diffKeys = Object.keys(QUEST_DIFFICULTY);
+
+        // Filter by Max Rank
+        const maxVal = QUEST_RANK_VALUE[maxRankLabel] || 1;
+        const diffKeys = Object.keys(QUEST_DIFFICULTY).filter(k => {
+            const r = QUEST_DIFFICULTY[k].rank;
+            return (QUEST_RANK_VALUE[r] || 0) <= maxVal;
+        });
+
+        // Fallback if empty (shouldn't happen)
+        if (diffKeys.length === 0) diffKeys.push('E');
+
         const randomDiffKey = diffKeys[Math.floor(Math.random() * diffKeys.length)];
         const difficulty = QUEST_DIFFICULTY[randomDiffKey];
         const rank = difficulty.rank;
@@ -191,7 +211,7 @@ export class QuestService {
 
         const q = new Quest(
             `qst_${this.questCounter}`, title, typeKey, difficulty, spec.weights,
-            { money: difficulty.baseReward, reputation: rank === 'S' ? 50 : (rank === 'A' ? 20 : 5) },
+            { money: Math.floor(difficulty.baseReward * partySize * days), reputation: Math.floor((difficulty.baseRep || 1) * partySize * days) },
             penalty, partySize, days, danger, meta
         );
         q.createdDay = day;
@@ -217,12 +237,13 @@ export class QuestService {
         const difficulty = QUEST_DIFFICULTY[rank];
         const title = `【特務】${spec.label}`;
         const partySize = rank === 'S' ? 5 : 4;
+        const days = 7;
 
         const q = new Quest(
             `sq_${this.questCounter}`, title, typeKey, difficulty, spec.weights,
-            { money: Math.floor(difficulty.baseReward * 2.0), reputation: 100 },
-            { money: difficulty.baseReward, reputation: 20 },
-            partySize, 7, rank === 'S' ? 95 : 80,
+            { money: Math.floor(difficulty.baseReward * partySize * days * 2.0), reputation: Math.floor((difficulty.baseRep || 1) * partySize * days * 2.0) },
+            { money: Math.floor(difficulty.baseReward * partySize * days), reputation: 20 },
+            partySize, days, rank === 'S' ? 95 : 80,
             { danger01: 0.9, rewardRate01: 1.0, prestige01: 1.0 }
         );
 

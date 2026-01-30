@@ -1,5 +1,5 @@
 import { Adventurer } from '../models/Adventurer.js';
-import { ADVENTURER_TYPES, ORIGINS, JOIN_TYPES } from '../data/constants.js';
+import { ADVENTURER_TYPES, ORIGINS, JOIN_TYPES, GUILD_RANK_THRESHOLDS, ADVENTURER_RANKS } from '../data/constants.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
 
 export class RecruitmentService {
@@ -18,10 +18,15 @@ export class RecruitmentService {
             buffMod = prBuff.effect; // e.g., 1.5 or 2.0
         }
 
-        // 2. Base Check
-        // Spec: 0.05 + rep factor
-        const rep = this.guild.reputation;
-        let chance = (0.05 + (rep * 0.0003)) * 3.0; // Tripled base
+        // 2. Base Check (Modified for PUBLIC_RELATIONS)
+        const prLv = (this.guild.facilities && this.guild.facilities.public_relations) || 0;
+
+        // Base: 1% + 3% per Level. Max (Lv5) = 16% + Rep Bonus
+        // Old formula was approx 15-20%.
+        let chance = 0.01 + (prLv * 0.03);
+
+        // Small Rep Bonus (0.01% per 200 Rep)
+        chance += this.guild.reputation * 0.00005;
 
         // Apply Buff
         chance *= buffMod;
@@ -88,8 +93,24 @@ export class RecruitmentService {
         else if (roll < 0.8) joinType = JOIN_TYPES.WANDERER;
         else joinType = JOIN_TYPES.CONTRACT;
 
+        // Determine Max Rank Value based on Guild Reputation
+        const guildRep = (this.guild && this.guild.reputation) || 0;
+        const guildRankObj = GUILD_RANK_THRESHOLDS.find(r => guildRep >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+
+        // Find corresponding Adventurer Rank index
+        // Assuming labels match (S, A, B, C, D, E)
+        const advRankIdx = ADVENTURER_RANKS.findIndex(r => r.label === guildRankObj.label);
+
+        let maxRankValue = 9999;
+        if (advRankIdx > 0) {
+            // Cap to just below the NEXT rank threshold
+            // e.g. if C (idx 3), next is B (idx 2). Cap = B.threshold - 1.
+            const nextRank = ADVENTURER_RANKS[advRankIdx - 1];
+            maxRankValue = nextRank.threshold - 1;
+        }
+
         // Create with all params
-        const adv = new Adventurer(id, name, type, origin, joinType);
+        const adv = new Adventurer(id, name, type, origin, joinType, maxRankValue);
 
         return adv;
     }

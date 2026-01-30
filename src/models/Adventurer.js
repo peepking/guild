@@ -1,7 +1,8 @@
 import { BASE_STATS, TRAITS, ORIGINS, JOIN_TYPES, ADVENTURER_RANKS } from '../data/constants.js';
+import { ARTS_DATA } from '../data/ArtsData.js';
 
 export class Adventurer {
-    constructor(id, name, type, origin = ORIGINS.CENTRAL, joinType = JOIN_TYPES.LOCAL) {
+    constructor(id, name, type, origin = ORIGINS.CENTRAL, joinType = JOIN_TYPES.LOCAL, maxRankValue = 9999) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -9,7 +10,7 @@ export class Adventurer {
         this.joinType = joinType;
 
         // Phase 10: Initialize Rank & Trust based on Origin/JoinType
-        this.rankValue = this._initRank(origin, joinType);
+        this.rankValue = this._initRank(origin, joinType, maxRankValue);
         this.rankLabel = this._getRankLabel();
 
         this.trust = this._initTrust(origin, joinType);
@@ -18,6 +19,7 @@ export class Adventurer {
         this.stats = this._generateStats(type, origin, this.rankValue);
         this.temperament = this._generateTemperament();
         this.traits = this._generateTraits();
+        this.arts = [];
 
         this.recoveryDays = 0;
         this.state = "IDLE";
@@ -143,9 +145,13 @@ export class Adventurer {
         this.addHistory = function (day, text) {
             this.history.push({ day, text });
         };
+
+        // Initial Arts Check
+        if (this.rankValue >= 380) this.learnRandomArt();
+        if (this.rankValue >= 1000) this.learnRandomArt();
     }
 
-    _initRank(origin, joinType) {
+    _initRank(origin, joinType, maxRankValue) {
         // 4.1 JoinType Base
         let min = 0, max = 100;
         if (joinType === JOIN_TYPES.LOCAL) { min = 0; max = 160; }
@@ -161,7 +167,10 @@ export class Adventurer {
 
         // 4.3 Clamp
         if (val < 0) val = 0;
-        if (val > 1000) val = 1000;
+        // Apply Limit
+        val = Math.min(val, maxRankValue);
+        // Absolute cap for generation (optional main cap)
+        if (val > 9999) val = 9999;
         return val;
     }
 
@@ -185,10 +194,30 @@ export class Adventurer {
     }
 
     updateRank(delta) {
+        const oldVal = this.rankValue;
         this.rankValue += delta;
         if (this.rankValue < 0) this.rankValue = 0;
         if (this.rankValue > 9999) this.rankValue = 9999;
+
+        // Arts check
+        if (oldVal < 380 && this.rankValue >= 380) this.learnRandomArt();
+        if (oldVal < 1000 && this.rankValue >= 1000) this.learnRandomArt();
+
         this.rankLabel = this._getRankLabel();
+    }
+
+    learnRandomArt() {
+        const list = ARTS_DATA[this.type];
+        if (!list) return;
+
+        // Filter out known
+        const knownIds = this.arts.map(a => a.id);
+        const candidates = list.filter(a => !knownIds.includes(a.id));
+
+        if (candidates.length > 0) {
+            const art = candidates[Math.floor(Math.random() * candidates.length)];
+            this.arts.push(art);
+        }
     }
 
     _generateStats(type, origin, rankValue) {
