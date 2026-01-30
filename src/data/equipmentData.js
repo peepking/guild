@@ -97,6 +97,20 @@ export const EQUIPMENT_DATA = [
     { "name": "終焉火種の禁呪札", "type": "SPECIAL", "rank": "S" },
     { "name": "冥王石の古印", "type": "SPECIAL", "rank": "S" },
 
+    // GAUNTLET
+    { "name": "レザーグローブ", "type": "GAUNTLET", "rank": "E" },
+    { "name": "鉄拳", "type": "GAUNTLET", "rank": "E" },
+    { "name": "冷鉄片の拳甲", "type": "GAUNTLET", "rank": "D" },
+    { "name": "砂鉄のガントレット", "type": "GAUNTLET", "rank": "D" },
+    { "name": "白銀鉱の拳甲", "type": "GAUNTLET", "rank": "C" },
+    { "name": "妖精樹脂の手甲", "type": "GAUNTLET", "rank": "C" },
+    { "name": "鋼殻ビートルの拳甲", "type": "GAUNTLET", "rank": "B" },
+    { "name": "熔核石の炎拳", "type": "GAUNTLET", "rank": "B" },
+    { "name": "太陽鋼の金剛拳", "type": "GAUNTLET", "rank": "A" },
+    { "name": "深海竜鱗の拳鎧", "type": "GAUNTLET", "rank": "A" },
+    { "name": "天霜鋼の神拳", "type": "GAUNTLET", "rank": "S" },
+    { "name": "虚無心核の封拳", "type": "GAUNTLET", "rank": "S" },
+
     // HEAVY
     { "name": "チェインメイル", "type": "HEAVY", "rank": "E" },
     { "name": "プレートアーマー", "type": "HEAVY", "rank": "E" },

@@ -46,7 +46,7 @@ export class Adventurer {
 
         // 新メソッド: 装備を追加
         this.addEquipment = function (equip) {
-            const WEAPON_TYPES = ['LONG_SWORD', 'SHORT_SWORD', 'AXE', 'MACE', 'STAFF', 'BOW', 'SPECIAL'];
+            const WEAPON_TYPES = ['LONG_SWORD', 'SHORT_SWORD', 'AXE', 'MACE', 'STAFF', 'BOW', 'SPECIAL', 'GAUNTLET'];
             const ARMOR_TYPES = ['HEAVY', 'LIGHT', 'CLOTHES', 'ROBE'];
 
             let newCategory = null;
@@ -200,8 +200,9 @@ export class Adventurer {
         if (this.rankValue > 9999) this.rankValue = 9999;
 
         // Arts check
-        if (oldVal < 380 && this.rankValue >= 380) this.learnRandomArt();
-        if (oldVal < 1000 && this.rankValue >= 1000) this.learnRandomArt();
+        // Arts check (Prevent duplicate learning via rank fluctuation)
+        if (oldVal < 380 && this.rankValue >= 380 && this.arts.length < 1) this.learnRandomArt();
+        if (oldVal < 1000 && this.rankValue >= 1000 && this.arts.length < 2) this.learnRandomArt();
 
         this.rankLabel = this._getRankLabel();
     }

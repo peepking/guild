@@ -392,7 +392,16 @@ export class AdventureSimulator {
                     [ADVENTURER_TYPES.ROGUE]: '盗賊', // ROGUE -> 盗賊
                     [ADVENTURER_TYPES.PRIEST]: '僧侶', // PRIEST -> 僧侶
                     [ADVENTURER_TYPES.MERCHANT]: '商人',
-                    [ADVENTURER_TYPES.BARD]: '吟遊詩人'
+                    [ADVENTURER_TYPES.BARD]: '吟遊詩人',
+                    [ADVENTURER_TYPES.SAMURAI]: '侍',
+                    [ADVENTURER_TYPES.SPELLBLADE]: '魔法戦士',
+                    [ADVENTURER_TYPES.DARK_KNIGHT]: '暗黒騎士',
+                    [ADVENTURER_TYPES.FENG_SHUI]: '風水術師',
+                    [ADVENTURER_TYPES.PALADIN]: '聖騎士',
+                    [ADVENTURER_TYPES.HUNTER]: '狩人',
+                    [ADVENTURER_TYPES.NINJA]: '忍者',
+                    [ADVENTURER_TYPES.MARTIAL_ARTIST]: '武闘家',
+                    [ADVENTURER_TYPES.BISHOP]: '司祭'
                 };
                 const jobName = JOB_NAME_MAP[jobType] || '冒険者';
 

@@ -45,6 +45,42 @@ export class EquipmentService {
             'BARD': {
                 'WEAPON': { 'LONG_SWORD': 5, 'SHORT_SWORD': 40, 'AXE': 0, 'MACE': 0, 'STAFF': 35, 'BOW': 15, 'SPECIAL': 5 },
                 'ARMOR': { 'HEAVY': 0, 'LIGHT': 20, 'CLOTHES': 60, 'ROBE': 20 }
+            },
+            'SAMURAI': {
+                'WEAPON': { 'LONG_SWORD': 100, 'SHORT_SWORD': 0, 'AXE': 0, 'MACE': 0, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 20, 'LIGHT': 50, 'CLOTHES': 30, 'ROBE': 0 }
+            },
+            'SPELLBLADE': {
+                'WEAPON': { 'LONG_SWORD': 60, 'SHORT_SWORD': 20, 'AXE': 0, 'MACE': 0, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 20, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 40, 'LIGHT': 40, 'CLOTHES': 10, 'ROBE': 10 }
+            },
+            'DARK_KNIGHT': {
+                'WEAPON': { 'LONG_SWORD': 40, 'SHORT_SWORD': 0, 'AXE': 40, 'MACE': 20, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 80, 'LIGHT': 20, 'CLOTHES': 0, 'ROBE': 0 }
+            },
+            'FENG_SHUI': {
+                'WEAPON': { 'LONG_SWORD': 0, 'SHORT_SWORD': 10, 'AXE': 0, 'MACE': 0, 'STAFF': 40, 'BOW': 0, 'SPECIAL': 50, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 0, 'LIGHT': 0, 'CLOTHES': 60, 'ROBE': 40 }
+            },
+            'PALADIN': {
+                'WEAPON': { 'LONG_SWORD': 50, 'SHORT_SWORD': 0, 'AXE': 0, 'MACE': 50, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 90, 'LIGHT': 10, 'CLOTHES': 0, 'ROBE': 0 }
+            },
+            'HUNTER': {
+                'WEAPON': { 'LONG_SWORD': 0, 'SHORT_SWORD': 0, 'AXE': 0, 'MACE': 0, 'STAFF': 0, 'BOW': 100, 'SPECIAL': 0, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 0, 'LIGHT': 60, 'CLOTHES': 40, 'ROBE': 0 }
+            },
+            'NINJA': {
+                'WEAPON': { 'LONG_SWORD': 0, 'SHORT_SWORD': 60, 'AXE': 0, 'MACE': 0, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 40, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 0, 'LIGHT': 20, 'CLOTHES': 80, 'ROBE': 0 }
+            },
+            'MARTIAL_ARTIST': {
+                'WEAPON': { 'LONG_SWORD': 0, 'SHORT_SWORD': 0, 'AXE': 0, 'MACE': 0, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 100 },
+                'ARMOR': { 'HEAVY': 0, 'LIGHT': 30, 'CLOTHES': 70, 'ROBE': 0 }
+            },
+            'BISHOP': {
+                'WEAPON': { 'LONG_SWORD': 0, 'SHORT_SWORD': 0, 'AXE': 0, 'MACE': 50, 'STAFF': 50, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0 },
+                'ARMOR': { 'HEAVY': 0, 'LIGHT': 0, 'CLOTHES': 20, 'ROBE': 80 }
             }
         };
 
