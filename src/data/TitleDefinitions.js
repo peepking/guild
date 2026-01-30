@@ -69,7 +69,7 @@ export const ACHIEVEMENT_TITLE_DEFS = [
         targetKanji: "混沌の王",
         targetKata: "カオス・キング",
         kanjiTemplates: ["{targetKanji}を{traitVerb}もの", "{traitAdj}混沌鎮圧者", "{traitNoun}、王を砕く者"],
-        kataTemplates: ["{traitKata}・カオスブレイカー", "{traitKata}・キングバニッシャー"]
+        kataTemplates: ["{traitKata}・カオスブレイカー", "{traitKata}・カオスバニッシャー"]
     },
     {
         id: "BOSS_CENTRAL_WORLD_WILL_DEFEATED",
@@ -87,7 +87,7 @@ export const ACHIEVEMENT_TITLE_DEFS = [
         targetKanji: "妖精王オベロン",
         targetKata: "オベロン",
         kanjiTemplates: ["{targetKanji}を{traitVerb}もの", "{traitAdj}妖精王討滅者", "{traitNoun}、王を墜とす者"],
-        kataTemplates: ["{traitKata}・フェイキラー", "{traitKata}・キングスレイヤー"]
+        kataTemplates: ["{traitKata}・フェイキラー", "{traitKata}・グリムスレイヤー"]
     },
     {
         id: "BOSS_EAST_WORLD_TREE_DEFEATED",
@@ -101,7 +101,7 @@ export const ACHIEVEMENT_TITLE_DEFS = [
         targetKanji: "ウロボロス",
         targetKata: "ウロボロス",
         kanjiTemplates: ["{targetKanji}を{traitVerb}もの", "{traitAdj}輪廻断絶者", "{traitNoun}、環を断つ者"],
-        kataTemplates: ["{traitKata}・エンドレスブレイカー", "{traitKata}・オロボロスキラー"]
+        kataTemplates: ["{traitKata}・エンドレスブレイカー", "{traitKata}・ウロボロスキラー"]
     },
 
     // =========================
@@ -209,7 +209,7 @@ export const ACHIEVEMENT_TITLE_DEFS = [
         targetKanji: "王命護衛",
         targetKata: "VIPガード",
         kanjiTemplates: ["{targetKanji}を{traitVerb}もの", "{traitAdj}護衛長", "{traitNoun}、王命を護る者"],
-        kataTemplates: ["{traitKata}・ロイヤルガード", "{traitKata}・ボディガード"]
+        kataTemplates: ["{traitKata}・ロイヤルナイツ", "{traitKata}・ボディガード"]
     },
     {
         id: "QUEST_S_BORDER_RECON_CLEARED",
