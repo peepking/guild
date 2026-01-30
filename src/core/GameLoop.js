@@ -27,6 +27,11 @@ export class GameLoop {
         this.ongoingQuests = [];  // Currently being undertaken
         this.plannedQuests = [];  // Planned but not departed
         this.questHistory = [];   // Completed quests archive
+
+        // Initialize Tournament State
+        if (!this.guild.tournament) {
+            this.guild.tournament = { solo: 'E', team: 'E' };
+        }
     }
 
     archiveQuest(snapshot) {
@@ -57,6 +62,20 @@ export class GameLoop {
         }
 
         // --- 0. Depart Planned Quests (From previous day) ---
+        // Fee Check (Tournament)
+        for (let i = this.plannedQuests.length - 1; i >= 0; i--) {
+            const plan = this.plannedQuests[i];
+            if (plan.quest.entryFee) {
+                if (this.guild.money >= plan.quest.entryFee) {
+                    this.guild.money -= plan.quest.entryFee;
+                    this.uiManager.log(`参加費 ${plan.quest.entryFee}G を支払いました。(${plan.quest.title})`);
+                } else {
+                    this.uiManager.log(`資金不足のため参加費を払えず、依頼をキャンセルしました。(${plan.quest.title})`, 'error');
+                    this.assignmentService.cancelAssignment(plan, this.ongoingQuests, this.plannedQuests);
+                }
+            }
+        }
+
         const departedCount = this.assignmentService.confirmAssignments(this.plannedQuests, this.ongoingQuests);
         this.plannedQuests = []; // Clear
         // departed quests are already not in activeQuests
@@ -153,8 +172,12 @@ export class GameLoop {
         }
 
         // --- 3. Clean up Expired Quests ---
+        // --- 3. Clean up Expired Quests ---
         for (let i = this.activeQuests.length - 1; i >= 0; i--) {
             const q = this.activeQuests[i];
+
+            if (q.expiresInDays === null) continue;
+
             const expirationDay = (q.createdDay || 0) + (q.expiresInDays || 0);
             if (this.guild.day > expirationDay) {
                 this.activeQuests.splice(i, 1);
@@ -176,6 +199,9 @@ export class GameLoop {
 
         // --- 4. Generate Daily Quests ---
         const newQuests = this.questService.generateDailyQuests(this.guild.day, this.guild.reputation, this.guild.facilities);
+        const tourneyQuests = this.questService.generateTournamentQuests(this.guild.tournament, [...this.activeQuests, ...this.ongoingQuests.map(a => a.quest)]);
+        newQuests.push(...tourneyQuests);
+
         this.activeQuests.push(...newQuests);
 
         // Cap quests
@@ -295,6 +321,32 @@ export class GameLoop {
                 msg += ` (報酬総額: ${result.reward.money}G)`;
             }
             this.uiManager.log(msg, 'success');
+
+            // Tournament Completion
+            if (result.quest.isTournament) {
+                const ranks = ['E', 'D', 'C', 'B', 'A', 'S'];
+                const currentRank = result.quest.difficulty.rank;
+                const currentRankIdx = ranks.indexOf(currentRank);
+
+                if (currentRankIdx === -1) {
+                    console.error("Tournament Rank Error: Invalid Rank", currentRank);
+                } else {
+                    const nextRankIdx = currentRankIdx + 1;
+                    const nextRank = nextRankIdx < ranks.length ? ranks[nextRankIdx] : 'COMPLETED';
+
+                    if (result.quest.type === 'TOURNAMENT_SOLO') {
+                        this.guild.tournament.solo = nextRank;
+                        if (this.mailService) {
+                            this.mailService.send('天下一武闘会（個人）制覇通知', `${currentRank}ランク戦を勝利しました！\n次は${nextRank}ランクへの挑戦権が得られます。`, 'IMPORTANT');
+                        }
+                    } else if (result.quest.type === 'TOURNAMENT_TEAM') {
+                        this.guild.tournament.team = nextRank;
+                        if (this.mailService) {
+                            this.mailService.send('天下一武闘会（団体）制覇通知', `${currentRank}ランク戦を勝利しました！\n次は${nextRank}ランクへの挑戦権が得られます。`, 'IMPORTANT');
+                        }
+                    }
+                }
+            }
         } else {
             let penaltyMoney = result.effectivePenalty ? result.effectivePenalty.money : (result.quest.penalty ? result.quest.penalty.money : 0);
             let penaltyRep = result.quest.penalty ? result.quest.penalty.reputation : 0;

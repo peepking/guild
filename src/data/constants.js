@@ -45,7 +45,9 @@ export const QUEST_TYPES = {
     HUNT: 'HUNT',       // 戦士が得意
     MAGIC: 'MAGIC',     // 魔法使いが得意
     EXPLORE: 'EXPLORE', // 斥候が得意
-    GUARD: 'GUARD'      // 僧侶/戦士が得意
+    GUARD: 'GUARD',      // 僧侶/戦士が得意
+    TOURNAMENT_SOLO: 'TOURNAMENT_SOLO', // 個人戦
+    TOURNAMENT_TEAM: 'TOURNAMENT_TEAM'  // 団体戦
 };
 
 export const TYPE_ADVANTAGES = {

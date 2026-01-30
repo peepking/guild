@@ -1,9 +1,10 @@
 import { MonsterDataLoader } from '../data/MonsterDataLoader.js';
 import { ItemDataLoader } from '../data/ItemDataLoader.js';
 import { QUEST_SPECS } from '../data/QuestSpecs.js';
-import { TRAITS } from '../data/constants.js';
+import { TRAITS, ADVENTURER_TYPES } from '../data/constants.js';
 import { ADVENTURE_LOG_DATA } from '../data/AdventureLogData.js';
 import { NORMAL_ACTION_LOGS } from '../data/ArtsData.js';
+import { REGIONAL_NAMES } from '../data/Names.js';
 
 export class AdventureSimulator {
     constructor() {
@@ -66,12 +67,16 @@ export class AdventureSimulator {
             const intro = this._pick(introTemplates);
             logs.push(this._format(intro, context));
 
-            const envIntro = this._pick(ADVENTURE_LOG_DATA.ENVIRONMENT[region]?.intro);
-            if (envIntro) logs.push(envIntro);
+            if (!quest.isTournament) {
+                const envIntro = this._pick(ADVENTURE_LOG_DATA.ENVIRONMENT[region]?.intro);
+                if (envIntro) logs.push(envIntro);
+            }
         } else {
             // Daily Environment Log
-            const envMid = this._pick(ADVENTURE_LOG_DATA.ENVIRONMENT[region]?.mid);
-            if (envMid) logs.push(envMid);
+            if (!quest.isTournament) {
+                const envMid = this._pick(ADVENTURE_LOG_DATA.ENVIRONMENT[region]?.mid);
+                if (envMid) logs.push(envMid);
+            }
         }
 
         // --- Calculate Modifiers ---
@@ -95,7 +100,7 @@ export class AdventureSimulator {
         });
 
         // 2. Trait Flavor Log (Random chance per day)
-        if (Math.random() < 0.4) {
+        if (!quest.isTournament && Math.random() < 0.4) {
             const randomTrait = this._pick(partyTraits);
             if (randomTrait && ADVENTURE_LOG_DATA.TRAITS[randomTrait]) {
                 const owner = party.find(p => p.traits.includes(randomTrait));
@@ -107,7 +112,7 @@ export class AdventureSimulator {
         }
 
         // 3. Random Events (15% Base)
-        if (Math.random() < 0.15) {
+        if (!quest.isTournament && Math.random() < 0.15) {
             this._processRandomEvent(logs, results, party);
         }
 
@@ -120,13 +125,19 @@ export class AdventureSimulator {
 
         // Boss Logic
         let isBossDay = false;
-        if (spec.bossDays?.includes('LAST') && dayIndex === totalDays) {
-            isBossDay = true;
-            battleCount = Math.max(battleCount, 1);
-        }
-        if (spec.bossModifier && Math.random() < spec.bossModifier) {
-            isBossDay = true;
-            battleCount = Math.max(battleCount, 1);
+        if (quest.isTournament) {
+            battleCount = 1;
+            gatherCount = 0;
+            if (dayIndex === 4) isBossDay = true;
+        } else {
+            if (spec.bossDays?.includes('LAST') && dayIndex === totalDays) {
+                isBossDay = true;
+                battleCount = Math.max(battleCount, 1);
+            }
+            if (spec.bossModifier && Math.random() < spec.bossModifier) {
+                isBossDay = true;
+                battleCount = Math.max(battleCount, 1);
+            }
         }
 
         // Process Battles
@@ -150,31 +161,59 @@ export class AdventureSimulator {
             }
 
             const targetOverride = isBossBattle ? (quest.bossTarget || quest.target) : null;
-            const encounter = this._generateEncounter(quest, isBossBattle, region, targetOverride);
+            const encounter = this._generateEncounter(quest, isBossBattle, region, targetOverride, dayIndex);
 
             // --- ENCOUNTER LOG ---
             // Show discovery log before result
-            const context = { monster: encounter.name, area: this._getRegionName(region) };
-            logs.push(this._generateLog('ENCOUNTER', null, context));
+            const context = { monster: encounter.name, area: this._getRegionName(region), name: encounter.name };
 
-            const battleResult = this._resolveBattle(party, encounter, modifiers, logs);
+            if (quest.isTournament) {
+                const key = (quest.type === 'TOURNAMENT_TEAM') ? 'TOURNAMENT_BATTLE_START_TEAM' : 'TOURNAMENT_BATTLE_START';
+                logs.push(this._generateLog(key, null, context, quest));
+            } else {
+                logs.push(this._generateLog('ENCOUNTER', null, context, quest));
+            }
+
+            const battleResult = this._resolveBattle(party, encounter, modifiers, logs, quest);
 
             results.battles++;
 
             if (battleResult.win) {
                 results.wins++;
                 results.monstersKilled.push(encounter);
-                logs.push(this._generateLog('BATTLE_WIN', null, context));
+
+                let winKey = 'BATTLE_WIN';
+                let winName = party[0].name;
+
+                if (quest && quest.type === 'TOURNAMENT_TEAM') {
+                    winKey = 'BATTLE_WIN_TEAM';
+                    winName = `${party[0].name}たち`;
+                }
+
+                const winContext = { ...context, name: winName };
+                logs.push(this._generateLog(winKey, null, winContext, quest));
 
                 if (battleResult.materials && battleResult.materials.length > 0) {
                     results.itemsFound.push(...battleResult.materials);
-                    // Optional: Log material drop? "素材を手に入れた！"
-                    // logs.push(`[戦利品] ${battleResult.materials.map(m => m.name).join('、')}を入手した。`);
                 }
             } else {
-                logs.push(this._generateLog('BATTLE_LOSE', null, context));
+                let loseKey = 'BATTLE_LOSE';
+                let loseName = party[0].name;
+
+                if (quest && quest.type === 'TOURNAMENT_TEAM') {
+                    loseKey = 'BATTLE_LOSE_TEAM';
+                    loseName = `${party[0].name}たち`;
+                }
+                const loseContext = { ...context, name: loseName };
+                logs.push(this._generateLog(loseKey, null, loseContext, quest));
             }
             results.damageTaken += battleResult.damage;
+
+            if (quest.isTournament && !battleResult.win) {
+                logs.push(`【敗退】本戦にて敗北しました。大会への挑戦は終了です。`);
+                results.isFailure = true;
+                break;
+            }
         }
 
         // Process Gathering
@@ -212,14 +251,35 @@ export class AdventureSimulator {
     // Updated to remove INTRO branch as it is handled in simulateDay via QUEST_LOGS
     _generateLog(category, subType, context, quest) {
         let templates = [];
-        if (category === 'BATTLE_WIN') {
-            templates = ADVENTURE_LOG_DATA.BATTLE_WIN;
-        } else if (category === 'BATTLE_LOSE') {
-            templates = ADVENTURE_LOG_DATA.BATTLE_LOSE;
-        } else if (category === 'GATHER_SUCCESS') {
-            templates = ADVENTURE_LOG_DATA.GATHER_SUCCESS;
-        } else if (category === 'ENCOUNTER') {
-            templates = ADVENTURE_LOG_DATA.ENCOUNTER;
+
+        // Tournament Override Logic
+        if (quest && quest.isTournament) {
+            if (category === 'BATTLE_WIN') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_WIN;
+            else if (category === 'BATTLE_WIN_TEAM') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_WIN_TEAM;
+            else if (category === 'BATTLE_LOSE') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_LOSE;
+            else if (category === 'BATTLE_LOSE_TEAM') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_LOSE_TEAM;
+            else if (category === 'TOURNAMENT_BATTLE_START') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_START;
+            else if (category === 'TOURNAMENT_BATTLE_START_TEAM') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_START_TEAM;
+        }
+
+        if (templates.length === 0) {
+            if (category === 'BATTLE_WIN') {
+                templates = ADVENTURE_LOG_DATA.BATTLE_WIN;
+            } else if (category === 'BATTLE_LOSE') {
+                templates = ADVENTURE_LOG_DATA.BATTLE_LOSE;
+            } else if (category === 'GATHER_SUCCESS') {
+                templates = ADVENTURE_LOG_DATA.GATHER_SUCCESS;
+            } else if (category === 'ENCOUNTER') {
+                templates = ADVENTURE_LOG_DATA.ENCOUNTER;
+            } else if (category === 'TOURNAMENT_BATTLE_START') {
+                templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_START;
+            } else if (category === 'TOURNAMENT_BATTLE_START_TEAM') {
+                templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_START_TEAM;
+            } else if (category === 'BATTLE_WIN_TEAM') {
+                templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_WIN_TEAM;
+            } else if (category === 'BATTLE_LOSE_TEAM') {
+                templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_LOSE_TEAM;
+            }
         }
 
         const template = this._pick(templates) || "......";
@@ -271,7 +331,7 @@ export class AdventureSimulator {
         return intVal;
     }
 
-    _generateEncounter(quest, isBoss, region, targetOverride) { // Added targetOverride check
+    _generateEncounter(quest, isBoss, region, targetOverride, dayIndex) { // Added targetOverride check
         const rank = quest.difficulty.rank;
 
         // 1. Primary Search: Correct Region & Rank
@@ -300,38 +360,81 @@ export class AdventureSimulator {
         }
 
         // --- Selection (Candidates Found) ---
-        // Note: We need to filter by Boss/Non-Boss if able, but prioritize having *something* over "Mystery Shadow"
-        const SAFE_LIST = candidates; // Use our found list
-
-        // Use 'candidates' variable for the next block, renaming SAFE_LIST usage
-        // But wait, the existing code uses SAFE_LIST then filters into 'candidates'.
-        // Let's reuse the variable name `candidates` properly in the next steps or map SAFE_LIST to it.
-        // Actually, let's redefine SAFE_LIST to be our robust candidates list for minimal diff downstream.
         const ROBUST_LIST = candidates;
-
-        // Reset candidates for determining Boss/Non-Boss specific
         candidates = []; // Clear for filtering steps
 
-        // Filter by Boss / Non-Boss
-        if (isBoss) {
-            candidates = ROBUST_LIST.filter(m => m.category.includes('ボス'));
-            if (candidates.length === 0) candidates = ROBUST_LIST;
+        // Filter Logic
+        if (quest.isTournament) {
+            let displayName = '';
+
+            const rankMap = { 'E': 90, 'D': 110, 'C': 130, 'B': 150, 'A': 170, 'S': 190 };
+            let power = rankMap[quest.difficulty.rank] || 90;
+
+            if (quest.type === 'TOURNAMENT_TEAM') {
+                const rKeys = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
+                const rKey = rKeys[Math.floor(Math.random() * rKeys.length)];
+                const rMap = { NORTH: '北街', SOUTH: '南街', EAST: '東街', WEST: '西街' };
+                displayName = `${rMap[rKey]}ギルド代表チーム`;
+
+                // Team Coeff: 4 people equiv
+                power *= 1.4;
+            } else {
+                // Solo
+                const typeKeys = Object.keys(ADVENTURER_TYPES);
+                const typeKey = typeKeys[Math.floor(Math.random() * typeKeys.length)];
+                const jobType = ADVENTURER_TYPES[typeKey];
+
+                // Map to Japanese
+                const JOB_NAME_MAP = {
+                    [ADVENTURER_TYPES.WARRIOR]: '戦士',
+                    [ADVENTURER_TYPES.KNIGHT]: '騎士',
+                    [ADVENTURER_TYPES.MAGE]: '魔術師',
+                    [ADVENTURER_TYPES.ROGUE]: '盗賊', // ROGUE -> 盗賊
+                    [ADVENTURER_TYPES.PRIEST]: '僧侶', // PRIEST -> 僧侶
+                    [ADVENTURER_TYPES.MERCHANT]: '商人',
+                    [ADVENTURER_TYPES.BARD]: '吟遊詩人'
+                };
+                const jobName = JOB_NAME_MAP[jobType] || '冒険者';
+
+                // 2. Pick Name (Central Logic: Random Region)
+                const regionKeys = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
+                const rKey = regionKeys[Math.floor(Math.random() * regionKeys.length)];
+                const nameList = REGIONAL_NAMES[rKey] || REGIONAL_NAMES['CENTRAL'];
+                const charName = nameList[Math.floor(Math.random() * nameList.length)];
+
+                displayName = `${charName} (${jobName})`;
+            }
+
+            if (dayIndex === 2) power *= 1.1;
+            else if (dayIndex === 3) power *= 1.2;
+            else if (isBoss) power *= 1.5;
+
+            return {
+                name: displayName,
+                rank: quest.difficulty.rank,
+                mainType: 'humanoid',
+                category: ['TOURNAMENT'],
+                power: power,
+                isBoss: isBoss
+            };
         } else {
-            candidates = ROBUST_LIST.filter(m => !m.category.includes('ボス'));
-            if (candidates.length === 0) candidates = ROBUST_LIST;
+            // Normal Quest Filter
+            if (isBoss) {
+                candidates = ROBUST_LIST.filter(m => m.category.includes('ボス'));
+                if (candidates.length === 0) candidates = ROBUST_LIST;
+            } else {
+                candidates = ROBUST_LIST.filter(m => !m.category.includes('ボス'));
+                if (candidates.length === 0) candidates = ROBUST_LIST;
+            }
         }
 
         let monster = candidates[Math.floor(Math.random() * candidates.length)];
 
         // Target Override for Boss
         if (isBoss && targetOverride) {
-            // Check if target name exists in the list? 
-            // Or just create a monster with that name.
-            // Search list first
-            const found = SAFE_LIST.find(m => m.name === targetOverride);
+            const found = ROBUST_LIST.find(m => m.name === targetOverride);
             if (found) monster = found;
             else {
-                // If not found in current rank list (maybe selected from different rank?), just use name
                 monster = { ...monster, name: targetOverride };
             }
         }
@@ -344,6 +447,11 @@ export class AdventureSimulator {
         if (isBoss) {
             power *= 1.5;
             return { ...monster, name: monster.name, power, isBoss: true };
+        } else if (quest.isTournament) {
+            // Force scaling for tournament days
+            if (dayIndex === 3) power *= 1.2;
+            else if (dayIndex === 2) power *= 1.1;
+            return { ...monster, power, isBoss: false };
         } else {
             if (monster.category && monster.category.includes('強敵')) power *= 1.2;
             else if (monster.category && monster.category.includes('中堅')) power *= 1.1;
@@ -387,7 +495,25 @@ export class AdventureSimulator {
         return cp;
     }
 
-    _resolveBattle(party, monster, modifiers = {}, logs = []) {
+    _resolveBattle(party, monster, modifiers = {}, logs = [], quest = null) {
+        // Verbose Tournament Log
+        if (quest && quest.isTournament) {
+            const flavor = [
+                "互いに距離を取り、隙を伺う...",
+                "激しい剣戟が火花を散らす！",
+                "一進一退の攻防が続く！",
+                "観客席から大きな歓声が上がる！",
+                "互いの意地と誇りがぶつかり合う！",
+                "目にも止まらぬ速さで技が交差する！",
+                "勝負の行方はまだ分からない..."
+            ];
+            // Add 3-5 lines
+            const count = Math.floor(Math.random() * 3) + 3; // 3 to 5
+            for (let i = 0; i < count; i++) {
+                logs.push(`[戦況] ${this._pick(flavor)}`);
+            }
+        }
+
         // --- Action Logs ---
         party.forEach(adv => {
             let template = '';
@@ -461,7 +587,7 @@ export class AdventureSimulator {
         let damage = Math.floor(totalDamage);
 
         let materials = [];
-        if (win) {
+        if (win && !(quest && quest.isTournament)) {
             const mat = this._generateMonsterMaterial(monster);
             if (mat) materials.push(mat);
         }

@@ -27,6 +27,9 @@ export class Guild {
         this.activePolicy = 'BALANCED'; // Default Policy ID
         this.activeEvents = []; // [{ id, name, remainingDays }]
 
+        // Tournament State
+        this.tournament = { solo: 'E', team: 'E' };
+
         this.adventurers = this._initAdventurers();
         this.logs = [];
     }

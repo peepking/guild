@@ -422,6 +422,22 @@ export class AdventurerScreen {
         }
         container.appendChild(equipDiv);
 
+        // 8.7 Ultimate Arts
+        const artsDiv = document.createElement('div');
+        artsDiv.innerHTML = `<div class="sub-header">習得奥義</div>`;
+        if (adv.arts && adv.arts.length > 0) {
+            artsDiv.innerHTML += `<div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
+                ${adv.arts.map(art => `
+                    <div style="background:#fff3e0; border:1px solid #ffcc80; color:#e65100; padding:2px 6px; border-radius:4px; font-size:0.9em; font-weight:bold;">
+                        ⚡ ${art.name}
+                    </div>
+                `).join('')}
+            </div>`;
+        } else {
+            artsDiv.innerHTML += `<div class="text-sm text-muted">なし</div>`;
+        }
+        container.appendChild(artsDiv);
+
         const moneyDiv = document.createElement('div');
         moneyDiv.innerHTML = `
             <div class="sub-header">所持金 (Debug)</div>

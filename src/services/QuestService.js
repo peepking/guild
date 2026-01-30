@@ -494,10 +494,12 @@ export class QuestService {
         });
 
         let freeHuntReward = 0;
-        combinedResults.monstersKilled.forEach(m => {
-            freeHuntReward += 10;
-            if (m.isBoss) freeHuntReward += 100;
-        });
+        if (!quest.isTournament) {
+            combinedResults.monstersKilled.forEach(m => {
+                freeHuntReward += 10;
+                if (m.isBoss) freeHuntReward += 100;
+            });
+        }
         let materialReward = 0;
         combinedResults.itemsFound.forEach(i => {
             materialReward += (i.value || 20);
@@ -626,6 +628,61 @@ export class QuestService {
         }
 
         adv.updateRank(delta);
+    }
+
+    generateTournamentQuests(tournamentState, existingQuests) {
+        const newQuests = [];
+
+        const ranks = ['E', 'D', 'C', 'B', 'A', 'S'];
+
+        // Solo
+        if (tournamentState.solo && tournamentState.solo !== 'COMPLETED') {
+            const has = existingQuests.some(q => q.type === 'TOURNAMENT_SOLO' && q.difficulty.rank === tournamentState.solo);
+            if (!has) {
+                newQuests.push(this._createTournamentQuest('TOURNAMENT_SOLO', tournamentState.solo, 1, ranks.indexOf(tournamentState.solo)));
+            }
+        }
+
+        // Team
+        if (tournamentState.team && tournamentState.team !== 'COMPLETED') {
+            const has = existingQuests.some(q => q.type === 'TOURNAMENT_TEAM' && q.difficulty.rank === tournamentState.team);
+            if (!has) {
+                newQuests.push(this._createTournamentQuest('TOURNAMENT_TEAM', tournamentState.team, 4, ranks.indexOf(tournamentState.team)));
+            }
+        }
+        return newQuests;
+    }
+
+    _createTournamentQuest(type, rank, partySize, rankIdx) {
+        this.questCounter++;
+        const difficulty = QUEST_DIFFICULTY[rank];
+        const days = 4;
+
+        let title = type === 'TOURNAMENT_SOLO' ? `天下一武闘会（個人・${rank}）` : `天下一武闘会（団体・${rank}）`;
+
+        let rewardMoney = 1000 * (rankIdx + 1);
+        if (partySize === 4) rewardMoney *= 2;
+
+        // Rep: Standard = BaseRep * Size * Days
+        const rewardRep = Math.floor((difficulty.baseRep || 1) * partySize * days);
+
+        const q = new Quest(
+            `tourney_${this.questCounter}`, title, type, difficulty, {},
+            { money: rewardMoney, reputation: rewardRep },
+            { money: 0, reputation: 0 }, // No Penalty
+            partySize, days, 100, // Danger 100%
+            {}
+        );
+        q.entryFee = 0;
+        q.expiresInDays = null; // Infinite
+        q.isTournament = true;
+        q.isSpecial = true;
+
+        if (ADVENTURE_LOG_DATA.QUEST_LOGS[type] && ADVENTURE_LOG_DATA.QUEST_LOGS[type].descriptions) {
+            q.description = ADVENTURE_LOG_DATA.QUEST_LOGS[type].descriptions[0];
+        }
+
+        return q;
     }
 
     _applyStatGrowth(adv, quest, success, modifiers = {}) {

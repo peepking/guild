@@ -172,10 +172,10 @@ export class QuestHistoryScreen {
 
         div.innerHTML = `
             <div class="list-item-header">
+                ${specialBadge}
                 <span class="list-item-title">${item.title}</span>
             </div>
             <div class="list-item-meta">
-                ${specialBadge}
                 <span style="font-weight:bold; color:${statusColor};">${statusText}</span>
                 <span style="color:#777;">Day ${item.date}</span>
                 <span class="status-badge" style="background:#efebe9; border:1px solid #d7ccc8;">Rank ${item.rank}</span>
