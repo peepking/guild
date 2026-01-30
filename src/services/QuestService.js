@@ -590,7 +590,7 @@ export class QuestService {
 
         // 4. Diminishing Returns (Only at very high ranks: 850+)
         if (adv.rankValue > 850) {
-            const ratio = Math.max(0, (1000 - adv.rankValue) / 150);
+            const ratio = Math.max(0, (1050 - adv.rankValue) / 150);
             delta *= ratio;
         }
 

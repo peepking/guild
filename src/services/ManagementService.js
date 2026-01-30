@@ -36,18 +36,18 @@ export class ManagementService {
         let totalIncome = 0;
         const details = [];
 
-        // Shop Income: 10G * Lv * Count
+        // Shop Income: 2G * Lv * Count
         const shopLv = (guild.facilities && guild.facilities.shop) || 0;
         if (shopLv > 0) {
-            const income = 10 * shopLv * advCount;
+            const income = 2 * shopLv * advCount;
             totalIncome += income;
             details.push({ reason: `売店売上 (Lv.${shopLv})`, amount: income });
         }
 
-        // Tavern Income: 15G * Lv * Count
+        // Tavern Income: 3G * Lv * Count
         const tavernLv = (guild.facilities && guild.facilities.tavern) || 0;
         if (tavernLv > 0) {
-            const income = 15 * tavernLv * advCount;
+            const income = 3 * tavernLv * advCount;
             totalIncome += income;
             details.push({ reason: `酒場売上 (Lv.${tavernLv})`, amount: income });
         }
@@ -110,10 +110,8 @@ export class ManagementService {
 
     // --- Policy ---
     canChangePolicy(guild) {
-        // Only allow once a week? Or flexible? 
-        // Plan says: Changeable once per week (Day % 7 === 0)
-        // Let's stick to Plan. But maybe Day 1 is exception.
-        return (guild.day % 7 === 0);
+        // Changed to allow anytime update as per user request
+        return true;
     }
 
     setPolicy(guild, policyId) {

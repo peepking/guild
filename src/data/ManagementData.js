@@ -80,7 +80,7 @@ export const FACILITIES = {
         baseCost: 500,
         costMult: 1, // Cost = baseCost * Level
         description: '冒険者に物資を提供する売店。日々の売上でギルド財政を支える。',
-        effectDesc: '日次収入: 冒険者数 × Lv × 10G',
+        effectDesc: '日次収入: 冒険者数 × Lv × 2G',
         type: 'INCOME'
     },
     TAVERN: {
@@ -90,7 +90,7 @@ export const FACILITIES = {
         baseCost: 800,
         costMult: 1,
         description: '冒険者の憩いの場。活気ある酒場は金を生む。',
-        effectDesc: '日次収入: 冒険者数 × Lv × 15G',
+        effectDesc: '日次収入: 冒険者数 × Lv × 3G',
         type: 'INCOME'
     },
     TRAINING: {

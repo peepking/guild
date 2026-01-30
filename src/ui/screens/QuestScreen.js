@@ -234,7 +234,7 @@ export class QuestScreen {
                  <div>
                     ${specialBadge}${manualBadge}
                     <span>募集${quest.partySize}人</span>
-                    <span>残${quest.expiresInDays}日</span>
+                    <span>残${Math.max(0, (quest.createdDay + quest.expiresInDays) - this.gameLoop.guild.day)}日</span>
                 </div>
             `;
         }
@@ -277,7 +277,7 @@ export class QuestScreen {
                 <div>期間: ${quest.days}日</div>
                 <div>募集: ${quest.partySize}人</div>
                 <div>危険度: ${quest.danger}%</div>
-                <div>期限: あと${quest.expiresInDays || '?'}日</div>
+                <div>期限: あと${Math.max(0, (quest.createdDay + quest.expiresInDays) - this.gameLoop.guild.day)}日</div>
             </div>
             <br>
             <div class="quest-reward-box">
@@ -382,9 +382,9 @@ export class QuestScreen {
             const score = Math.floor(this.gameLoop.questService.calculateScore(quest, adv));
 
             row.innerHTML = `
-            < span > ${adv.name} <span class="text-sm text-sub-color">(${adv.type}/${adv.rankLabel})</span></span >
+                <span>${adv.name} <span class="text-sm text-sub-color">(${adv.type}/${adv.rankLabel})</span></span>
                 <span class="font-mono">適性:${score}</span>
-        `;
+            `;
 
             row.onclick = () => {
                 const toggled = !this.state.selectedAdventurerIds.includes(adv.id);

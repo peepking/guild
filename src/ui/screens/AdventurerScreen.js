@@ -303,7 +303,7 @@ export class AdventurerScreen {
 
     _renderDetail(panel, adv) {
         // Header with Title
-        const titlePart = adv.title ? `<span style="font-size:0.8em; color:#ffcc80;">《${adv.title}》</span>` : '';
+        const titlePart = adv.title ? `<span style="font-size:0.8em; color:#d84315;">《${adv.title}》</span>` : '';
 
         panel.innerHTML = `
             <div class="panel-header flex-no-shrink">

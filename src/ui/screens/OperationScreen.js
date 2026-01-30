@@ -191,7 +191,6 @@ export class OperationScreen {
         container.innerHTML = `
             <div class="mb-md">
                 <div class="policy-desc">
-                    週に一度（7の倍数日）、ギルド全体の方針を変更できます。<br>
                     方針は依頼の危険度、報酬計算、冒険者の成長率に影響します。
                 </div>
                 <div id="policy-list" class="operation-grid"></div>
@@ -244,7 +243,7 @@ export class OperationScreen {
         });
 
         if (!canChange) {
-            container.innerHTML += `<div class="text-center text-danger mt-md text-sm">方針変更は週の初め(7の倍数日)にのみ可能です。</div>`;
+            // No restriction
         }
     }
 

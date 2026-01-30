@@ -44,7 +44,12 @@ export class TitleService {
         // Step 1: Determine Achievement
         let achievement = null;
         if (context.isBoss && context.bossId) {
-            achievement = ACHIEVEMENT_TITLE_DEFS.find(a => a.id === context.bossId || a.id === `BOSS_${context.bossId}`);
+            achievement = ACHIEVEMENT_TITLE_DEFS.find(a =>
+                a.id === context.bossId ||
+                a.id === `BOSS_${context.bossId}` ||
+                a.targetKanji === context.bossId ||
+                a.targetKata === context.bossId
+            );
         }
 
         if (!achievement && isSRank) {

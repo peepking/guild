@@ -187,7 +187,7 @@ export class Adventurer {
     updateRank(delta) {
         this.rankValue += delta;
         if (this.rankValue < 0) this.rankValue = 0;
-        if (this.rankValue > 1000) this.rankValue = 1000;
+        if (this.rankValue > 9999) this.rankValue = 9999;
         this.rankLabel = this._getRankLabel();
     }
 

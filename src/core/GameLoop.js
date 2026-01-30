@@ -86,7 +86,7 @@ export class GameLoop {
                 // Career Bonus (small drip rank increase for staying)
                 // 0.05 * (1 + EMA) * decay
                 const ema = adv.perfEMA || 0;
-                const cap = (1000 - adv.rankValue) / 1000;
+                const cap = Math.max(0, (1000 - adv.rankValue) / 1000);
                 let careerBonus = 0.05 * (1 + ema);
                 careerBonus *= cap;
                 if (careerBonus > 0) adv.updateRank(careerBonus);
