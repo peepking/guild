@@ -194,7 +194,7 @@ export class ArchivesScreen {
         }
 
         container.innerHTML = list.map(adv => `
-            <div class="list-item bg-light border-sub">
+            <div class="list-item-history bg-light border-sub">
                 <div class="flex justify-between items-center mb-xs">
                     <span class="list-item-title font-bold text-main">
                         ${adv.title ? `<span class="text-sm text-accent">《${adv.title}》</span> ` : ''}${adv.name}
