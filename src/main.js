@@ -21,74 +21,74 @@ import { OperationScreen } from './ui/screens/OperationScreen.js';
 import { ArchivesScreen } from './ui/screens/ArchivesScreen.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Initialize Data
+    // 1. データ初期化
     const guild = new Guild();
     const questService = new QuestService();
     const mailService = new MailService();
-    const titleService = new TitleService(); // Instantiate
-    titleService.mailService = mailService; // Inject MailService
+    const titleService = new TitleService(); // インスタンス化
+    titleService.mailService = mailService; // MailServiceを注入
 
-    // Inject Dependencies
+    // 依存関係の注入
     questService.titleService = titleService;
 
-    // Load Data for Simulator
+    // シミュレーター用データの読み込み
     questService.initSimulator(MONSTER_DATA, ITEM_DATA);
     // console.log("Quest Simulator Initialized with JS data.");
 
-    // 2. Initialize UI Manager
+    // 2. UIマネージャーの初期化
     const uiManager = new UIManager(guild, null);
 
-    // 3. Initialize Layout
+    // 3. レイアウトの初期化
     const layout = new Layout(uiManager);
     uiManager.setLayout(layout);
 
-    // 4. Initialize Management Service (Needs UI)
+    // 4. 管理サービスの初期化 (UIが必要)
     const managementService = new ManagementService(uiManager);
     const equipmentService = new EquipmentService();
     const recruitmentService = new RecruitmentService(guild);
 
-    // 5. Initialize GameLoop
+    // 5. ゲームループの初期化
     const gameLoop = new GameLoop(guild, uiManager, questService, mailService, managementService, equipmentService, recruitmentService);
-    // Bind global mail service to gameLoop for easy access (used by MailScreen)
+    // グローバルなメールサービスをGameLoopにバインド (MailScreenで使用)
     gameLoop.mailService = mailService;
-    // 5. Register Screens
+    // 5. 画面の登録
     uiManager.registerScreen('MAIN', new MainScreen(gameLoop));
     uiManager.registerScreen('MAIL', new MailScreen(gameLoop));
     uiManager.registerScreen('QUESTS', new QuestScreen(gameLoop));
     uiManager.registerScreen('HISTORY', new QuestHistoryScreen(gameLoop));
     uiManager.registerScreen('ADVENTURERS', new AdventurerScreen(gameLoop));
     uiManager.registerScreen('OPERATION', new OperationScreen(gameLoop));
-    uiManager.registerScreen('ARCHIVES', new ArchivesScreen(gameLoop)); // Changed
-    // Finance removed
+    uiManager.registerScreen('ARCHIVES', new ArchivesScreen(gameLoop)); // 変更あり
+    // 財務画面は削除
 
-    // 6. Bind Global Events
+    // 6. グローバルイベントのバインド
     document.addEventListener('next-day', () => {
         gameLoop.nextDay();
-        // Update Mail Badge on day change (if any logic added there)
+        // 日付変更時にメールバッジを更新 (ロジックが追加された場合)
         const unread = mailService.getUnreadCount();
         layout.updateMailBadge(unread);
     });
 
-    // Mail System Events
+    // メールシステムイベント
     document.addEventListener('mail-updated', () => {
         const unread = mailService.getUnreadCount();
         layout.updateMailBadge(unread);
     });
 
-    // Polling for Toasts (Optimization: Use event instead?)
+    // トースト通知のポーリング (最適化: イベント使用を検討?)
     setInterval(() => {
         const toast = mailService.getToast();
         if (toast) {
             layout.showToast(toast.title, toast.type);
-            // Also update badge as toast usually means new mail
+            // トーストは通常新規メールを意味するためバッジも更新
             const unread = mailService.getUnreadCount();
             layout.updateMailBadge(unread);
         }
     }, 500);
 
-    // Initial Badge update
+    // 初回バッジ更新
     layout.updateMailBadge(mailService.getUnreadCount());
 
-    // 7. Initial Render
+    // 7. 初期描画
     uiManager.setScreen('MAIN');
 });

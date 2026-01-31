@@ -59,7 +59,7 @@ export class AssignmentService {
     // --- 手動割り当て ---
     // 即時出発ではなく、計画 (Planning) を作成する
     manualAssign(quest, adventurerIds) {
-        // Validation
+        // バリデーション
         if (adventurerIds.length < quest.partySize) {
             return { success: false, message: '人数が不足しています。' };
         }

@@ -5,7 +5,7 @@ export class AdventurerScreen {
         this.state = {
             selectedAdventurerId: null,
             currentTab: 'STATUS', // STATUS | HISTORY
-            // Sort & Filter State
+            // ソート & フィルタ状態
             sortKey: 'RANK', // RANK, DAYS, TRUST, STATE, ID
             sortOrder: 'DESC', // ASC, DESC
             filterClass: 'ALL',
@@ -15,18 +15,17 @@ export class AdventurerScreen {
     }
 
     render(container, guild, globalState) {
-        // Clear container to prevent duplication
+        // 重複防止のためコンテナをクリア
         container.innerHTML = '';
 
-        // Layout: List full width for now (or split if detail wanted)
-        // Layout
+        // レイアウト: 当面は全幅リスト (詳細が必要なら分割)
         container.classList.add('grid-2-col-fixed-right');
 
-        // --- Left: List ---
+        // --- 左: リスト ---
         const listPanel = document.createElement('section');
         listPanel.className = 'panel adventurer-list-panel flex-col';
 
-        // Header & Toolbar
+        // ヘッダー & ツールバー
         const header = document.createElement('div');
         header.innerHTML = `<h2>冒険者一覧 (${guild.adventurers.length}名)</h2>`;
         listPanel.appendChild(header);
@@ -39,20 +38,20 @@ export class AdventurerScreen {
 
         container.appendChild(listPanel);
 
-        // --- Right: Detail ---
+        // --- 右: 詳細 ---
         const detailPanel = document.createElement('section');
         detailPanel.className = 'panel detail-panel flex-col';
 
-        // Render List Logic (Now detailPanel is defined)
+        // リスト描画ロジック (detailPanelが定義された後に実行)
         this._renderList(listContainer, guild, detailPanel);
 
-        // Restore Selection (Buffer Fix)
+        // 選択状態の復元 (バッファ修正)
         if (this.state.selectedAdventurerId) {
             const adv = guild.adventurers.find(a => a.id === this.state.selectedAdventurerId);
             if (adv) {
                 this._renderDetail(detailPanel, adv);
             } else {
-                this.state.selectedAdventurerId = null; // Reset if gone
+                this.state.selectedAdventurerId = null; // 存在しない場合はリセット
             }
         }
 
@@ -62,15 +61,15 @@ export class AdventurerScreen {
     _renderList(container, guild, detailPanel) {
         container.innerHTML = '';
 
-        // 1. Filter
+        // 1. フィルタ
         let filtered = guild.adventurers.filter(adv => {
-            // Class Filter
+            // クラスフィルタ
             if (this.state.filterClass !== 'ALL' && adv.type !== this.state.filterClass) return false;
 
-            // Rank Filter (Using Label)
+            // ランクフィルタ (ラベルを使用)
             if (this.state.filterRank !== 'ALL' && adv.rankLabel !== this.state.filterRank) return false;
 
-            // Status Filter
+            // 状態フィルタ
             if (this.state.filterStatus === 'AVAILABLE') {
                 if (adv.state !== 'IDLE' || adv.recoveryDays > 0) return false;
             } else if (this.state.filterStatus === 'QUESTING') {
@@ -82,7 +81,7 @@ export class AdventurerScreen {
             return true;
         });
 
-        // 2. Sort
+        // 2. ソート
         filtered.sort((a, b) => {
             let valA, valB;
 
@@ -94,9 +93,9 @@ export class AdventurerScreen {
                     valA = a.trust; valB = b.trust;
                     break;
                 case 'STATE':
-                    // Custom Order: IDLE > QUESTING > RECOVERY
-                    const order = { 'IDLE': 3, 'QUESTING': 2, 'RECOVERY': 1 }; // High to Low
-                    // Adjust for numeric sort
+                    // カスタム順序: IDLE > QUESTING > RECOVERY
+                    const order = { 'IDLE': 3, 'QUESTING': 2, 'RECOVERY': 1 }; // 高 -> 低
+                    // 数値比較用に調整
                     valA = order[a.state] || 0;
                     if (a.recoveryDays > 0) valA = 0; // RECOVERY
                     valB = order[b.state] || 0;
@@ -104,8 +103,7 @@ export class AdventurerScreen {
                     break;
                 case 'ID':
                 default:
-                    // String comparison for ID? Or insertion order?
-                    // Assuming ID is string, specific logic needed?
+                    // ID文字列比較
                     if (a.id < b.id) return this.state.sortOrder === 'ASC' ? -1 : 1;
                     if (a.id > b.id) return this.state.sortOrder === 'ASC' ? 1 : -1;
                     return 0;
@@ -116,7 +114,7 @@ export class AdventurerScreen {
             return 0;
         });
 
-        // 3. Render
+        // 3. 描画
         if (filtered.length === 0) {
             container.innerHTML = '<div style="padding:1rem; color:#888; font-style:italic;">条件に合致する者はおりません。</div>';
             return;
@@ -127,11 +125,11 @@ export class AdventurerScreen {
             el.addEventListener('click', () => {
                 this.state.selectedAdventurerId = adv.id;
 
-                // Update visuals
+                // 表示の更新
                 container.querySelectorAll('.list-item').forEach(item => item.classList.remove('selected'));
                 el.classList.add('selected');
 
-                // Render Detail
+                // 詳細描画
                 this._renderDetail(detailPanel, adv);
             });
             container.appendChild(el);

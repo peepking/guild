@@ -261,7 +261,7 @@ export class QuestService {
             if (this.simulator.monsters && this.simulator.monsters[q.region]) {
                 const list = this.simulator.monsters[q.region][rank];
                 if (list && list.length > 0) {
-                    // Prefer Boss category
+                    // ボスカテゴリを優先
                     const bosses = list.filter(m => m.category && m.category.includes('ボス'));
                     if (bosses.length > 0) {
                         target = bosses[Math.floor(Math.random() * bosses.length)].name;
@@ -658,18 +658,18 @@ export class QuestService {
         let rewardMoney = 1000 * (rankIdx + 1);
         if (partySize === 4) rewardMoney *= 2;
 
-        // Rep: Standard = BaseRep * Size * Days
+        // 名声: 標準 = 基礎名声 * 人数 * 日数
         const rewardRep = Math.floor((difficulty.baseRep || 1) * partySize * days);
 
         const q = new Quest(
             `tourney_${this.questCounter}`, title, type, difficulty, {},
             { money: rewardMoney, reputation: rewardRep },
-            { money: 0, reputation: 0 }, // No Penalty
-            partySize, days, 100, // Danger 100%
+            { money: 0, reputation: 0 }, // ペナルティなし
+            partySize, days, 100, // 危険度 100%
             {}
         );
         q.entryFee = 0;
-        q.expiresInDays = null; // Infinite
+        q.expiresInDays = null; // 無期限
         q.isTournament = true;
         q.isSpecial = true;
 

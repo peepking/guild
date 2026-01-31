@@ -295,7 +295,7 @@ export class QuestScreen {
                 html += `<button id="btn-cancel" class="btn btn-secondary" style="margin-top:1rem;">計画を取り消す</button>`;
             } else {
                 html += `<div>進捗: 残り ${assignment.remainingDays}日</div>`;
-                // Removed disabled button
+                // 無効化ボタンは削除済み
             }
         } else {
             html += `<div class="sub-header">アクション</div>`;
@@ -306,7 +306,7 @@ export class QuestScreen {
 
         if (isOngoing) {
             const btn = panel.querySelector('#btn-cancel');
-            if (btn && !btn.disabled) { // Only enables for Planning
+            if (btn && !btn.disabled) { // 準備中の場合のみ有効
                 btn.onclick = () => {
                     const res = this.gameLoop.assignmentService.cancelAssignment(assignment, this.gameLoop.ongoingQuests, this.gameLoop.plannedQuests);
                     if (res.success) {
@@ -316,7 +316,7 @@ export class QuestScreen {
                             // リストになければ復帰させる
                             this.gameLoop.activeQuests.push(quest);
                         }
-                        this.state.selectedQuestId = null; // Deselect
+                        this.state.selectedQuestId = null; // 選択解除
                         this.render(panel.parentElement, this.gameLoop.guild, {});
 
                         document.dispatchEvent(new Event('plan-update'));
@@ -401,7 +401,7 @@ export class QuestScreen {
         const btnConfirm = panel.querySelector('#btn-confirm');
         if (btnConfirm && !btnConfirm.disabled) {
             btnConfirm.onclick = () => {
-                // CHANGED: Use new signature and manual handling
+                // CHANGED: 新しいシグネチャと手動ハンドリングを使用
                 const result = this.gameLoop.assignmentService.manualAssign(quest, this.state.selectedAdventurerIds);
                 if (result.success) {
                     // 手動: plannedQuests に追加し、activeQuests から削除

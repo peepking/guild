@@ -34,8 +34,10 @@ export class MailService {
             timestamp: Date.now()
         };
         this.mails.unshift(mail); // Newest first
+        // 最新を先頭に
 
         // Trigger Toast logic
+        // トーストロジックをトリガー
         this.toastQueue.push({
             title: title,
             type: type,
@@ -69,7 +71,6 @@ export class MailService {
         return this.mails.filter(m => !m.isRead).length;
     }
 
-    // --- Toast Logic ---
     getToast() {
         return this.toastQueue.shift();
     }

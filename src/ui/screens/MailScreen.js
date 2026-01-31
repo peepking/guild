@@ -19,7 +19,7 @@ export class MailScreen {
         if (container) this.container = container;
         if (!this.container) return;
 
-        // Capture scroll position
+        // スクロール位置をキャプチャ
         const listEl = document.getElementById('mail-list');
         const lastScroll = listEl ? listEl.scrollTop : 0;
 
@@ -36,13 +36,13 @@ export class MailScreen {
                 </div>
 
                 <div class="mail-layout">
-                    <!-- Mail List -->
+                    <!-- メールリスト -->
                     <div class="mail-list" id="mail-list">
                         ${mails.length === 0 ? '<div class="empty-state">メッセージはありません</div>' : ''}
-                        <!-- Items injected here -->
+                        <!-- 項目はここに挿入されます -->
                     </div>
 
-                    <!-- Mail Detail -->
+                    <!-- メール詳細 -->
                     <div class="mail-detail" id="mail-detail">
                         <div class="empty-detail">メールを選択してください</div>
                     </div>
@@ -52,7 +52,7 @@ export class MailScreen {
 
         this._renderMailList(mails);
 
-        // Restore scroll
+        // スクロール位置を復元
         const newListEl = document.getElementById('mail-list');
         if (newListEl) {
             newListEl.scrollTop = lastScroll;
@@ -65,10 +65,10 @@ export class MailScreen {
             }
         }
 
-        // Bind Actions
+        // アクションのバインド
         document.getElementById('mark-all-read-btn')?.addEventListener('click', () => {
             this.gameLoop.mailService.markAllAsRead();
-            this.render(); // Re-render to update UI
+            this.render(); // UIを更新するために再描画
             this._updateBadge();
         });
     }
@@ -97,7 +97,7 @@ export class MailScreen {
             item.addEventListener('click', () => {
                 this.selectedMailId = mail.id;
                 this.gameLoop.mailService.markAsRead(mail.id);
-                this.render(); // Re-render full screen to update read status and selection
+                this.render(); // 既読状態と選択を更新するために全画面再描画
                 this._updateBadge();
             });
             listContainer.appendChild(item);
@@ -137,7 +137,7 @@ export class MailScreen {
             ${actionsHtml}
         `;
 
-        // Bind Action Buttons
+        // アクションボタンのバインド
         const actionBtns = detailContainer.querySelectorAll('.action-btn');
         actionBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -158,7 +158,7 @@ export class MailScreen {
 
     _handleAction(mailArg, action) {
         console.log("Handle Action Start. Mail ID:", mailArg.id, "Action:", action);
-        // Ensure we have the persistent reference from the service
+        // サービスからの永続的な参照があることを確認
         const mail = this.gameLoop.mailService.getMails().find(m => m.id === mailArg.id) || mailArg;
 
         if (mail.acted) {
@@ -166,19 +166,19 @@ export class MailScreen {
             return;
         }
 
-        // Execute Action via GameLoop
+        // GameLoop経由でアクションを実行
         const result = this.gameLoop.handleMailAction(action.id, action.data);
         console.log("Action Result:", result);
 
         if (result.success) {
-            mail.acted = true; // Mark as acted locally on the correct reference
+            mail.acted = true; // 正しい参照でローカルにactedとしてマーク
             this.gameLoop.uiManager.showToast(result.message || '完了しました', 'success');
 
-            // Force re-render of detail view immediately
+            // 詳細ビューを即座に強制再描画
             console.log("Forcing _renderDetail with mail.acted =", mail.acted);
             this._renderDetail(mail);
 
-            // Do NOT call this.render() to avoid resetting view state
+            // ビュー状態のリセットを避けるため、this.render()は呼び出さない
             this._updateBadge();
         } else {
             console.error("Action Failed:", result);
@@ -197,8 +197,8 @@ export class MailScreen {
     }
 
     _updateBadge() {
-        // Trigger global update? 
-        // Or directly update Layout via DOM if safe?
+        // グローバル更新をトリガー
+        // 安全であればDOM経由でレイアウトを直接更新
         document.dispatchEvent(new CustomEvent('mail-updated'));
     }
 }

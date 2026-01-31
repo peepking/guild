@@ -1,11 +1,11 @@
-// EquipmentService provides equipment upgrade functionality for browser environment
+// EquipmentService: ブラウザ環境向けの装備強化機能を提供
 import { EQUIPMENT_DATA } from '../data/equipmentData.js';
 
 export class EquipmentService {
     constructor() {
         this.equipmentList = EQUIPMENT_DATA;
 
-        // Rank Configuration (Spec 3 & 8)
+        // ランク設定 (仕様 3 & 8)
         this.RANK_ORDER = ['E', 'D', 'C', 'B', 'A', 'S'];
         this.RANK_PRICES = {
             'E': 50,
@@ -16,7 +16,7 @@ export class EquipmentService {
             'S': 3500
         };
 
-        // Job Preferences (Spec 2.2)
+        // 職業別選好 (仕様 2.2)
         this.JOB_PREFERENCES = {
             'WARRIOR': {
                 'WEAPON': { 'LONG_SWORD': 30, 'SHORT_SWORD': 10, 'AXE': 25, 'MACE': 20, 'STAFF': 0, 'BOW': 10, 'SPECIAL': 5 },
@@ -84,7 +84,7 @@ export class EquipmentService {
             }
         };
 
-        // Default preferences if job not found
+        // 職業が見つからない場合のデフォルト選好
         this.DEFAULT_PREF = {
             'WEAPON': { 'LONG_SWORD': 20, 'SHORT_SWORD': 20, 'AXE': 10, 'MACE': 10, 'STAFF': 10, 'BOW': 10, 'SPECIAL': 20 },
             'ARMOR': { 'LIGHT': 40, 'CLOTHES': 40, 'HEAVY': 10, 'ROBE': 10 }
@@ -92,29 +92,30 @@ export class EquipmentService {
     }
 
     /**
-     * Choose a random equipment based on Adventurer's Job and Current Status.
-     * Logic:
-     * 1. Check funds vs Rank Prices.
-     * 2. Determine target rank (Strictly > current).
-     * 3. Select Category based on Job Weights.
-     * 4. Pick Item.
+     * 
+     * 冒険者の職業と現在のステータスに基づいてランダムな装備を選択
+     * ロジック:
+     * 1. 資金とランク価格を確認
+     * 2. ターゲットランクを決定 (現在より厳密に高い)
+     * 3. 職業の重みに基づいてカテゴリを選択
+     * 4. アイテムを選択
      */
     upgradeEquipment(adventurer) {
-        // 1. Identify Current Ranks
+        // 1. 現在のランクを特定
         const currentWeapon = adventurer.equipment.find(e => this._isWeapon(e.type));
         const currentArmor = adventurer.equipment.find(e => this._isArmor(e.type));
 
         const currentWeaponRank = currentWeapon ? currentWeapon.rank : null;
         const currentArmorRank = currentArmor ? currentArmor.rank : null;
 
-        // 2. Decide Target Slot (Prefer lower rank, or random)
-        // If one is missing, prioritize it (Rank None -> E)
+        // 2. ターゲットスロットを決定 (低ランクを優先、またはランダム)
+        // 欠けている場合は優先 (ランクなし -> E)
         let targetSlot = 'WEAPON';
         if (!currentWeapon && !currentArmor) targetSlot = Math.random() < 0.5 ? 'WEAPON' : 'ARMOR';
         else if (!currentWeapon) targetSlot = 'WEAPON';
         else if (!currentArmor) targetSlot = 'ARMOR';
         else {
-            // Compare ranks
+            // ランク比較
             const wIdx = this.RANK_ORDER.indexOf(currentWeaponRank);
             const aIdx = this.RANK_ORDER.indexOf(currentArmorRank);
             if (wIdx < aIdx) targetSlot = 'WEAPON';
@@ -122,23 +123,23 @@ export class EquipmentService {
             else targetSlot = Math.random() < 0.5 ? 'WEAPON' : 'ARMOR';
         }
 
-        // 3. Determine Target Rank (Next Rank)
+        // 3. ターゲットランクを決定 (次のランク)
         const currentRank = targetSlot === 'WEAPON' ? currentWeaponRank : currentArmorRank;
         let nextRankIndex = 0;
         if (currentRank) {
             nextRankIndex = this.RANK_ORDER.indexOf(currentRank) + 1;
         }
 
-        // Check Max Rank
+        // 最大ランクチェック
         if (nextRankIndex >= this.RANK_ORDER.length) return { success: false, reason: 'MAX_RANK' };
 
         const targetRank = this.RANK_ORDER[nextRankIndex];
         const cost = this.RANK_PRICES[targetRank];
 
-        // 4. Check Funds (Spec 9.2)
+        // 4. 資金チェック (仕様 9.2)
         if (adventurer.personalMoney < cost) return { success: false, cost, reason: 'NO_MONEY' };
 
-        // 5. Select Category (Weighted Random)
+        // 5. カテゴリ選択 (重み付きランダム)
         const job = adventurer.type;
         const prefs = this.JOB_PREFERENCES[job] || this.DEFAULT_PREF;
         const categoryWeights = prefs[targetSlot]; // e.g. { 'LONG_SWORD': 40, ... }
@@ -146,20 +147,19 @@ export class EquipmentService {
 
         if (!targetType) return { success: false, reason: 'NO_TYPE_PREF' };
 
-        // 6. Pick Item from Data (Filter by Type & Rank & Region?)
-        // Spec 5: "D+ rank must include region material".
-        // Current data is flat list. We filter by Type and Rank.
-        // Region matching is ideally done here if data allows, but data has fixed names.
-        // We just pick from list for now.
+        // 6. データからアイテムを選択 (タイプ & ランク & 地域でフィルタ?)
+        // 仕様 5: "D+ランクは地域素材を含む必要がある"
+        // 現在のデータはフラットリスト。タイプとランクでフィルタリング。
+        // データが許せば地域マッチングが理想的だが、データは固定名。
+        // 現時点ではリストから選択。
         const candidates = this.equipmentList.filter(e => e.type === targetType && e.rank === targetRank);
         if (candidates.length === 0) return { success: false, reason: 'NO_ITEM_DATA' };
 
         const selectedItem = candidates[Math.floor(Math.random() * candidates.length)];
 
-        // 7. Execute Transaction
+        // 7. トランザクション実行
         adventurer.personalMoney -= cost;
-        // Legacy support: update abstract level (optional but good for syncing)
-        // adventurer.equipmentLevel = nextRankIndex; 
+        // レガシーサポート: 抽象レベルの更新 (オプションだが同期に有用)
         adventurer.addEquipment(selectedItem);
 
         return { success: true, equipment: selectedItem, cost };

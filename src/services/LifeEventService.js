@@ -9,13 +9,16 @@ export class LifeEventService {
 
     processLifeEvents(guild) {
         // Filter IDLE adventurers who are not recovering
+        // 回復中でないIDLE状態の冒険者をフィルタ
         const candidates = guild.adventurers.filter(a => a.state === 'IDLE' && a.recoveryDays <= 0);
 
         candidates.forEach(adv => {
             // 1. Daily Equipment Shopping
+            // 1. 日次の装備購入
             this._processShopping(adv);
 
             // 2. Chance for event: 10% per day standard
+            // 2. イベント発生確率: 標準で日次10%
             if (Math.random() < 0.1) {
                 this._rollEvent(adv, guild);
             }
@@ -24,15 +27,17 @@ export class LifeEventService {
 
     _processShopping(adv) {
         // Base chance to shop if money allows: 30% (Increased from 20%)
+        // 資金がある場合の基本購入確率: 30% (20%から増加)
         let shopChance = 0.3;
 
         const traits = adv.traits || [];
         // Trait Modifiers
-        if (traits.includes('spender')) shopChance += 0.4; // High chance
-        if (traits.includes('frugal')) shopChance -= 0.15; // Low chance
-        if (traits.includes('greedy')) shopChance -= 0.1;  // Hoards money
-        if (traits.includes('gourmet')) shopChance += 0.1; // Likes spending
-        if (traits.includes('noble')) shopChance += 0.1;   // Quality checks
+        // 特性による補正
+        if (traits.includes('spender')) shopChance += 0.4; // High chance (高確率)
+        if (traits.includes('frugal')) shopChance -= 0.15; // Low chance (低確率)
+        if (traits.includes('greedy')) shopChance -= 0.1;  // Hoards money (貯金優先)
+        if (traits.includes('gourmet')) shopChance += 0.1; // Likes spending (浪費家)
+        if (traits.includes('noble')) shopChance += 0.1;   // Quality checks (品質重視)
 
         if (Math.random() < shopChance) {
             const result = this.equipmentService.upgradeEquipment(adv);
@@ -44,9 +49,11 @@ export class LifeEventService {
 
     _rollEvent(adv, guild) {
         // Check traits
+        // 特性チェック
         const traits = adv.traits || [];
 
         // Priority to Trait-based events
+        // 特性ベースのイベントを優先
         if (traits.includes('drunkard') && Math.random() < 0.3) {
             this._eventDrunkard(adv);
             return;
@@ -70,7 +77,8 @@ export class LifeEventService {
         }
 
         // Generic Interaction
-        // ... (Future work)
+        // 一般的な交流
+        // ... (Future work) (将来の課題)
     }
 
     // --- Specific Events ---
@@ -78,17 +86,21 @@ export class LifeEventService {
     _eventDrunkard(adv) {
         adv.trust = Math.max(0, adv.trust - 2);
         adv.recoveryDays = 1; // Minor injury (hangover/brawl)
+        // 軽傷 (二日酔い/喧嘩)
         adv.state = "IDLE"; // Still Idle but recovering
+        // IDLEままだが回復中
         this.uiManager.log(`${adv.name} は酒場で大暴れし、二日酔いで動けません。(信頼度低下)`, 'warning');
     }
 
     _eventSpender(adv) {
         // Use EquipmentService to attempt an upgrade
+        // EquipmentServiceを使用してアップグレードを試行
         const result = this.equipmentService.upgradeEquipment(adv);
         if (result.success) {
             this.uiManager.log(`${adv.name} は装備「${result.equipment.name}」を取得し、レベル${adv.equipmentLevel}に上がりました。(費用:${result.cost}G)`, 'info');
         } else {
             // Fallback behavior when upgrade fails
+            // アップグレード失敗時のフォールバック
             this.uiManager.log(`${adv.name} は街で豪遊しています。`, 'info');
         }
     }
@@ -119,6 +131,7 @@ export class LifeEventService {
         if (adv.personalMoney > 100) {
             adv.personalMoney -= 100;
             // Potential temporary buff logic here (omitted for now)
+            // 一時的なバフロジックの可能性 (現在は省略)
             this.uiManager.log(`${adv.name} は美食にお金を使っています。`, 'info');
         } else {
             this.uiManager.log(`${adv.name} は腹を空かせて食堂を覗いています...`, 'info');

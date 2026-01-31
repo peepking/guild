@@ -32,7 +32,7 @@ export class Adventurer {
         this.equipmentLevel = 0;
         this.equipment = []; // 装備リスト
 
-        // Phase 5: Titles & Legend Records
+        // フェーズ5: 二つ名 & 伝説の記録
         this.title = null;
         this.history = []; // { day: N, event: "Did X" }
         // 特定のカウンターは基本ステータスとは別に保持
@@ -104,8 +104,7 @@ export class Adventurer {
 
         // 主要功績の更新 (Top 10)
         this.addMajorAchievement = function (quest, day) {
-            // QUEST_RANK_VALUE need to be imported or hardcoded here to sort.
-            // Simplified: S=6, A=5, B=4, C=3, D=2, E=1.
+            // 簡易版: S=6, A=5, B=4, C=3, D=2, E=1.
             const RANK_VAL = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
             const rank = quest.difficulty.rank;
             const val = RANK_VAL[rank] || 0;

@@ -15,10 +15,10 @@ export class AdventureSimulator {
     }
 
     /**
-     * Initialize data
+     * データ初期化
      */
     init(monsterData, itemData) {
-        // If data is already an object, use it directly (Legacy MD parsing support kept just in case)
+        // データがすでにオブジェクトの場合は直接使用 (念のためレガシーMD解析サポートを維持)
         if (typeof monsterData === 'object' && monsterData !== null) {
             this.monsters = monsterData;
         } else {
@@ -33,7 +33,7 @@ export class AdventureSimulator {
     }
 
     /**
-     * Simulate a single day of a quest
+     * クエストの1日をシミュレート
      */
     simulateDay(quest, party, dayIndex, totalDays, modifiers = {}) {
         const spec = QUEST_SPECS[quest.type] || {};
@@ -48,19 +48,19 @@ export class AdventureSimulator {
 
         const region = this._detectRegion(quest.title) || 'EAST';
 
-        // 1. Intro Log (Only Day 1)
+        // 1. 導入ログ (初日のみ)
         if (dayIndex === 1) {
-            // Use Quest Target if available
+            // 利用可能な場合はクエストターゲットを使用
             const context = { area: this._getRegionName(region), target: quest.target || '未知の脅威' };
 
-            // Generate Intro using QUEST_LOGS (Type Specific)
+            // QUEST_LOGSを使用して導入を生成 (タイプ別)
             const questLogData = ADVENTURE_LOG_DATA.QUEST_LOGS[quest.type];
             let introTemplates = [];
 
             if (questLogData && questLogData.intro) {
                 introTemplates = questLogData.intro;
             } else {
-                // Fallback: This shouldn't happen if all types are covered
+                // フォールバック: すべてのタイプがカバーされていれば発生しないはず
                 introTemplates = ["一行は《{area}》へと向かった。"];
             }
 
@@ -72,18 +72,18 @@ export class AdventureSimulator {
                 if (envIntro) logs.push(envIntro);
             }
         } else {
-            // Daily Environment Log
+            // 日次環境ログ
             if (!quest.isTournament) {
                 const envMid = this._pick(ADVENTURE_LOG_DATA.ENVIRONMENT[region]?.mid);
                 if (envMid) logs.push(envMid);
             }
         }
 
-        // --- Calculate Modifiers ---
+        // --- 補正値の計算 ---
         let battleRateMod = 1.0;
         let gatherRateMod = 1.0;
 
-        // Global Mods
+        // グローバル補正
         if (modifiers.danger) battleRateMod *= modifiers.danger;
         if (modifiers.dropRate) gatherRateMod *= modifiers.dropRate;
 
@@ -99,7 +99,7 @@ export class AdventureSimulator {
             });
         });
 
-        // 2. Trait Flavor Log (Random chance per day)
+        // 2. 特性フレーバーログ (日次ランダム確率)
         if (!quest.isTournament && Math.random() < 0.4) {
             const randomTrait = this._pick(partyTraits);
             if (randomTrait && ADVENTURE_LOG_DATA.TRAITS[randomTrait]) {
@@ -111,19 +111,19 @@ export class AdventureSimulator {
             }
         }
 
-        // 3. Random Events (15% Base)
+        // 3. ランダムイベント (基本15%)
         if (!quest.isTournament && Math.random() < 0.15) {
             this._processRandomEvent(logs, results, party);
         }
 
-        // 4. Main Activity Loops
+        // 4. メインアクティビティループ
         let battleCount = this._resolveRate(spec.rates?.battle);
         battleCount = this._applyProbabilisticMod(battleCount, battleRateMod);
 
         let gatherCount = this._resolveRate(spec.rates?.gather);
         gatherCount = this._applyProbabilisticMod(gatherCount, gatherRateMod);
 
-        // Boss Logic
+        // ボスロジック
         let isBossDay = false;
         if (quest.isTournament) {
             battleCount = 1;
@@ -140,11 +140,11 @@ export class AdventureSimulator {
             }
         }
 
-        // Process Battles
+        // 戦闘処理
         for (let i = 0; i < battleCount; i++) {
             const isBossBattle = isBossDay && (i === battleCount - 1);
 
-            // --- CLIMAX LOG (Specific to Boss Battle) ---
+            // --- クライマックスログ (ボス戦専用) ---
             if (isBossBattle) {
                 const questLogData = ADVENTURE_LOG_DATA.QUEST_LOGS[quest.type];
                 if (questLogData && questLogData.climax && questLogData.climax.length > 0) {
@@ -163,8 +163,8 @@ export class AdventureSimulator {
             const targetOverride = isBossBattle ? (quest.bossTarget || quest.target) : null;
             const encounter = this._generateEncounter(quest, isBossBattle, region, targetOverride, dayIndex);
 
-            // --- ENCOUNTER LOG ---
-            // Show discovery log before result
+            // --- 遭遇ログ ---
+            // 結果の前に発見ログを表示
             const context = { monster: encounter.name, area: this._getRegionName(region), name: encounter.name };
 
             if (quest.isTournament) {
@@ -216,7 +216,7 @@ export class AdventureSimulator {
             }
         }
 
-        // Process Gathering
+        // 採取処理
         for (let i = 0; i < gatherCount; i++) {
             const item = this._generateItem(quest, region);
             if (item) {
@@ -225,7 +225,7 @@ export class AdventureSimulator {
             }
         }
 
-        // 5. Filler Logs (Quiet Day Check)
+        // 5. フィラーログ (静かな日のチェック)
         if (logs.length <= 1 && dayIndex > 1) {
             const filler = this._pick(ADVENTURE_LOG_DATA.FILLER);
             if (filler) logs.push(`[日常] ${filler}`);
@@ -248,11 +248,11 @@ export class AdventureSimulator {
         return text;
     }
 
-    // Updated to remove INTRO branch as it is handled in simulateDay via QUEST_LOGS
+    // QUEST_LOGS経由でsimulateDay内で処理されるため、INTROブランチを削除するために更新
     _generateLog(category, subType, context, quest) {
         let templates = [];
 
-        // Tournament Override Logic
+        // トーナメントオーバーライドロジック
         if (quest && quest.isTournament) {
             if (category === 'BATTLE_WIN') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_WIN;
             else if (category === 'BATTLE_WIN_TEAM') templates = ADVENTURE_LOG_DATA.TOURNAMENT.BATTLE_WIN_TEAM;
@@ -331,39 +331,39 @@ export class AdventureSimulator {
         return intVal;
     }
 
-    _generateEncounter(quest, isBoss, region, targetOverride, dayIndex) { // Added targetOverride check
+    _generateEncounter(quest, isBoss, region, targetOverride, dayIndex) { // targetOverrideチェック追加
         const rank = quest.difficulty.rank;
 
-        // 1. Primary Search: Correct Region & Rank
+        // 1. プライマリ検索: 正しい地域とランク
         let candidates = this.monsters[region]?.[rank] || [];
 
-        // 2. Secondary Search: East Region & Rank (Legacy Fallback)
+        // 2. セカンダリ検索: 東エリアとランク (レガシーフォールバック)
         if (candidates.length === 0) {
             candidates = this.monsters['EAST']?.[rank] || [];
         }
 
-        // 3. Fallback: Any Rank in Current Region
+        // 3. フォールバック: 現在の地域の任意のランク
         if (candidates.length === 0 && this.monsters[region]) {
             Object.values(this.monsters[region]).forEach(list => candidates.push(...list));
         }
 
-        // 4. Ultimate Fallback: Any Monster in Game
+        // 4. 最終フォールバック: ゲーム内の任意のモンスター
         if (candidates.length === 0) {
             Object.values(this.monsters).forEach(ranks => {
                 Object.values(ranks).forEach(list => candidates.push(...list));
             });
         }
 
-        // 5. Last Resort
+        // 5. 最後の手段
         if (candidates.length === 0) {
             return { name: '謎の影', rank: 'E', mainType: 'unknown', power: 100 };
         }
 
-        // --- Selection (Candidates Found) ---
+        // --- 選択 (候補あり) ---
         const ROBUST_LIST = candidates;
-        candidates = []; // Clear for filtering steps
+        candidates = []; // フィルタリングステップのためにクリア
 
-        // Filter Logic
+        // フィルタロジック
         if (quest.isTournament) {
             let displayName = '';
 
@@ -375,15 +375,15 @@ export class AdventureSimulator {
                 const rMap = { NORTH: '北街', SOUTH: '南街', EAST: '東街', WEST: '西街' };
                 displayName = `${rMap[rKey]}ギルド代表チーム`;
 
-                // Team Coeff: 4 people equiv
+                // チーム係数: 4人相当
                 power *= 1.4;
             } else {
-                // Solo
+                // ソロ
                 const typeKeys = Object.keys(ADVENTURER_TYPES);
                 const typeKey = typeKeys[Math.floor(Math.random() * typeKeys.length)];
                 const jobType = ADVENTURER_TYPES[typeKey];
 
-                // Map to Japanese
+                // 日本語へのマッピング
                 const JOB_NAME_MAP = {
                     [ADVENTURER_TYPES.WARRIOR]: '戦士',
                     [ADVENTURER_TYPES.KNIGHT]: '騎士',
@@ -404,7 +404,7 @@ export class AdventureSimulator {
                 };
                 const jobName = JOB_NAME_MAP[jobType] || '冒険者';
 
-                // 2. Pick Name (Central Logic: Random Region)
+                // 2. 名前の選択 (中央ロジック: ランダム地域)
                 const regionKeys = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
                 const rKey = regionKeys[Math.floor(Math.random() * regionKeys.length)];
                 const nameList = REGIONAL_NAMES[rKey] || REGIONAL_NAMES['CENTRAL'];
@@ -426,7 +426,7 @@ export class AdventureSimulator {
                 isBoss: isBoss
             };
         } else {
-            // Normal Quest Filter
+            // 通常クエストフィルタ
             if (isBoss) {
                 candidates = ROBUST_LIST.filter(m => m.category.includes('ボス'));
                 if (candidates.length === 0) candidates = ROBUST_LIST;
@@ -438,7 +438,7 @@ export class AdventureSimulator {
 
         let monster = candidates[Math.floor(Math.random() * candidates.length)];
 
-        // Target Override for Boss
+        // ボス用ターゲットオーバーライド
         if (isBoss && targetOverride) {
             const found = ROBUST_LIST.find(m => m.name === targetOverride);
             if (found) monster = found;
@@ -447,7 +447,7 @@ export class AdventureSimulator {
             }
         }
 
-        // New Power Curve (Flattened)
+        // 新しいパワーカーブ (平坦化)
         const powerBase = QUEST_RANK_BASE_POWER[rank] || 90;
         let power = powerBase;
 
@@ -455,7 +455,7 @@ export class AdventureSimulator {
             power *= 1.5;
             return { ...monster, name: monster.name, power, isBoss: true };
         } else if (quest.isTournament) {
-            // Force scaling for tournament days
+            // トーナメント日の強制スケーリング
             if (dayIndex === 3) power *= 1.2;
             else if (dayIndex === 2) power *= 1.1;
             return { ...monster, power, isBoss: false };
@@ -481,7 +481,7 @@ export class AdventureSimulator {
         let cp = ((stats.STR || 0) + (stats.VIT || 0) + (stats.DEX || 0) + (stats.MAG || 0)) * 1.0 +
             ((stats.INT || 0) + (stats.CHA || 0)) * 0.5;
 
-        // Equipment Bonus (Real Items: 2% per Rank Point)
+        // 装備ボーナス (実アイテム: ランクポイントごとに2%)
         if (adv.equipment && adv.equipment.length > 0) {
             const RANK_VAL = { 'E': 1, 'D': 2, 'C': 3, 'B': 4, 'A': 5, 'S': 6 };
             let totalRank = 0;
@@ -490,11 +490,11 @@ export class AdventureSimulator {
             });
             cp *= (1 + totalRank * 0.02);
         } else if (adv.equipmentLevel) {
-            // Fallback
+            // フォールバック
             cp *= (1 + adv.equipmentLevel * 0.02);
         }
 
-        // Arts Bonus (1 Art = C Rank Equip = +6%)
+        // アーツボーナス (1アーツ = Cランク装備 = +6%)
         if (adv.arts && adv.arts.length > 0) {
             cp *= (1 + adv.arts.length * 0.06);
         }

@@ -28,7 +28,10 @@ export class RecruitmentService {
         // 微量の評判ボーナス (200 Reputation毎に0.01%)
         chance += this.guild.reputation * 0.00005;
 
-        // Apply Buff
+        // 微量の評判ボーナス (200 Reputation毎に0.01%)
+        chance += this.guild.reputation * 0.00005;
+
+        // バフ適用
         chance *= buffMod;
 
         // 3. ソフトキャップ（収容人数制限）ロジック
@@ -55,7 +58,7 @@ export class RecruitmentService {
         this.counter++;
         const id = `adv_${this.counter}`;
 
-        // Random Type
+        // ランダムタイプ
         const types = Object.values(ADVENTURER_TYPES);
         const type = types[Math.floor(Math.random() * types.length)];
 
@@ -72,7 +75,7 @@ export class RecruitmentService {
             case 'east': regionKey = 'EAST'; break;
             case 'west': regionKey = 'WEST'; break;
             default:
-                // Central or Foreign: Pick random culture
+                // 中央または外国: ランダムな文化を選択
                 const keys = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
                 regionKey = keys[Math.floor(Math.random() * keys.length)];
                 break;
@@ -105,7 +108,7 @@ export class RecruitmentService {
             maxRankValue = nextRank.threshold - 1;
         }
 
-        // Create with all params
+        // 全パラメータで作成
         const adv = new Adventurer(id, name, type, origin, joinType, maxRankValue);
 
         return adv;
@@ -122,7 +125,7 @@ export class RecruitmentService {
 
             let origin = ORIGINS.CENTRAL;
             if (originId) {
-                // Find by ID match
+                // ID一致を検索
                 origin = Object.values(ORIGINS).find(o => o.id === originId) || ORIGINS.CENTRAL;
             } else {
                 const origins = Object.values(ORIGINS);
@@ -229,8 +232,11 @@ export class RecruitmentService {
 
         const newAdv = new Adventurer(candidate.id, candidate.name, candidate.type, candidate.origin, JOIN_TYPES.LOCAL, candidate.rankValue);
         newAdv.rankValue = candidate.rankValue; // Explicitly enforce rank value from scout data
+        // スカウトデータからランク値を強制適用
         newAdv.lastPeriodRankValue = newAdv.rankValue; // Sync
+        // 同期
         newAdv.updateRank(0); // Update label based on enforced rank
+        // 強制適用ランクに基づいてラベル更新
 
         newAdv.stats = candidate.stats;
         newAdv.arts = candidate.arts || [];

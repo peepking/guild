@@ -12,13 +12,13 @@ export class Quest {
         this.danger = danger || 0;
         this.meta = meta || {}; // { danger01, rewardRate01, prestige01 }
 
-        // Phase 12: Manual/Special Extensions
+        // フェーズ12: 手動/特殊拡張
         this.isSpecial = false;
         this.specialKind = null;
         this.manualOnly = false;
 
-        this.createdDay = 1; // Needs to be passed or set by service? Service sets usually.
-        this.expiresInDays = 30; // Normal quests last long or recycled?
+        this.createdDay = 1; // サービスによって設定される必要があります（通常はサービスが設定）
+        this.expiresInDays = 30; // 通常クエストの有効期限
 
         this.assignedAdventurerIds = [];
         this.lockedByPlayer = false;

@@ -61,7 +61,7 @@ export class Layout {
             <div id="toast-container" class="toast-container"></div>
         `;
 
-        // Bind events
+        // イベントバインド
         document.getElementById('next-day-btn').addEventListener('click', () => {
             document.dispatchEvent(new CustomEvent('next-day'));
         });
@@ -82,11 +82,11 @@ export class Layout {
         const rankObj = GUILD_RANK_THRESHOLDS.find(r => guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
         document.getElementById('display-reputation').innerHTML = `${guild.reputation} <span style="font-size:0.8em; color:#ddd;">(Rank ${rankObj.label})</span>`;
 
-        // Policy
+        // 方針
         const pName = { BALANCED: '標準', AGGRESSIVE: '利益', SAFE: '安全', TRAINING: '育成', COMMERCIAL: '商業' };
         document.getElementById('display-policy').textContent = pName[guild.activePolicy] || guild.activePolicy;
 
-        // Event
+        // イベント
         const eventContainer = document.getElementById('display-event-container');
         const eventText = document.getElementById('display-event');
 
@@ -94,7 +94,7 @@ export class Layout {
             const evt = guild.activeEvents[0];
             eventText.textContent = evt.name;
             eventContainer.classList.remove('hidden');
-            // Tooltip
+            // ツールチップ
             eventContainer.title = `${evt.name}: ${evt.description}`;
         } else {
             eventContainer.classList.add('hidden');
@@ -111,7 +111,7 @@ export class Layout {
         });
     }
 
-    // New: Toast Method
+    // 新規: Toastメソッド
     showToast(message, type = 'NORMAL') {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -122,7 +122,7 @@ export class Layout {
 
         container.appendChild(toast);
 
-        // Auto remove
+        // 自動削除
         setTimeout(() => {
             toast.classList.add('fade-out');
             setTimeout(() => toast.remove(), 500);

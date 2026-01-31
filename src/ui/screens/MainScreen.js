@@ -2,14 +2,14 @@ import { GUILD_RANK_THRESHOLDS } from '../../data/constants.js';
 
 export class MainScreen {
     constructor() {
-        // No dependency on Renderer needed if logs are passed in
+        // ログが渡される場合、Rendererへの依存は不要
     }
 
     render(container, guild, state, logs = []) {
-        // Layout: 2 columns (Summary / Notifications)
+        // レイアウト: 2カラム (サマリー / 通知)
         container.classList.add('grid-2-col-even');
 
-        // 0. Management Status (New)
+        // 0. 運営状況 (新規)
         const mgmtPanel = document.createElement('section');
         mgmtPanel.className = 'panel mb-md';
         mgmtPanel.innerHTML = `<h2>現在の運営状況</h2>`;
@@ -17,11 +17,11 @@ export class MainScreen {
         const mgmtContent = document.createElement('div');
         mgmtContent.className = 'text-sm';
 
-        // Active Policy
+        // 現在の方針
         const pName = { BALANCED: '標準', AGGRESSIVE: '利益追求', SAFE: '安全第一', TRAINING: '新人育成', COMMERCIAL: '商業振興' };
         const policyName = pName[guild.activePolicy] || guild.activePolicy;
 
-        // Active Events
+        // 発生中のイベント
         let eventHtml = '<span style="color:#9e9e9e;">特になし</span>';
         if (guild.activeEvents && guild.activeEvents.length > 0) {
             eventHtml = guild.activeEvents.map(evt => {
@@ -61,15 +61,15 @@ export class MainScreen {
         `;
         mgmtPanel.appendChild(mgmtContent);
 
-        // Modify Grid Layout logic a bit? 
-        // We want Summary + Mgmt on Left, Log on Right.
+        // グリッドレイアウトロジックを修正
+        // 左側にサマリーと運営状況、右側にログを配置したい
 
         const leftCol = document.createElement('div');
         leftCol.className = 'flex-col gap-md';
 
         leftCol.appendChild(mgmtPanel);
 
-        // 1. Summary Panel (Existing)
+        // 1. サマリーパネル (既存)
         const summaryPanel = document.createElement('section');
         summaryPanel.className = 'panel summary-panel';
         summaryPanel.innerHTML = `<h2>ギルド人員状況</h2>`;
@@ -77,7 +77,7 @@ export class MainScreen {
         const stats = document.createElement('div');
         stats.className = 'summary-stats';
 
-        // Count statuses
+        // ステータスカウント
         const idle = guild.adventurers.filter(a => a.state === 'IDLE' && a.recoveryDays <= 0).length;
         const planning = guild.adventurers.filter(a => a.state === 'PLANNING').length;
         const questing = guild.adventurers.filter(a => a.state === 'QUESTING').length;
@@ -95,7 +95,7 @@ export class MainScreen {
 
         container.appendChild(leftCol);
 
-        // 2. Notification Panel (Log)
+        // 2. 通知パネル (ログ)
         const logPanel = document.createElement('section');
         logPanel.className = 'panel log-panel';
         logPanel.innerHTML = `<h2>通知</h2>`;
@@ -104,7 +104,7 @@ export class MainScreen {
         logContainer.id = 'log-container-main';
         logContainer.className = 'log-list';
 
-        // Render Logs from array
+        // 配列からログを描画
         logs.forEach(log => {
             const entry = document.createElement('div');
             entry.className = `log-entry ${log.type}`;

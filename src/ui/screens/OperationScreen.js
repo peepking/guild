@@ -5,7 +5,7 @@ export class OperationScreen {
         this.gameLoop = gameLoop;
         this.container = null;
         this.currentTab = 'FACILITY'; // FACILITY | POLICY | PERSONNEL | PR
-        this.scrollPositions = {}; // Persist scroll per tab
+        this.scrollPositions = {}; // タブごとのスクロール位置保持
     }
 
     render(container, guild, state, logs) {
@@ -34,12 +34,12 @@ export class OperationScreen {
         // スクロール位置の復元と追跡
         const newContentEl = container.querySelector('#operation-content');
         if (newContentEl) {
-            // Restore
+            // 復元
             if (this.scrollPositions[this.currentTab]) {
                 newContentEl.scrollTop = this.scrollPositions[this.currentTab];
             }
 
-            // Track
+            // 追跡
             newContentEl.addEventListener('scroll', () => {
                 this.scrollPositions[this.currentTab] = newContentEl.scrollTop;
             });
@@ -81,10 +81,10 @@ export class OperationScreen {
         const hqList = container.querySelector('#hq-list');
         const facilityList = container.querySelector('#facility-list');
 
-        // 1. 収容人数 (HQ)
+        // 1. 収容人数 (本部)
         this._renderCapacityCard(hqList, guild);
 
-        // 2. 本部施設 (PR & Admin)
+        // 2. 本部施設 (広報 & 管理)
         const hqIds = ['PUBLIC_RELATIONS', 'ADMINISTRATION'];
         hqIds.forEach(id => {
             if (FACILITIES[id]) {
@@ -92,7 +92,7 @@ export class OperationScreen {
             }
         });
 
-        // 3. Other Facilities
+        // 3. その他の施設
         Object.values(FACILITIES).forEach(def => {
             if (!hqIds.includes(def.id)) {
                 this._renderSingleFacility(def, facilityList, guild);
@@ -181,7 +181,7 @@ export class OperationScreen {
             if (guild.money >= cost) {
                 guild.money -= cost;
 
-                // Log
+                // ログ
                 if (guild.todayFinance) {
                     guild.todayFinance.expense += cost;
                     guild.todayFinance.balance = guild.money;
@@ -191,9 +191,9 @@ export class OperationScreen {
                     });
                 }
 
-                // Update Level
+                // レベル更新
                 const key = def.id.toLowerCase();
-                if (!guild.facilities) guild.facilities = {}; // Safety
+                if (!guild.facilities) guild.facilities = {}; // 安全策
                 if (!guild.facilities[key]) guild.facilities[key] = 0;
                 guild.facilities[key]++;
 
@@ -225,7 +225,7 @@ export class OperationScreen {
             const item = document.createElement('div');
             item.className = `operation-card ${isActive ? 'hero' : ''}`;
 
-            // Mod String
+            // 効果文字列
             let modStr = [];
             for (const [k, v] of Object.entries(p.mod)) {
                 let val = Math.round((v - 1.0) * 100);
@@ -263,7 +263,7 @@ export class OperationScreen {
         });
 
         if (!canChange) {
-            // No restriction
+            // 特に制限なし
         }
     }
 
@@ -280,7 +280,7 @@ export class OperationScreen {
         `;
         container.appendChild(header);
 
-        // Active Advisors
+        // 契約中の顧問
         const advisorSection = document.createElement('div');
         advisorSection.style.marginBottom = '2rem';
 
@@ -437,7 +437,7 @@ export class OperationScreen {
                 this.gameLoop.uiManager.log(`新規募集キャンペーンを開始しました。(7日間)`, 'success');
                 this.gameLoop.mailService.send("キャンペーン開始", `広報活動を開始しました。\n今後7日間、冒険者の加入率が上昇します。`, 'EVENT', { day: guild.day });
 
-                // Full Render to update Top Bar
+                // Update Top Bar
                 this.gameLoop.uiManager.render();
             }
         });

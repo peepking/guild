@@ -15,29 +15,29 @@ export class QuestHistoryScreen {
         container.style.gridTemplateColumns = '1.3fr 1fr';
         container.style.gap = '1.5rem';
 
-        // --- Left: History List ---
+        // --- 左: 履歴リスト ---
         const listPanel = document.createElement('section');
         listPanel.className = 'panel';
         listPanel.style.padding = '0.5rem';
         listPanel.style.display = 'flex';
         listPanel.style.flexDirection = 'column';
 
-        // Header
+        // ヘッダー
         const header = document.createElement('div');
         header.className = 'list-header';
         header.textContent = '依頼履歴';
         listPanel.appendChild(header);
 
-        // List Container
+        // リストコンテナ
         const listContainer = document.createElement('div');
         listContainer.className = 'scroll-list';
-        listContainer.id = 'history-list-container'; // Add ID for easier access if needed
+        listContainer.id = 'history-list-container'; // 必要に応じてアクセスしやすくするID
         listContainer.style.flex = '1';
 
         const history = this.gameLoop.questHistory || [];
         const totalPages = Math.ceil(history.length / this.ITEMS_PER_PAGE) || 1;
 
-        // Clamp page
+        // ページ修正
         if (this.state.currentPage >= totalPages) this.state.currentPage = totalPages - 1;
         if (this.state.currentPage < 0) this.state.currentPage = 0;
 
@@ -56,29 +56,27 @@ export class QuestHistoryScreen {
             displayItems.forEach(item => {
                 const el = this._createHistoryItem(item);
                 el.onclick = () => {
-                    // Capture scroll position
+                    // スクロール位置の保持
                     const currentScroll = listContainer.scrollTop;
                     this.state.selectedHistoryId = item.id;
-                    this.state.lastScrollTop = currentScroll; // Store in state
+                    this.state.lastScrollTop = currentScroll; // ステートに保存
                     this.render(container, guild, globalState);
                 };
                 listContainer.appendChild(el);
             });
         }
 
-        // Restore scroll position if available
+        // スクロール位置の復元 (存在する場合)
         if (typeof this.state.lastScrollTop !== 'undefined') {
-            // Use setTimeout to ensure DOM is rendered (though synchronous append usually works, safer with 0 timeout or just direct set)
-            // But since we just collected elements, they are not yet in DOM until listPanel is appended? 
-            // Actually listContainer IS appended to listPanel below, but listPanel is not in container yet.
-            // We can set it immediately after this block.
+            // setTimeoutを使用してDOMが描画されたことを確認する (同期appendは通常機能するが、0タイムアウトの方が安全)
+            // ListItemsを収集した直後だが、listPanelはまだコンテナに追加されていない。
         }
 
         listPanel.appendChild(listContainer);
 
 
 
-        // Pagination Controls
+        // ページネーション制御
         const pagination = document.createElement('div');
         pagination.style.display = 'flex';
         pagination.style.justifyContent = 'space-between';
@@ -86,7 +84,7 @@ export class QuestHistoryScreen {
         pagination.style.borderTop = '1px solid #d7ccc8';
 
         const prevBtn = document.createElement('button');
-        prevBtn.className = 'btn-secondary'; // Matched style
+        prevBtn.className = 'btn-secondary'; // スタイル合わせ
         prevBtn.style.padding = '0.2rem 0.5rem';
         prevBtn.style.width = 'auto';
         prevBtn.textContent = '<< 前へ';
@@ -97,11 +95,11 @@ export class QuestHistoryScreen {
         };
 
         const pageLabel = document.createElement('span');
-        pageLabel.className = 'text-meta'; // Matched style
+        pageLabel.className = 'text-meta'; // スタイル合わせ
         pageLabel.textContent = `Page ${this.state.currentPage + 1} / ${totalPages}`;
 
         const nextBtn = document.createElement('button');
-        nextBtn.className = 'btn-secondary'; // Matched style
+        nextBtn.className = 'btn-secondary'; // スタイル合わせ
         nextBtn.style.padding = '0.2rem 0.5rem';
         nextBtn.style.width = 'auto';
         nextBtn.textContent = '次へ >>';
@@ -119,7 +117,7 @@ export class QuestHistoryScreen {
         container.appendChild(listPanel);
 
 
-        // --- Right: Details ---
+        // --- 右: 詳細 ---
         const detailPanel = document.createElement('section');
         detailPanel.className = 'panel detail-panel';
         detailPanel.style.background = '#fdf5e6';
@@ -139,7 +137,7 @@ export class QuestHistoryScreen {
 
         container.appendChild(detailPanel);
 
-        // Restore Scroll (Must be done after elements are in DOM to have layout/height)
+        // スクロール復元 (要素がDOMに配置され、レイアウト/高さが確定した後に行う)
         if (typeof this.state.lastScrollTop !== 'undefined') {
             const listEl = container.querySelector('#history-list-container');
             if (listEl) {
@@ -155,16 +153,16 @@ export class QuestHistoryScreen {
             div.className += ' selected';
         }
 
-        let statusColor = '#757575'; // Expired/Unknown
+        let statusColor = '#757575'; // 期限切れ/不明
         let statusText = '終了';
         if (item.result === 'SUCCESS') {
-            statusColor = '#2e7d32'; // Green
+            statusColor = '#2e7d32'; // 緑
             statusText = '成功';
         } else if (item.result === 'FAILURE') {
-            statusColor = '#c62828'; // Red
+            statusColor = '#c62828'; // 赤
             statusText = '失敗';
         } else if (item.result === 'EXPIRED') {
-            statusColor = '#ef6c00'; // Orange
+            statusColor = '#ef6c00'; // オレンジ
             statusText = '期限切れ';
         }
 
@@ -218,7 +216,7 @@ export class QuestHistoryScreen {
             `;
         }
 
-        // Narrative Log Area
+        // 冒険日誌エリア
         panel.innerHTML += `<div class="sub-header" style="margin-top:1.5rem;">冒険日誌</div>`;
         const logArea = document.createElement('div');
         logArea.style.background = '#fff';
@@ -241,28 +239,28 @@ export class QuestHistoryScreen {
     }
 
     _formatLogs(dailyLogs) {
-        // Placeholder for poetic narrative
-        // dailyLogs is array of { day: N, logs: [strings] }
-        // We will just flatten them for now, but in a "story" format.
+        // 詩的な冒険日誌のためのプレースホルダー
+        // dailyLogsは { day: N, logs: [strings] } の配列
+        // 現状はフラット化して表示するが、将来的には「物語」形式にする
         let text = "";
 
         dailyLogs.forEach(d => {
             text += `【Day ${d.day}】\n`;
             d.logs.forEach(l => {
-                // Determine icon based on log content simply
+                // ログ内容に基づいてアイコンを簡易決定
                 let icon = '';
                 if (l.includes('戦闘')) icon = '⚔️ ';
                 else if (l.includes('採取') || l.includes('発見')) icon = '🌿 ';
                 else if (l.includes('休息') || l.includes('食事')) icon = '⛺ ';
 
-                // Add some flavor prefix logic here later
+                // ここにフレーバーテキストのプレフィックスロジックを追加可能
                 text += `${icon}${l}\n`;
             });
             text += `\n`;
         });
 
-        // Add intro/outro based on result
-        // if success... "彼らは無事に帰還した。"
+        // 結果に基づくイントロ/アウトロを追加
+        // 成功なら... "彼らは無事に帰還した。"
         return text;
     }
 }
