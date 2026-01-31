@@ -42,8 +42,7 @@ export class GameLoop {
     }
 
     nextDay() {
-        // Capture previous Rank for notification
-        const prevRankObj = GUILD_RANK_THRESHOLDS.find(r => this.guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+        // Capture previous Rank for notification available in guild state now
 
         this.guild.day++;
         this.uiManager.log(`--- ${this.guild.day}日目 開始 ---`, 'day-start');
@@ -249,8 +248,12 @@ export class GameLoop {
         }
 
         // --- Rank Up Check ---
+        // --- Rank Up Check ---
         const newRankObj = GUILD_RANK_THRESHOLDS.find(r => this.guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
-        if (newRankObj.threshold > prevRankObj.threshold) {
+        if (newRankObj.threshold > this.guild.highestRankThreshold) {
+            // Update Highest Achieved
+            this.guild.highestRankThreshold = newRankObj.threshold;
+
             this.uiManager.log(`ギルドランクが【${newRankObj.label}】に昇格しました！`, 'event');
             if (this.mailService) {
                 this.mailService.send(

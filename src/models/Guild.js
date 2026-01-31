@@ -26,6 +26,7 @@ export class Guild {
         this.advisorCandidates = []; // Subset of retired adventurers eligible for advisor
         this.activePolicy = 'BALANCED'; // Default Policy ID
         this.activeEvents = []; // [{ id, name, remainingDays }]
+        this.highestRankThreshold = 0; // Track highest achieved rank threshold
 
         // Tournament State
         this.tournament = { solo: 'E', team: 'E' };
