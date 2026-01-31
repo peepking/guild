@@ -1,5 +1,7 @@
 import { BASE_STATS, TRAITS, ORIGINS, JOIN_TYPES, ADVENTURER_RANKS } from '../data/constants.js';
 import { ARTS_DATA } from '../data/ArtsData.js';
+import { INTRO_TEMPLATES, ARTS_TEMPLATES, TRAIT_TEMPLATES, CAREER_TEMPLATES, NICKNAME_TEMPLATES, FLAVOR_TEMPLATES } from '../data/BioData.js';
+import { ADVENTURER_TYPES } from '../data/constants.js';
 
 export class Adventurer {
     constructor(id, name, type, origin = ORIGINS.CENTRAL, joinType = JOIN_TYPES.LOCAL, maxRankValue = 9999) {
@@ -21,6 +23,20 @@ export class Adventurer {
         this.temperament = this._generateTemperament();
         this.traits = this._generateTraits();
         this.arts = [];
+
+        // 名鑑データ (Meikan Bio)
+        this.bio = {
+            intro: "",
+            arts: [],
+            traits: [],
+            career: [],
+            nickname: "",
+            flavor: ""
+        };
+
+        // 初期バイオ生成
+        this.updateBio('INTRO');
+        this.updateBio('TRAITS');
 
         this.recoveryDays = 0;
         this.state = "IDLE";
@@ -44,110 +60,233 @@ export class Adventurer {
             majorKills: [] // モンスター討伐トップ10
         };
 
-        // 新メソッド: 装備を追加
-        this.addEquipment = function (equip) {
-            const WEAPON_TYPES = ['LONG_SWORD', 'SHORT_SWORD', 'AXE', 'MACE', 'STAFF', 'BOW', 'SPECIAL', 'GAUNTLET'];
-            const ARMOR_TYPES = ['HEAVY', 'LIGHT', 'CLOTHES', 'ROBE'];
-
-            let newCategory = null;
-            if (WEAPON_TYPES.includes(equip.type)) newCategory = 'WEAPON';
-            else if (ARMOR_TYPES.includes(equip.type)) newCategory = 'ARMOR';
-
-            if (newCategory) {
-                // 同じカテゴリの装備を削除 (更新)
-                this.equipment = this.equipment.filter(e => {
-                    let eCategory = null;
-                    if (WEAPON_TYPES.includes(e.type)) eCategory = 'WEAPON';
-                    else if (ARMOR_TYPES.includes(e.type)) eCategory = 'ARMOR';
-                    return eCategory !== newCategory;
-                });
-            }
-            this.equipment.push(equip);
-        };
-
-        this.addMajorKill = function (monster, day) {
-            // ボス補正を適用 (+1 ランク相当)
-            const isBoss = monster.category && (monster.category.includes('ボス') || monster.isBoss);
-
-            // 重複チェック (初回の討伐を保持)
-            if (this.records.majorKills.some(k => k.name === monster.name)) {
-                return;
-            }
-
-            const RANK_VAL = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
-            const rank = monster.rank || 'E';
-            let val = RANK_VAL[rank] || 1;
-
-            if (isBoss) val += 1;
-
-            const record = {
-                day: day,
-                name: monster.name,
-                rank: rank,
-                isBoss: !!isBoss,
-                rankValue: val
-            };
-
-            this.records.majorKills.push(record);
-
-            // ソート: ランク値の降順、次に日付の降順
-            this.records.majorKills.sort((a, b) => {
-                if (b.rankValue !== a.rankValue) return b.rankValue - a.rankValue;
-                return b.day - a.day;
-            });
-
-            // トップ10を保持
-            if (this.records.majorKills.length > 10) {
-                this.records.majorKills = this.records.majorKills.slice(0, 10);
-            }
-        };
-
-        // 主要功績の更新 (Top 10)
-        this.addMajorAchievement = function (quest, day) {
-            // 簡易版: S=6, A=5, B=4, C=3, D=2, E=1.
-            const RANK_VAL = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
-            const rank = quest.difficulty.rank;
-            const val = RANK_VAL[rank] || 0;
-
-            const record = {
-                day: day,
-                title: quest.title,
-                rank: rank,
-                rankValue: val
-            };
-
-            this.records.majorAchievements.push(record);
-
-            // ソート: ランク降順、次に日付の降順（新しい順）
-            this.records.majorAchievements.sort((a, b) => {
-                if (b.rankValue !== a.rankValue) return b.rankValue - a.rankValue;
-                return b.day - a.day;
-            });
-
-            // トップ10を保持
-            if (this.records.majorAchievements.length > 10) {
-                this.records.majorAchievements = this.records.majorAchievements.slice(0, 10);
-            }
-        };
-        // 装備レベルアップ（所持金消費）
-        this.upgradeEquipment = function (cost) {
-            if (this.personalMoney >= cost) {
-                this.personalMoney -= cost;
-                this.equipmentLevel = (this.equipmentLevel || 0) + 1;
-                return true;
-            }
-            return false;
-        };
-
-        // 履歴追加メソッド
-        this.addHistory = function (day, text) {
-            this.history.push({ day, text });
-        };
-
         // 初回アーツ習得チェック
         if (this.rankValue >= 380) this.learnRandomArt();
         if (this.rankValue >= 1000) this.learnRandomArt();
     }
+
+    addEquipment(equip) {
+        const WEAPON_TYPES = ['LONG_SWORD', 'SHORT_SWORD', 'AXE', 'MACE', 'STAFF', 'BOW', 'SPECIAL', 'GAUNTLET'];
+        const ARMOR_TYPES = ['HEAVY', 'LIGHT', 'CLOTHES', 'ROBE'];
+
+        let newCategory = null;
+        if (WEAPON_TYPES.includes(equip.type)) newCategory = 'WEAPON';
+        else if (ARMOR_TYPES.includes(equip.type)) newCategory = 'ARMOR';
+
+        if (newCategory) {
+            // 同じカテゴリの装備を削除 (更新)
+            this.equipment = this.equipment.filter(e => {
+                let eCategory = null;
+                if (WEAPON_TYPES.includes(e.type)) eCategory = 'WEAPON';
+                else if (ARMOR_TYPES.includes(e.type)) eCategory = 'ARMOR';
+                return eCategory !== newCategory;
+            });
+        }
+        this.equipment.push(equip);
+    }
+
+    addMajorKill(monster, day) {
+        // ボス補正を適用 (+1 ランク相当)
+        const isBoss = monster.category && (monster.category.includes('ボス') || monster.isBoss);
+
+        // 重複チェック (初回の討伐を保持)
+        if (this.records.majorKills.some(k => k.name === monster.name)) {
+            return;
+        }
+
+        const RANK_VAL = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
+        const rank = monster.rank || 'E';
+        let val = RANK_VAL[rank] || 1;
+
+        if (isBoss) val += 1;
+
+        const record = {
+            day: day,
+            name: monster.name,
+            rank: rank,
+            isBoss: !!isBoss,
+            rankValue: val
+        };
+
+        this.records.majorKills.push(record);
+
+        // ソート: ランク値の降順、次に日付の降順
+        this.records.majorKills.sort((a, b) => {
+            if (b.rankValue !== a.rankValue) return b.rankValue - a.rankValue;
+            return b.day - a.day;
+        });
+
+        // トップ10を保持
+        if (this.records.majorKills.length > 10) {
+            this.records.majorKills = this.records.majorKills.slice(0, 10);
+        }
+    }
+
+    // 主要功績の更新 (Top 10)
+    addMajorAchievement(quest, day) {
+        // 簡易版: S=6, A=5, B=4, C=3, D=2, E=1.
+        const RANK_VAL = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
+        const rank = quest.difficulty.rank;
+        const val = RANK_VAL[rank] || 0;
+
+        const record = {
+            day: day,
+            title: quest.title,
+            rank: rank,
+            rankValue: val
+        };
+
+        this.records.majorAchievements.push(record);
+
+        // ソート: ランク降順、次に日付の降順（新しい順）
+        this.records.majorAchievements.sort((a, b) => {
+            if (b.rankValue !== a.rankValue) return b.rankValue - a.rankValue;
+            return b.day - a.day;
+        });
+
+        // トップ10を保持
+        if (this.records.majorAchievements.length > 10) {
+            this.records.majorAchievements = this.records.majorAchievements.slice(0, 10);
+        }
+    }
+
+    // 装備レベルアップ（所持金消費）
+    upgradeEquipment(cost) {
+        if (this.personalMoney >= cost) {
+            this.personalMoney -= cost;
+            this.equipmentLevel = (this.equipmentLevel || 0) + 1;
+            return true;
+        }
+        return false;
+    }
+
+    // 履歴追加メソッド
+    addHistory(day, text) {
+        this.history.push({ day, text });
+    }
+
+    // 名鑑更新
+    updateBio(category, context = {}) {
+        switch (category) {
+            case 'INTRO':
+                this.bio.intro = this._generateIntro();
+                // ランクB以上ならフレーバーも更新
+                if (this.rankValue >= 380) { // B Rank Threshold
+                    this.bio.flavor = this._generateFlavor();
+                }
+                break;
+            case 'TRAITS':
+                this.bio.traits = this._generateTraitBio();
+                break;
+            case 'ARTS':
+                // context: { artId: '...', artName: '...' }
+                if (context.artId) {
+                    const text = this._generateArtBio(context.artId, context.artName);
+                    // 重複チェック
+                    if (!this.bio.arts.includes(text)) {
+                        // 2つまで保持 (仕様書: 複数あれば複数表示だが、例にあるように制御してもよい。ここは追記式にする)
+                        this.bio.arts.push(text);
+                    }
+                }
+                break;
+            case 'CAREER':
+                // context: { ...stats } (呼び出し元で集計したデータを渡す想定)
+                if (context.careerData) {
+                    this.bio.career = this._generateCareerBio(context.careerData);
+                }
+                break;
+            case 'NICKNAME':
+                // context: { nickname: '...', feat: '...', day: ... }
+                if (context.nickname) {
+                    this.bio.nickname = this._generateNicknameBio(context);
+                }
+                break;
+        }
+    }
+
+    _getRandomTemplate(templates, context = {}) {
+        if (!templates || templates.length === 0) return "";
+        let text = templates[Math.floor(Math.random() * templates.length)];
+        // 置換
+        text = text.replace(/{name}/g, this.name);
+        text = text.replace(/{rank}/g, this.rankLabel);
+        for (const [key, val] of Object.entries(context)) {
+            text = text.replace(new RegExp(`{${key}}`, 'g'), val);
+        }
+        return text;
+    }
+
+    _generateIntro() {
+        // rankLabel based lookup
+        const typeTemplates = INTRO_TEMPLATES[this.type];
+        if (typeTemplates && typeTemplates[this.rankLabel]) {
+            return this._getRandomTemplate(typeTemplates[this.rankLabel]);
+        }
+        // Fallback
+        return this._getRandomTemplate(INTRO_TEMPLATES.DEFAULT);
+    }
+
+    _generateFlavor() {
+        // B Rank+ only, so just look up type
+        const list = FLAVOR_TEMPLATES[this.type] || FLAVOR_TEMPLATES.DEFAULT;
+        return this._getRandomTemplate(list);
+    }
+
+    _generateTraitBio() {
+        return this.traits.map(t => {
+            const list = TRAIT_TEMPLATES[t] || TRAIT_TEMPLATES.DEFAULT;
+            const traitName = TRAITS[t] ? TRAITS[t].name : t;
+            return this._getRandomTemplate(list, { traitName: traitName });
+        });
+    }
+
+    _generateArtBio(artId, artName) {
+        // IDに基づく検索、なければデフォルト
+        // artId might be specific like "smash"
+        // If not found in ARTS_TEMPLATES, use DEFAULT
+        let list = ARTS_TEMPLATES[artId];
+        if (!list) list = ARTS_TEMPLATES.DEFAULT;
+
+        return this._getRandomTemplate(list, { artName: artName });
+    }
+
+    _generateCareerBio(data) {
+        // data: { questCount, topMonster, topQuestType, isStreak, etc }
+        // ランダムに1つ選ぶか、複数選ぶか。仕様「ランダムに表示」
+        const candidates = [];
+
+        if (data.questCount > 0) {
+            candidates.push(this._getRandomTemplate(CAREER_TEMPLATES.QUEST_KEY, { val: data.questCount }));
+        }
+        if (data.topMonster) {
+            candidates.push(this._getRandomTemplate(CAREER_TEMPLATES.TOP_MONSTER, { val: data.topMonster }));
+        }
+        if (data.topQuestType) {
+            const key = `QUEST_TYPE_${data.topQuestType}`;
+            if (CAREER_TEMPLATES[key]) {
+                candidates.push(this._getRandomTemplate(CAREER_TEMPLATES[key]));
+            }
+        }
+        // Add more conditions...
+
+        if (candidates.length === 0) return ["まだ特筆すべき経歴はない。"];
+
+        // 1つランダムに返す、あるいはリストとして返す？
+        // 仕様「経歴に関する文をランダムに表示」 -> 1文？
+        // "Updating trigger is every 30 days" -> implies it changes.
+        return [candidates[Math.floor(Math.random() * candidates.length)]];
+    }
+
+    _generateNicknameBio(data) {
+        // data.featId should be present
+        if (data.featId && NICKNAME_TEMPLATES[data.featId]) {
+            return this._getRandomTemplate(NICKNAME_TEMPLATES[data.featId], data);
+        }
+        // Fallback or generic
+        const list = data.feat ? NICKNAME_TEMPLATES.WITH_FEAT : NICKNAME_TEMPLATES.DEFAULT;
+        return this._getRandomTemplate(list, data);
+    }
+
 
     _initRank(origin, joinType, maxRankValue) {
         // 4.1 加入タイプベース
@@ -202,7 +341,13 @@ export class Adventurer {
         if (oldVal < 380 && this.rankValue >= 380 && this.arts.length < 1) this.learnRandomArt();
         if (oldVal < 1000 && this.rankValue >= 1000 && this.arts.length < 2) this.learnRandomArt();
 
+        const oldLabel = this.rankLabel;
         this.rankLabel = this._getRankLabel();
+
+        // Bio更新 (Intro/Flavor): ランク(ラベル)が上がった時のみ更新
+        if (oldLabel !== this.rankLabel) {
+            this.updateBio('INTRO');
+        }
     }
 
     learnRandomArt() {
@@ -216,6 +361,9 @@ export class Adventurer {
         if (candidates.length > 0) {
             const art = candidates[Math.floor(Math.random() * candidates.length)];
             this.arts.push(art);
+
+            // Bio更新 (Arts)
+            this.updateBio('ARTS', { artId: art.id, artName: art.name });
         }
     }
 

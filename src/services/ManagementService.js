@@ -32,6 +32,33 @@ export class ManagementService {
                 this._triggerRandomEvent(guild);
             }
         }
+
+        // 5. Meikan (Career) Update
+        // 5. 名鑑(経歴)更新 (30日ごと)
+        if (guild.day > 0 && guild.day % 30 === 0) {
+            guild.adventurers.forEach(adv => {
+                if (adv.updateBio) {
+                    const careerData = {
+                        questCount: Object.values(adv.records.quests).reduce((a, b) => a + b, 0),
+                        topMonster: adv.records.majorKills.length > 0 ? adv.records.majorKills[0].name : null,
+                        topQuestType: this._getTopQuestType(adv.records.quests),
+                    };
+                    adv.updateBio('CAREER', { careerData });
+                }
+            });
+        }
+    }
+
+    _getTopQuestType(quests) {
+        let max = 0;
+        let type = null;
+        for (const [k, v] of Object.entries(quests)) {
+            if (v > max) {
+                max = v;
+                type = k;
+            }
+        }
+        return type;
     }
 
     _processFacilityIncome(guild) {

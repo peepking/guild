@@ -315,6 +315,7 @@ export class AdventurerScreen {
         tabs.innerHTML = `
             <button class="tab ${this.state.currentTab === 'STATUS' ? 'active' : ''}" data-tab="STATUS">ステータス</button>
             <button class="tab ${this.state.currentTab === 'HISTORY' ? 'active' : ''}" data-tab="HISTORY">経歴</button>
+            <button class="tab ${this.state.currentTab === 'MEIKAN' ? 'active' : ''}" data-tab="MEIKAN">名鑑</button>
         `;
         panel.appendChild(tabs);
 
@@ -344,9 +345,74 @@ export class AdventurerScreen {
         container.innerHTML = '';
         if (this.state.currentTab === 'STATUS') {
             this._renderStatusTab(container, adv);
-        } else {
+        } else if (this.state.currentTab === 'HISTORY') {
             this._renderHistoryTab(container, adv);
+        } else if (this.state.currentTab === 'MEIKAN') {
+            this._renderMeikanTab(container, adv);
         }
+    }
+
+    _renderMeikanTab(container, adv) {
+        const bio = adv.bio || {};
+
+        const createSection = (title, content, isItalic = false) => {
+            if (!content || (Array.isArray(content) && content.length === 0)) return '';
+
+            let htmlContent = '';
+            if (Array.isArray(content)) {
+                htmlContent = content.map(line => `<p style="margin-bottom:0.4rem; line-height:1.6;">${line}</p>`).join('');
+            } else {
+                htmlContent = `<p style="line-height:1.6;">${content}</p>`;
+            }
+
+            if (isItalic) htmlContent = `<div style="font-style:italic; color:#555;">${htmlContent}</div>`;
+
+            return `
+                <div style="margin-bottom:1.5rem;">
+                    <div class="sub-header" style="color:#5D4037; border-bottom:1px solid #d7ccc8; margin-bottom:0.5rem;">${title}</div>
+                    <div style="padding:0 0.5rem; font-family:'Yu Mincho', serif;">
+                        ${htmlContent}
+                    </div>
+                </div>
+             `;
+        };
+
+        let html = '<div style="padding:0.5rem;">';
+
+        // 1. Intro
+        html += createSection('人物', bio.intro);
+
+        // 2. Arts
+        if (bio.arts && bio.arts.length > 0) {
+            html += createSection('奥義・魔法', bio.arts);
+        }
+
+        // 3. Traits
+        if (bio.traits && bio.traits.length > 0) {
+            html += createSection('特性・人柄', bio.traits);
+        }
+
+        // 4. Career
+        if (bio.career && bio.career.length > 0) {
+            html += createSection('主な経歴', bio.career);
+        }
+
+        // 5. Nickname
+        if (bio.nickname) {
+            html += createSection('二つ名', bio.nickname);
+        }
+
+        // 6. Flavor (B Rank+)
+        if (bio.flavor) {
+            html += createSection('評価', bio.flavor, true);
+        }
+
+        if (html === '<div style="padding:0.5rem;">') {
+            html += '<div class="text-muted" style="padding:1rem;">まだ記録された情報はありません。</div>';
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
     }
 
     _renderStatusTab(container, adv) {

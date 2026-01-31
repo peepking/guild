@@ -130,6 +130,16 @@ export class TitleService {
         // 通知
         this._sendNotifications(adventurer, title, achievement);
 
+        // 名鑑更新 (Nickname)
+        if (adventurer.updateBio) {
+            adventurer.updateBio('NICKNAME', {
+                nickname: title,
+                feat: achievement.targetKanji || achievement.targetKata || '偉業', // 簡易的
+                featId: achievement.id, // IDを渡してテンプレート選択に使用
+                day: context.day
+            });
+        }
+
         return title;
     }
 
