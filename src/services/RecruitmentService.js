@@ -168,6 +168,11 @@ export class RecruitmentService {
             dummyAdv.rankValue = rankMap[targetRank] + Math.floor(Math.random() * 20);
             dummyAdv.rankLabel = targetRank;
             dummyAdv.stats = dummyAdv._generateStats(type, dummyAdv.origin, dummyAdv.rankValue);
+
+            // ランクに合わせてアーツ習得
+            if (dummyAdv.rankValue >= 380 && dummyAdv.arts.length < 1) dummyAdv.learnRandomArt();
+            if (dummyAdv.rankValue >= 1000 && dummyAdv.arts.length < 2) dummyAdv.learnRandomArt();
+
             candidates.push(dummyAdv);
         }
 

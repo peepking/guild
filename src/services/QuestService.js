@@ -100,13 +100,27 @@ export class QuestService {
         let days = 1;
         let danger = 5;
 
+        // まずランク基準のデフォルト値を設定 (danger決定のため必要)
         switch (rank) {
-            case 'E': partySize = 1; days = 1; danger = 5; break;
-            case 'D': partySize = Math.random() < 0.5 ? 1 : 2; days = Math.floor(Math.random() * 2) + 1; danger = 15; break;
-            case 'C': partySize = Math.floor(Math.random() * 2) + 2; days = Math.floor(Math.random() * 2) + 2; danger = 30; break;
-            case 'B': partySize = Math.floor(Math.random() * 2) + 3; days = Math.floor(Math.random() * 3) + 3; danger = 50; break;
-            case 'A': partySize = Math.floor(Math.random() * 2) + 4; days = Math.floor(Math.random() * 3) + 5; danger = 75; break;
-            case 'S': partySize = 5; days = Math.floor(Math.random() * 4) + 7; danger = 95; break;
+            case 'E': danger = 5; partySize = 1; days = 1; break;
+            case 'D': danger = 15; partySize = 2; days = 2; break;
+            case 'C': danger = 30; partySize = 3; days = 3; break;
+            case 'B': danger = 50; partySize = 4; days = 4; break;
+            case 'A': danger = 75; partySize = 5; days = 6; break;
+            case 'S': danger = 95; partySize = 5; days = 8; break;
+        }
+
+        // スペック定義があれば上書き (優先)
+        if (spec.duration) {
+            const min = spec.duration.min;
+            const max = spec.duration.max;
+            days = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        if (spec.partySize) {
+            const min = spec.partySize.min;
+            const max = spec.partySize.max;
+            partySize = Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
         const penalty = {
@@ -233,8 +247,20 @@ export class QuestService {
         const rank = spec.ranks[Math.floor(Math.random() * spec.ranks.length)];
         const difficulty = QUEST_DIFFICULTY[rank];
         const title = `【特務】${spec.label}`;
-        const partySize = rank === 'S' ? 5 : 4;
-        const days = 7;
+
+        let partySize = rank === 'S' ? 5 : 4;
+        let days = 7;
+
+        if (spec.duration) {
+            const min = spec.duration.min;
+            const max = spec.duration.max;
+            days = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        if (spec.partySize) {
+            const min = spec.partySize.min;
+            const max = spec.partySize.max;
+            partySize = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
 
         const q = new Quest(
             `sq_${this.questCounter}`, title, typeKey, difficulty, spec.weights,

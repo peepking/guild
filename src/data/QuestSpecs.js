@@ -5,8 +5,10 @@ export const QUEST_SPECS = {
         category: 'ADVENTURE',
         rates: { battle: { min: 1.0, max: 2.0 }, gather: 0.5 },
         bossDays: ['LAST'],
-        weights: { STR: 1.0, VIT: 1.0, DEX: 0.5, INT: 0.2 }, // デフォルトの狩猟ウェイト
-        ranks: ['E', 'D', 'C', 'B', 'A', 'S']
+        weights: { STR: 1.0, VIT: 1.0, DEX: 0.5, INT: 0.2 },
+        ranks: ['E', 'D', 'C', 'B', 'A', 'S'],
+        duration: { min: 2, max: 4 },
+        partySize: { min: 2, max: 5 }
     },
     CULLING: {
         label: '危険生物の間引き',
@@ -14,25 +16,29 @@ export const QUEST_SPECS = {
         rates: { battle: { min: 2.0, max: 3.0 }, gather: 0.2 },
         bossDays: ['LAST'],
         weights: { STR: 2.0, VIT: 1.5, DEX: 2.0, MAG: 0.5, INT: 0.5, CHA: 0.5 },
-        ranks: ['E', 'D', 'C']
+        ranks: ['E', 'D', 'C'],
+        duration: { min: 1, max: 3 },
+        partySize: { min: 1, max: 3 }
     },
     DUNGEON: {
         label: 'ダンジョン探索',
         category: 'ADVENTURE',
         rates: { battle: 1.5, gather: 1.5 },
-        bossDays: ['LAST'], // 最終日ボス出現フラグ
+        bossDays: ['LAST'],
         weights: { DEX: 2.5, INT: 2.0, VIT: 1.5, MAG: 1.0, STR: 1.0, CHA: 0.5 },
-        ranks: ['D', 'C', 'B', 'A', 'S']
+        ranks: ['D', 'C', 'B', 'A', 'S'],
+        duration: { min: 3, max: 7 },
+        partySize: { min: 3, max: 5 }
     },
     RUINS: {
         label: '遺跡調査',
         category: 'ADVENTURE',
         rates: { battle: 0.5, gather: 1.0 },
-        // 進捗に基づいたボス(守護者)遭遇チャンス。シミュレーションでは日毎のランダム確率として処理？
-        // 守護者バトルイベントの実装。レアバトルイベントとする。
-        bossModifier: 0.1, // ボス遭遇率 10%/日
+        bossModifier: 0.1,
         weights: { INT: 3.0, MAG: 2.0, DEX: 1.5, CHA: 1.0, VIT: 0.5, STR: 0.5 },
-        ranks: ['C', 'B', 'A', 'S']
+        ranks: ['C', 'B', 'A', 'S'],
+        duration: { min: 4, max: 7 },
+        partySize: { min: 2, max: 4 }
     },
     MATERIAL: {
         label: '素材回収',
@@ -40,7 +46,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.3, gather: 3.0 },
         bossDays: [],
         weights: { DEX: 2.0, VIT: 2.0, STR: 1.5, INT: 1.0, MAG: 0.5, CHA: 0.5 },
-        ranks: ['E', 'D', 'C', 'B']
+        ranks: ['E', 'D', 'C', 'B'],
+        duration: { min: 1, max: 5 },
+        partySize: { min: 1, max: 3 }
     },
 
     // 2. Logistics/Economic
@@ -50,7 +58,9 @@ export const QUEST_SPECS = {
         rates: { battle: { min: 0.5, max: 1.0 }, gather: 0 },
         bossDays: ['LAST'],
         weights: { VIT: 2.5, STR: 2.0, CHA: 1.5, DEX: 1.0, INT: 0.5, MAG: 0.5 },
-        ranks: ['E', 'D', 'C', 'B']
+        ranks: ['E', 'D', 'C', 'B'],
+        duration: { min: 2, max: 6 },
+        partySize: { min: 2, max: 4 }
     },
     TRANSPORT: {
         label: '物資輸送',
@@ -58,7 +68,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.1, gather: 0 },
         bossDays: [],
         weights: { VIT: 3.0, STR: 2.0, DEX: 1.0, INT: 1.0, CHA: 0.5, MAG: 0.5 },
-        ranks: ['E', 'D', 'C']
+        ranks: ['E', 'D', 'C'],
+        duration: { min: 1, max: 5 },
+        partySize: { min: 1, max: 2 }
     },
     RESUPPLY: {
         label: '緊急補給',
@@ -66,7 +78,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.1, gather: 0 },
         bossDays: [],
         weights: { DEX: 3.0, VIT: 2.0, STR: 1.5, INT: 1.0, MAG: 0.5, CHA: 0.5 },
-        ranks: ['D', 'C', 'B']
+        ranks: ['D', 'C', 'B'],
+        duration: { min: 1, max: 3 },
+        partySize: { min: 1, max: 3 }
     },
 
     // 3. Citizen/Livelihood
@@ -76,23 +90,29 @@ export const QUEST_SPECS = {
         rates: { battle: 0, gather: 0 },
         bossDays: [],
         weights: { INT: 2.0, CHA: 2.0, DEX: 1.5, VIT: 1.0, STR: 0.5, MAG: 0.5 },
-        ranks: ['E', 'D']
+        ranks: ['E', 'D'],
+        duration: { min: 1, max: 1 },
+        partySize: { min: 1, max: 2 }
     },
     WELL: {
         label: '井戸の怪異調査',
         category: 'CITIZEN',
         rates: { battle: 1.0, gather: 0.1 },
-        bossModifier: 0.5, // 中ボス遭遇率 50%
+        bossModifier: 0.5,
         weights: { INT: 2.0, MAG: 1.5, STR: 1.5, VIT: 1.0, DEX: 1.0, CHA: 0.5 },
-        ranks: ['E', 'D']
+        ranks: ['E', 'D'],
+        duration: { min: 1, max: 1 },
+        partySize: { min: 1, max: 2 }
     },
     EXTERMINATION: {
         label: '家屋の魔物駆除',
         category: 'CITIZEN',
         rates: { battle: { min: 1.0, max: 2.0 }, gather: 0 },
-        bossModifier: 0.05, // 希にクイーン出現
+        bossModifier: 0.05,
         weights: { DEX: 2.5, STR: 1.5, VIT: 1.0, INT: 1.0, MAG: 0.5, CHA: 0.5 },
-        ranks: ['E', 'D']
+        ranks: ['E', 'D'],
+        duration: { min: 1, max: 1 },
+        partySize: { min: 1, max: 2 }
     },
     NIGHT_WATCH: {
         label: '夜警代行',
@@ -100,7 +120,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.3, gather: 0 },
         bossDays: [],
         weights: { VIT: 2.5, INT: 2.0, STR: 1.5, DEX: 1.0, CHA: 0.5, MAG: 0.5 },
-        ranks: ['E', 'D']
+        ranks: ['E', 'D'],
+        duration: { min: 1, max: 1 },
+        partySize: { min: 2, max: 3 }
     },
 
     // 4. National/Political
@@ -110,7 +132,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.5, gather: 0 },
         bossDays: ['LAST'],
         weights: { CHA: 2.5, VIT: 2.0, STR: 1.5, INT: 1.5, DEX: 1.0, MAG: 0.5 },
-        ranks: ['C', 'B', 'A', 'S']
+        ranks: ['C', 'B', 'A', 'S'],
+        duration: { min: 3, max: 7 },
+        partySize: { min: 2, max: 5 }
     },
     BORDER_RECON: {
         label: '国境偵察',
@@ -118,7 +142,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.2, gather: 0.2 },
         bossDays: [],
         weights: { DEX: 3.0, INT: 2.0, VIT: 1.5, STR: 1.0, MAG: 1.0, CHA: 0.5 },
-        ranks: ['B', 'A', 'S']
+        ranks: ['B', 'A', 'S'],
+        duration: { min: 4, max: 7 },
+        partySize: { min: 1, max: 3 }
     },
     REBELLION: {
         label: '反乱鎮圧補助',
@@ -126,7 +152,9 @@ export const QUEST_SPECS = {
         rates: { battle: { min: 2.0, max: 5.0 }, gather: 0 },
         bossDays: ['LAST'],
         weights: { STR: 2.5, INT: 2.0, VIT: 2.0, DEX: 1.0, MAG: 1.0, CHA: 1.0 },
-        ranks: ['A', 'S']
+        ranks: ['A', 'S'],
+        duration: { min: 5, max: 7 },
+        partySize: { min: 4, max: 5 }
     },
     INTEL: {
         label: '機密情報収集',
@@ -134,7 +162,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.1, gather: 0 },
         bossDays: [],
         weights: { CHA: 2.5, DEX: 2.5, INT: 2.0, MAG: 1.0, STR: 0.5, VIT: 0.5 },
-        ranks: ['B', 'A']
+        ranks: ['B', 'A'],
+        duration: { min: 3, max: 10 },
+        partySize: { min: 1, max: 2 }
     },
 
     // 5. Academic
@@ -144,7 +174,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.2, gather: 0.5 },
         bossDays: [],
         weights: { INT: 2.5, DEX: 2.0, VIT: 1.5, MAG: 1.0, STR: 1.0, CHA: 0.5 },
-        ranks: ['C', 'B', 'A']
+        ranks: ['C', 'B', 'A'],
+        duration: { min: 3, max: 10 },
+        partySize: { min: 2, max: 3 }
     },
     DOCUMENTS: {
         label: '古文書回収',
@@ -152,7 +184,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.2, gather: 0.1 },
         bossDays: [],
         weights: { INT: 3.0, MAG: 2.0, CHA: 1.5, STR: 0.5, VIT: 0.5, DEX: 0.5 },
-        ranks: ['D', 'C', 'B']
+        ranks: ['D', 'C', 'B'],
+        duration: { min: 3, max: 7 },
+        partySize: { min: 1, max: 3 }
     },
     RELIC_ANALYSIS: {
         label: '遺物分析用採取',
@@ -160,7 +194,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.5, gather: 2.0 },
         bossDays: [],
         weights: { MAG: 3.0, INT: 2.0, DEX: 1.5, VIT: 1.0, STR: 1.0, CHA: 0.5 },
-        ranks: ['B', 'A']
+        ranks: ['B', 'A'],
+        duration: { min: 3, max: 7 },
+        partySize: { min: 2, max: 4 }
     },
     EXPERIMENT: {
         label: '実験補助',
@@ -168,7 +204,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0, gather: 0 },
         bossDays: [],
         weights: { VIT: 3.0, MAG: 2.0, INT: 1.5, STR: 1.0, DEX: 0.5, CHA: 0.5 },
-        ranks: ['E', 'D', 'C', 'B', 'A']
+        ranks: ['E', 'D', 'C', 'B', 'A'],
+        duration: { min: 1, max: 7 },
+        partySize: { min: 1, max: 1 }
     },
 
     // 6. Disaster
@@ -178,7 +216,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.1, gather: 0 },
         bossDays: [],
         weights: { STR: 3.0, DEX: 2.0, VIT: 2.0, INT: 1.0, MAG: 0.5, CHA: 0.5 },
-        ranks: ['C', 'B', 'A']
+        ranks: ['C', 'B', 'A'],
+        duration: { min: 2, max: 5 },
+        partySize: { min: 3, max: 5 }
     },
     FLOOD: {
         label: '洪水対策',
@@ -186,7 +226,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.3, gather: 0 },
         bossDays: [],
         weights: { INT: 2.5, STR: 2.5, VIT: 2.0, DEX: 1.0, MAG: 1.0, CHA: 0.5 },
-        ranks: ['C', 'B']
+        ranks: ['C', 'B'],
+        duration: { min: 2, max: 4 },
+        partySize: { min: 3, max: 5 }
     },
     FIRE: {
         label: '火災鎮圧',
@@ -194,7 +236,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.1, gather: 0 },
         bossDays: [],
         weights: { MAG: 3.0, DEX: 2.0, VIT: 2.0, STR: 1.0, INT: 1.0, CHA: 0.5 },
-        ranks: ['C', 'B', 'A']
+        ranks: ['C', 'B', 'A'],
+        duration: { min: 1, max: 2 },
+        partySize: { min: 2, max: 5 }
     },
     BARRIER: {
         label: '結界破損修復',
@@ -202,7 +246,9 @@ export const QUEST_SPECS = {
         rates: { battle: 1.0, gather: 0 },
         bossDays: [],
         weights: { MAG: 4.0, INT: 2.5, CHA: 1.0, VIT: 1.0, STR: 0.5, DEX: 0.5 },
-        ranks: ['A', 'S']
+        ranks: ['A', 'S'],
+        duration: { min: 1, max: 3 },
+        partySize: { min: 2, max: 4 }
     },
 
     // 7. Trouble
@@ -212,7 +258,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.1, gather: 0 },
         bossDays: [],
         weights: { CHA: 3.0, INT: 2.5, DEX: 1.0, MAG: 0.5, STR: 0.5, VIT: 0.5 },
-        ranks: ['D', 'C', 'B']
+        ranks: ['D', 'C', 'B'],
+        duration: { min: 2, max: 5 },
+        partySize: { min: 1, max: 2 }
     },
     ADVENTURER_DISPUTE: {
         label: '冒険者同士の仲裁',
@@ -220,7 +268,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.5, gather: 0 },
         bossDays: [],
         weights: { STR: 2.0, CHA: 2.0, VIT: 2.0, INT: 1.0, DEX: 0.5, MAG: 0.5 },
-        ranks: ['C', 'B']
+        ranks: ['C', 'B'],
+        duration: { min: 1, max: 3 },
+        partySize: { min: 1, max: 3 }
     },
     DEBT: {
         label: '借金取り立て補助',
@@ -228,7 +278,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.3, gather: 0 },
         bossDays: [],
         weights: { STR: 2.0, DEX: 2.0, CHA: 1.5, INT: 1.5, VIT: 1.0, MAG: 0.5 },
-        ranks: ['D', 'C']
+        ranks: ['D', 'C'],
+        duration: { min: 2, max: 5 },
+        partySize: { min: 1, max: 2 }
     },
     FRAUD: {
         label: '詐欺調査',
@@ -236,7 +288,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.1, gather: 0 },
         bossDays: [],
         weights: { INT: 3.0, CHA: 2.0, DEX: 2.0, MAG: 0.5, STR: 0.5, VIT: 0.5 },
-        ranks: ['C', 'B']
+        ranks: ['C', 'B'],
+        duration: { min: 3, max: 7 },
+        partySize: { min: 1, max: 2 }
     },
 
     // 8. Special
@@ -244,18 +298,22 @@ export const QUEST_SPECS = {
         label: '異界出現',
         category: 'SPECIAL',
         rates: { battle: { min: 3.0, max: 10.0 }, gather: 3.0 },
-        bossDays: [], // ゲートキーパーは専用ロジックで処理
-        bossModifier: 1.0, // 常時ボス判定
+        bossDays: [],
+        bossModifier: 1.0,
         weights: { MAG: 2.0, STR: 2.0, VIT: 2.0, DEX: 2.0, INT: 2.0, CHA: 1.0 },
-        ranks: ['A', 'S']
+        ranks: ['A', 'S'],
+        duration: { min: 5, max: 7 },
+        partySize: { min: 4, max: 5 }
     },
     ANCIENT_BEAST: {
         label: '古代生物の目覚め',
         category: 'SPECIAL',
         rates: { battle: 1.0, gather: 0.1 },
-        bossDays: ['LAST'], // レイドボス想定
+        bossDays: ['LAST'],
         weights: { STR: 3.0, VIT: 3.0, MAG: 2.0, DEX: 1.0, INT: 1.0, CHA: 0.5 },
-        ranks: ['S']
+        ranks: ['S'],
+        duration: { min: 7, max: 7 },
+        partySize: { min: 5, max: 5 }
     },
     MISSING_ROYAL: {
         label: '王族失踪',
@@ -263,7 +321,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.5, gather: 0 },
         bossDays: [],
         weights: { INT: 3.0, DEX: 3.0, CHA: 2.0, MAG: 1.0, STR: 1.0, VIT: 1.0 },
-        ranks: ['S']
+        ranks: ['S'],
+        duration: { min: 5, max: 7 },
+        partySize: { min: 3, max: 5 }
     },
     ORACLE: {
         label: '神託調査',
@@ -271,7 +331,9 @@ export const QUEST_SPECS = {
         rates: { battle: 0.5, gather: 0 },
         bossDays: [],
         weights: { MAG: 3.0, INT: 3.0, CHA: 2.0, VIT: 1.0, STR: 0.5, DEX: 0.5 },
-        ranks: ['A', 'S']
+        ranks: ['A', 'S'],
+        duration: { min: 4, max: 7 },
+        partySize: { min: 1, max: 3 }
     }
 };
 
