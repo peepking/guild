@@ -1820,3 +1820,51 @@ h2 {
     gap: 0.8rem;
     font-size: 0.85rem;
 }
+
+/* Mail Actions */
+.mail-actions-body {
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    /* Add spacing before footer */
+    display: flex;
+    flex-direction: column;
+    /* Keep vertical stack but style items */
+    gap: 0.5rem;
+}
+
+.action-btn {
+    align-self: flex-start;
+    /* Prevent full width */
+    min-width: 280px;
+    width: 280px !important;
+}
+
+.action-completed {
+    color: #888;
+    font-style: italic;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+/* Mail Detail Header Separator */
+.mail-detail-header {
+    border-bottom: 1px dashed #d7ccc8;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.mail-detail-meta {
+    font-size: 0.85rem;
+    color: #8d6e63;
+    margin-bottom: 0.2rem;
+}
+
+.mail-detail-title {
+    font-size: 1.1rem;
+    color: var(--wood-dark);
+}
+
+.mail-detail-body {
+    line-height: 1.6;
+    color: #3e2723;
+}

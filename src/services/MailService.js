@@ -6,10 +6,12 @@ export class MailService {
         this.mailCounter = 0;
 
         // Initial Tutorial Mail
+        // Initial Tutorial Mail
         this.send(
             "ギルドへようこそ",
             "ギルド運営へようこそ！\nまずは「依頼」メニューからクエストを発注し、冒険者を派遣してみましょう。\n日数が経過すると結果が届きます。",
-            "SYSTEM"
+            "SYSTEM",
+            { day: 1 }
         );
     }
 

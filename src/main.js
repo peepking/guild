@@ -4,8 +4,9 @@ import { UIManager } from './ui/UIManager.js';
 import { Layout } from './ui/Layout.js';
 import { QuestService } from './services/QuestService.js';
 import { MailService } from './services/MailService.js';
+import { RecruitmentService } from './services/RecruitmentService.js';
 import { TitleService } from './services/TitleService.js';
-import { ManagementService } from './services/ManagementService.js'; // Added // Added
+import { ManagementService } from './services/ManagementService.js';
 import { EquipmentService } from './services/EquipmentService.js';
 import { MONSTER_DATA } from './data/monsterData.js';
 import { ITEM_DATA } from './data/itemData.js';
@@ -44,9 +45,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Initialize Management Service (Needs UI)
     const managementService = new ManagementService(uiManager);
     const equipmentService = new EquipmentService();
+    const recruitmentService = new RecruitmentService(guild);
 
     // 5. Initialize GameLoop
-    const gameLoop = new GameLoop(guild, uiManager, questService, mailService, managementService, equipmentService);
+    const gameLoop = new GameLoop(guild, uiManager, questService, mailService, managementService, equipmentService, recruitmentService);
     // Bind global mail service to gameLoop for easy access (used by MailScreen)
     gameLoop.mailService = mailService;
     // 5. Register Screens

@@ -435,7 +435,7 @@ export class OperationScreen {
                     effect: 1.5
                 });
                 this.gameLoop.uiManager.log(`新規募集キャンペーンを開始しました。(7日間)`, 'success');
-                this.gameLoop.mailService.send("キャンペーン開始", `広報活動を開始しました。\n今後7日間、冒険者の加入率が上昇します。`, 'EVENT');
+                this.gameLoop.mailService.send("キャンペーン開始", `広報活動を開始しました。\n今後7日間、冒険者の加入率が上昇します。`, 'EVENT', { day: guild.day });
 
                 // Full Render to update Top Bar
                 this.gameLoop.uiManager.render();

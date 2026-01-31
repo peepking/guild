@@ -11,6 +11,7 @@ export class Adventurer {
 
         // Phase 10: Initialize Rank & Trust based on Origin/JoinType
         this.rankValue = this._initRank(origin, joinType, maxRankValue);
+        this.lastPeriodRankValue = this.rankValue; // Snapshot for period tracking
         this.rankLabel = this._getRankLabel();
 
         this.trust = this._initTrust(origin, joinType);

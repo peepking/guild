@@ -108,25 +108,82 @@ export class MailScreen {
         const detailContainer = document.getElementById('mail-detail');
         if (!detailContainer) return;
 
+        const actions = (mail.meta && mail.meta.actions) || mail.actions;
+        let actionsHtml = '';
+        if (actions && actions.length > 0 && !mail.acted) {
+            actionsHtml = `<div class="mail-actions-body">`;
+            actions.forEach((action, index) => {
+                actionsHtml += `<button class="btn btn-primary action-btn" data-index="${index}">${action.label}</button>`;
+            });
+            actionsHtml += `</div>`;
+        } else if (mail.acted) {
+            actionsHtml = `<div class="mail-actions-body"><div class="action-completed">対応済み</div></div>`;
+        }
+
         detailContainer.innerHTML = `
-            <div class="detail-content">
-                <div class="detail-header">
-                    <div class="detail-meta">
-                        <span class="detail-type">${this._getTypeLabel(mail.type)}</span>
-                    </div>
-                    <h3 class="detail-title">${mail.title}</h3>
+            <div class="mail-detail-header">
+                <div class="mail-header-top" style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3 class="mail-detail-title" style="margin:0;">${mail.title}</h3>
+                    <button id="delete-mail-btn" class="btn btn-danger btn-sm">削除</button>
                 </div>
-                <div class="detail-body">
-                    ${mail.body.replace(/\n/g, '<br>')}
+                <div class="mail-detail-meta" style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+                    <span class="mail-type-badge ${mail.type.toLowerCase()}">${this._getTypeLabel(mail.type)}</span>
+                    <span class="mail-date">Day ${mail.meta && mail.meta.day ? mail.meta.day : ''}</span>
                 </div>
-                ${this._renderActions(mail)}
             </div>
+            <div class="mail-detail-body">
+                ${mail.body.replace(/\n/g, '<br>')}
+            </div>
+            ${actionsHtml}
         `;
+
+        // Bind Action Buttons
+        const actionBtns = detailContainer.querySelectorAll('.action-btn');
+        actionBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.index);
+                const action = actions[idx];
+                this._handleAction(mail, action);
+            });
+        });
+
+        document.getElementById('delete-mail-btn')?.addEventListener('click', () => {
+            if (confirm("削除しますか？")) {
+                this.gameLoop.mailService.delete(mail.id);
+                this.selectedMailId = null;
+                this.render();
+            }
+        });
     }
 
-    _renderActions(mail) {
-        // Future: Event choices logic using mail.meta
-        return '';
+    _handleAction(mailArg, action) {
+        console.log("Handle Action Start. Mail ID:", mailArg.id, "Action:", action);
+        // Ensure we have the persistent reference from the service
+        const mail = this.gameLoop.mailService.getMails().find(m => m.id === mailArg.id) || mailArg;
+
+        if (mail.acted) {
+            console.log("Mail is already acted.");
+            return;
+        }
+
+        // Execute Action via GameLoop
+        const result = this.gameLoop.handleMailAction(action.id, action.data);
+        console.log("Action Result:", result);
+
+        if (result.success) {
+            mail.acted = true; // Mark as acted locally on the correct reference
+            this.gameLoop.uiManager.showToast(result.message || '完了しました', 'success');
+
+            // Force re-render of detail view immediately
+            console.log("Forcing _renderDetail with mail.acted =", mail.acted);
+            this._renderDetail(mail);
+
+            // Do NOT call this.render() to avoid resetting view state
+            this._updateBadge();
+        } else {
+            console.error("Action Failed:", result);
+            this.gameLoop.uiManager.showToast(result.message || '失敗しました', 'error');
+        }
     }
 
     _getTypeLabel(type) {

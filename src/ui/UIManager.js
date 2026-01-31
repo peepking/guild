@@ -36,6 +36,12 @@ export class UIManager {
         if (this.logs.length > 50) this.logs.pop(); // Keep last 50
     }
 
+    showToast(message, type = 'NORMAL') {
+        if (this.layout) {
+            this.layout.showToast(message, type);
+        }
+    }
+
     render() {
         // 1. Render Layout (TopBar, BottomNav updates)
         if (this.layout) {

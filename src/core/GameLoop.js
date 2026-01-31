@@ -7,7 +7,7 @@ import { titleService } from '../services/TitleService.js';
 import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS } from '../data/constants.js';
 
 export class GameLoop {
-    constructor(guild, uiManager, questService, mailService, managementService, equipmentService) {
+    constructor(guild, uiManager, questService, mailService, managementService, equipmentService, recruitmentService) {
         this.guild = guild;
         this.uiManager = uiManager;
         this.questService = questService || new QuestService();
@@ -18,8 +18,8 @@ export class GameLoop {
         if (this.mailService) {
             titleService.setMailService(this.mailService);
         }
-        this.equipmentService = equipmentService; // Added
-        this.recruitmentService = new RecruitmentService(guild);
+        this.equipmentService = equipmentService;
+        this.recruitmentService = recruitmentService || new RecruitmentService(guild);
         this.assignmentService = new AssignmentService(guild, this.questService, uiManager);
         this.lifeEventService = new LifeEventService(uiManager);
 
@@ -256,12 +256,23 @@ export class GameLoop {
                 this.mailService.send(
                     'ギルドランク昇格のお知らせ',
                     `おめでとうございます。\nギルドの評判が高まり、ランクが【${newRankObj.label}: ${newRankObj.name}】に昇格しました。\n\nより高難易度の依頼が舞い込むようになるでしょう。\n今後ともギルドの発展に尽力してください。`,
-                    'IMPORTANT'
+                    'IMPORTANT',
+                    { day: this.guild.day }
                 );
             }
         }
 
-        // --- 7. Update UI ---
+        // --- 6. Check Daily Events (Scout, Apprentice) ---
+        if (this.recruitmentService) {
+            this.recruitmentService.checkDailyEvents(this.guild.day, this.mailService);
+        }
+
+        // --- 7. Monthly Award Event (Day % 30) ---
+        if (this.guild.day % 30 === 0 && this.guild.day > 0) {
+            this._handleMonthlyAward();
+        }
+
+        // --- 8. Update UI ---
         this.uiManager.render();
     }
 
@@ -414,5 +425,71 @@ export class GameLoop {
             isSpecial: result.quest.isSpecial,
             description: result.quest.description // Added description
         });
+    }
+    _handleMonthlyAward() {
+        if (!this.guild.adventurers || this.guild.adventurers.length === 0) return;
+
+        // 1. Calculate Evaluation Gain per Adventurer
+        let candidates = [];
+        let maxGain = -9999;
+
+        this.guild.adventurers.forEach(adv => {
+            const lastVal = adv.lastPeriodRankValue || adv.rankValue; // Fallback
+            const gain = adv.rankValue - lastVal;
+
+            // Update snapshot for next period
+            adv.lastPeriodRankValue = adv.rankValue;
+
+            if (gain > maxGain) {
+                maxGain = gain;
+                candidates = [adv];
+            } else if (gain === maxGain) {
+                candidates.push(adv);
+            }
+        });
+
+        // 2. Select Winner
+        if (candidates.length > 0 && maxGain > 0) {
+            const winner = candidates[Math.floor(Math.random() * candidates.length)];
+
+            // 3. Calculate Bonus (5 * Guild Rank Value)
+            // Determine Guild Rank Value (E=1, ..., S=6)
+            // Use existing logic to get label since Guild.getRankLabel might not exist
+            const rankObj = this.uiManager.layout ?
+                (GUILD_RANK_THRESHOLDS.find(r => this.guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1])
+                : { label: 'E' }; // Fallback
+
+            const rankValues = { E: 1, D: 2, C: 3, B: 4, A: 5, S: 6 };
+            const rankVal = rankValues[rankObj.label] || 1;
+
+            const bonus = 5 * rankVal;
+
+            // 4. Apply Bonus
+            winner.rankValue += bonus;
+            winner.updateRank(0); // Update label
+
+            // 5. Send Mail
+            this.mailService.send(
+                "【月間表彰】MVP選出",
+                `今月のギルド月間MVPは ${winner.name} に決定しました！\n期間中に最も評価を高めた功績を称え、評価値ボーナス +${bonus} を付与します。\n\n獲得評価: ${Math.floor(maxGain)}\n現在のランク: ${winner.rankLabel}`,
+                "IMPORTANT",
+                { day: this.guild.day }
+            );
+
+            this.uiManager.log(`月間MVP: ${winner.name} (Bonus +${bonus})`, 'event');
+        }
+    }
+    handleMailAction(actionId, data) {
+        if (actionId === 'SCOUT_ADVENTURER') {
+            if (this.recruitmentService) {
+                return this.recruitmentService.executeScout(data);
+            }
+        }
+        if (actionId === 'APPRENTICE_JOIN') {
+            if (this.recruitmentService) {
+                return this.recruitmentService.executeApprentice(data);
+            }
+        }
+        return { success: false, message: '不明なアクションです' };
     }
 }
