@@ -262,6 +262,7 @@ export class QuestService {
                 const list = this.simulator.monsters[q.region][rank];
                 if (list && list.length > 0) {
                     // Prefer Boss category
+                    const bosses = list.filter(m => m.category && m.category.includes('ボス'));
                     if (bosses.length > 0) {
                         target = bosses[Math.floor(Math.random() * bosses.length)].name;
                         bossTarget = target; // ボスターゲット割り当て

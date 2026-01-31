@@ -8,7 +8,7 @@ global.window = {};
 
 // Import necessary modules
 // Note: adjusting paths relative to this script
-import { CONSTANTS, ADVENTURER_TYPES, BASE_STATS, TRAITS } from '../src/data/constants.js';
+import { CONSTANTS, ADVENTURER_TYPES, BASE_STATS, TRAITS, QUEST_RANK_BASE_POWER } from '../src/data/constants.js';
 import { MONSTER_DATA } from '../src/data/monsterData.js';
 import { ITEM_DATA } from '../src/data/itemData.js';
 import { QUEST_SPECS, REGIONS } from '../src/data/QuestSpecs.js';
@@ -44,10 +44,8 @@ AdventureSimulator.prototype._resolveBattle = function (party, monster, modifier
     const partyPower = avgCP * sizeBonus;
 
     // 2. Enemy Power (Flattened Curve)
-    // Map Rank E-S to 90-190
-    // E:90, D:110, C:130, B:150, A:170, S:190
-    const rankMap = { 'E': 90, 'D': 110, 'C': 130, 'B': 150, 'A': 170, 'S': 190 };
-    let enemyBase = rankMap[monster.rank] || 90;
+    // Map Rank E-S to 90-190 (Using QUEST_RANK_BASE_POWER)
+    let enemyBase = QUEST_RANK_BASE_POWER[monster.rank] || 90;
 
     let enemyPower = enemyBase;
     if (monster.isBoss) enemyPower *= 1.5;

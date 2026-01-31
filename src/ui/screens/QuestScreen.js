@@ -1,4 +1,4 @@
-import { TRAITS } from '../../data/constants.js';
+import { TRAITS, ADVENTURER_JOB_NAMES } from '../../data/constants.js';
 
 export class QuestScreen {
     constructor(gameLoop) {
@@ -380,7 +380,7 @@ export class QuestScreen {
             const score = Math.floor(this.gameLoop.questService.calculateScore(quest, adv));
 
             row.innerHTML = `
-                <span>${adv.name} <span class="text-sm text-sub-color">(${adv.type}/${adv.rankLabel})</span></span>
+                <span>${adv.name} <span class="text-sm text-sub-color">(${ADVENTURER_JOB_NAMES[adv.type] || adv.type}/${adv.rankLabel})</span></span>
                 <span class="font-mono">適性:${score}</span>
             `;
 

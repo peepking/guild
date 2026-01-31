@@ -351,12 +351,28 @@ export class GameLoop {
                     if (result.quest.type === 'TOURNAMENT_SOLO') {
                         this.guild.tournament.solo = nextRank;
                         if (this.mailService) {
-                            this.mailService.send('天下一武闘会（個人）制覇通知', `${currentRank}ランク戦を勝利しました！\n次は${nextRank}ランクへの挑戦権が得られます。`, 'IMPORTANT');
+                            if (nextRank === 'COMPLETED') {
+                                this.mailService.send(
+                                    '【祝】天下一武闘会（個人）完全制覇！',
+                                    'Sランク戦での優勝、誠におめでとうございます！\n貴ギルドの武名は今や世界中に轟き、伝説として語り継がれることでしょう。\n\nもはやこの地に敵う者はおりません。貴殿こそが真の最強です！\nこれにて天下一武闘会への挑戦権は全て制覇されました。\n（※これ以上のランクはありませんが、引き続きギルド運営をお楽しみください）',
+                                    'IMPORTANT'
+                                );
+                            } else {
+                                this.mailService.send('天下一武闘会（個人）制覇通知', `${currentRank}ランク戦を勝利しました！\n次は${nextRank}ランクへの挑戦権が得られます。`, 'IMPORTANT');
+                            }
                         }
                     } else if (result.quest.type === 'TOURNAMENT_TEAM') {
                         this.guild.tournament.team = nextRank;
                         if (this.mailService) {
-                            this.mailService.send('天下一武闘会（団体）制覇通知', `${currentRank}ランク戦を勝利しました！\n次は${nextRank}ランクへの挑戦権が得られます。`, 'IMPORTANT');
+                            if (nextRank === 'COMPLETED') {
+                                this.mailService.send(
+                                    '【祝】天下一武闘会（団体）完全制覇！',
+                                    'Sランク戦での優勝、誠におめでとうございます！\n貴ギルドの結束と武名は今や世界中に轟き、伝説として語り継がれることでしょう。\n\nもはやこの地に敵う者たちはいません。貴殿らこそが真の最強チームです！\nこれにて天下一武闘会への挑戦権は全て制覇されました。\n（※これ以上のランクはありませんが、引き続きギルド運営をお楽しみください）',
+                                    'IMPORTANT'
+                                );
+                            } else {
+                                this.mailService.send('天下一武闘会（団体）制覇通知', `${currentRank}ランク戦を勝利しました！\n次は${nextRank}ランクへの挑戦権が得られます。`, 'IMPORTANT');
+                            }
                         }
                     }
                 }

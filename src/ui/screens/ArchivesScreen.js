@@ -1,3 +1,5 @@
+import { ADVENTURER_JOB_NAMES } from '../../data/constants.js';
+
 export class ArchivesScreen {
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
@@ -197,7 +199,7 @@ export class ArchivesScreen {
                     <span class="list-item-title font-bold text-main">
                         ${adv.title ? `<span class="text-sm text-accent">《${adv.title}》</span> ` : ''}${adv.name}
                     </span>
-                    <span class="status-badge bg-normal">${adv.type}</span>
+                    <span class="status-badge bg-normal">${ADVENTURER_JOB_NAMES[adv.type] || adv.type}</span>
                 </div>
                 <div class="list-item-meta">
                     <span>Rank ${adv.rank}</span>

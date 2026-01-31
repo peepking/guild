@@ -1,7 +1,7 @@
 import { MonsterDataLoader } from '../data/MonsterDataLoader.js';
 import { ItemDataLoader } from '../data/ItemDataLoader.js';
 import { QUEST_SPECS } from '../data/QuestSpecs.js';
-import { TRAITS, ADVENTURER_TYPES } from '../data/constants.js';
+import { TRAITS, ADVENTURER_TYPES, QUEST_RANK_BASE_POWER } from '../data/constants.js';
 import { ADVENTURE_LOG_DATA } from '../data/AdventureLogData.js';
 import { NORMAL_ACTION_LOGS } from '../data/ArtsData.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
@@ -367,8 +367,7 @@ export class AdventureSimulator {
         if (quest.isTournament) {
             let displayName = '';
 
-            const rankMap = { 'E': 90, 'D': 110, 'C': 130, 'B': 150, 'A': 170, 'S': 190 };
-            let power = rankMap[quest.difficulty.rank] || 90;
+            let power = QUEST_RANK_BASE_POWER[quest.difficulty.rank] || 90;
 
             if (quest.type === 'TOURNAMENT_TEAM') {
                 const rKeys = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
@@ -449,8 +448,7 @@ export class AdventureSimulator {
         }
 
         // New Power Curve (Flattened)
-        const rankMap = { 'E': 90, 'D': 110, 'C': 130, 'B': 150, 'A': 170, 'S': 190 };
-        const powerBase = rankMap[rank] || 90;
+        const powerBase = QUEST_RANK_BASE_POWER[rank] || 90;
         let power = powerBase;
 
         if (isBoss) {
@@ -553,9 +551,8 @@ export class AdventureSimulator {
         const partyPower = avgCP * sizeBonus;
 
         // 2. Enemy Power (Flattened Curve)
-        // E:90, D:110, C:130, B:150, A:170, S:190
-        const rankMap = { 'E': 90, 'D': 110, 'C': 130, 'B': 150, 'A': 170, 'S': 190 };
-        let enemyBase = rankMap[monster.rank] || 90;
+        // E:90, D:110, C:130, B:150, A:170, S:190 (Defined in QUEST_RANK_BASE_POWER)
+        let enemyBase = QUEST_RANK_BASE_POWER[monster.rank] || 90;
 
         let enemyPower = enemyBase;
         if (monster.isBoss) enemyPower *= 1.5;

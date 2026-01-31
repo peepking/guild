@@ -30,6 +30,25 @@ export const ADVENTURER_TYPES = {
     BISHOP: 'BISHOP'
 };
 
+export const ADVENTURER_JOB_NAMES = {
+    [ADVENTURER_TYPES.WARRIOR]: '戦士',
+    [ADVENTURER_TYPES.KNIGHT]: '騎士',
+    [ADVENTURER_TYPES.MAGE]: '魔術師',
+    [ADVENTURER_TYPES.ROGUE]: '盗賊',
+    [ADVENTURER_TYPES.PRIEST]: '僧侶',
+    [ADVENTURER_TYPES.MERCHANT]: '商人',
+    [ADVENTURER_TYPES.BARD]: '吟遊詩人',
+    [ADVENTURER_TYPES.SAMURAI]: '侍',
+    [ADVENTURER_TYPES.SPELLBLADE]: '魔法戦士',
+    [ADVENTURER_TYPES.DARK_KNIGHT]: '暗黒騎士',
+    [ADVENTURER_TYPES.FENG_SHUI]: '風水術師',
+    [ADVENTURER_TYPES.PALADIN]: '聖騎士',
+    [ADVENTURER_TYPES.HUNTER]: '狩人',
+    [ADVENTURER_TYPES.NINJA]: '忍者',
+    [ADVENTURER_TYPES.MARTIAL_ARTIST]: '武闘家',
+    [ADVENTURER_TYPES.BISHOP]: '司祭'
+};
+
 export const ORIGINS = {
     CENTRAL: { id: 'central', name: '中央街', statMod: {}, trust: 20 },
     NORTH: { id: 'north', name: '北街', statMod: { STR: 5, VIT: 5 }, trust: 10 },
@@ -178,6 +197,10 @@ export const ADVENTURER_RANKS = [
 
 export const QUEST_RANK_VALUE = {
     E: 1, D: 2, C: 3, B: 4, A: 5, S: 6
+};
+
+export const QUEST_RANK_BASE_POWER = {
+    E: 90, D: 120, C: 150, B: 170, A: 190, S: 210
 };
 
 export const QUEST_DIFFICULTY = {

@@ -1,4 +1,4 @@
-import { TRAITS, ADVENTURER_TYPES } from '../../data/constants.js';
+import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES } from '../../data/constants.js';
 
 export class AdventurerScreen {
     constructor() {
@@ -289,7 +289,7 @@ export class AdventurerScreen {
         div.innerHTML = `
             <div class="list-item-header">
                 <span class="list-item-title">[${adv.rankLabel}] ${adv.name}${titleStr}</span>
-                <span class="text-sm">(${adv.type})</span>
+                <span class="text-sm">(${ADVENTURER_JOB_NAMES[adv.type] || adv.type})</span>
             </div>
             <div class="text-meta">
                <div>評価値: ${Math.floor(adv.rankValue)} <span class="text-sub">(直近:${adv.perfEMA.toFixed(2)})</span></div>
@@ -357,7 +357,7 @@ export class AdventurerScreen {
         const info = document.createElement('div');
         info.innerHTML = `
             <div class="sub-header">基本情報</div>
-            <p>タイプ: ${adv.type}</p>
+            <p>職業: ${ADVENTURER_JOB_NAMES[adv.type] || adv.type}</p>
             <p>出身地: ${originName}</p>
             <p>契約: ${adv.joinType}</p>
             <p>在籍: ${adv.careerDays}日</p>

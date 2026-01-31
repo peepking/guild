@@ -1,5 +1,5 @@
 import { Adventurer } from '../models/Adventurer.js';
-import { ADVENTURER_TYPES, ORIGINS, JOIN_TYPES, GUILD_RANK_THRESHOLDS, ADVENTURER_RANKS } from '../data/constants.js';
+import { ADVENTURER_TYPES, ORIGINS, JOIN_TYPES, GUILD_RANK_THRESHOLDS, ADVENTURER_RANKS, ADVENTURER_JOB_NAMES } from '../data/constants.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
 
 export class RecruitmentService {
@@ -176,7 +176,7 @@ export class RecruitmentService {
 
         let info = "\n【候補者リスト】\n";
         candidates.forEach(c => {
-            info += `・${c.name} (${c.type} / Rank:${c.rankLabel})\n`;
+            info += `・${c.name} (${ADVENTURER_JOB_NAMES[c.type] || c.type} / Rank:${c.rankLabel})\n`;
             info += `  出身:${c.origin.name}  評価:${c.rankValue}\n`;
         });
         info += "\n(※スカウトできるのは1名のみです)";
@@ -209,7 +209,7 @@ export class RecruitmentService {
         }];
 
         const body = `${mentor.name}のもとに、弟子入りを志願する者が現れました。\n\n` +
-            `名前: ${apprentice.name} (${apprentice.type}/Rank:E)\n` +
+            `名前: ${apprentice.name} (${ADVENTURER_JOB_NAMES[apprentice.type] || apprentice.type}/Rank:E)\n` +
             `「${mentor.name}さんのような立派な冒険者になりたいんです！」\n\n` +
             `どうやら本気のようです。許可すれば${mentor.name}も指導を通じて成長するでしょう。`;
 
