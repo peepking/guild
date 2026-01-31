@@ -15,20 +15,20 @@ export class Guild {
             infirmary: 0,
             warehouse: 0,
             library: 0
-        }; // Facilities Levels
+        }; // 施設レベル
         this.activeBuffs = [];
         this.financeHistory = []; // Daily Aggregated History [{day, income, expense, balance, details:[]}]
-        this.todayFinance = null; // Current day record
-        this.retiredAdventurers = []; // Retired/Dead Adventurers
+        this.todayFinance = null; // 本日の記録
+        this.retiredAdventurers = []; // 引退/死亡した冒険者
 
-        // Phase 6: Management & Policy
+        // フェーズ6: 運営 & 方針
         this.advisors = []; // [{ id, name, roleId, salary, hiredDay }]
-        this.advisorCandidates = []; // Subset of retired adventurers eligible for advisor
+        this.advisorCandidates = []; // アドバイザー候補（引退済み冒険者）
         this.activePolicy = 'BALANCED'; // Default Policy ID
         this.activeEvents = []; // [{ id, name, remainingDays }]
-        this.highestRankThreshold = 0; // Track highest achieved rank threshold
+        this.highestRankThreshold = 0; // 最高到達ランクの閾値を記録
 
-        // Tournament State
+        // トーナメント状態
         this.tournament = { solo: 'E', team: 'E' };
 
         this.adventurers = this._initAdventurers();

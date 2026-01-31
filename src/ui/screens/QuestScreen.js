@@ -12,14 +12,14 @@ export class QuestScreen {
     }
 
     render(container, guild, globalState) {
-        // Capture scroll position before clearing
+        // 描画前のスクロール位置を保持
         let lastScrollTop = 0;
         const existingList = container.querySelector('.scroll-list');
         if (existingList) {
             lastScrollTop = existingList.scrollTop;
         }
 
-        // Capture Manual List Scroll (Right Panel)
+        // 手動選択リストのスクロール位置を保持 (右パネル)
         let manualScrollTop = 0;
         const manualList = container.querySelector('#adv-select-list');
         if (manualList) {
@@ -29,11 +29,11 @@ export class QuestScreen {
         container.innerHTML = '';
         container.classList.add('grid-2-col-fixed-right', 'gap-md');
 
-        // --- Left: Quest Board ---
+        // --- 左: 掲示板 ---
         const listPanel = document.createElement('section');
         listPanel.className = 'panel p-sm';
 
-        // Tabs
+        // タブ
         const tabsContainer = document.createElement('div');
         tabsContainer.className = 'tabs mb-sm';
 
@@ -54,7 +54,7 @@ export class QuestScreen {
         tabsContainer.appendChild(createTab('SPECIAL', '特殊依頼'));
         listPanel.appendChild(tabsContainer);
 
-        // List Area
+        // リストエリア
         const listContainer = document.createElement('div');
         listContainer.className = 'scroll-list';
 
@@ -76,12 +76,12 @@ export class QuestScreen {
             displayActive = allActive.filter(q => !q.isSpecial);
         }
 
-        // Render Planned (Preparation)
+        // 準備中 (Planned) の描画
         if (displayPlanned.length > 0) {
             const h = document.createElement('div');
             h.className = 'list-header';
             h.textContent = '準備中';
-            // Removed background color as requested
+            // 背景色はリクエストにより削除済み
             listContainer.appendChild(h);
 
             displayPlanned.forEach(a => {
@@ -95,7 +95,7 @@ export class QuestScreen {
             });
         }
 
-        // Render Ongoing
+        // 遂行中 (Ongoing) の描画
         if (displayAssigns.length > 0) {
             const h = document.createElement('div');
             h.className = 'list-header';
@@ -113,7 +113,7 @@ export class QuestScreen {
             });
         }
 
-        // Render Active
+        // 募集中 (Active) の描画
         const h = document.createElement('div');
         h.className = 'list-header';
         h.textContent = '募集中';
@@ -146,12 +146,12 @@ export class QuestScreen {
         listPanel.appendChild(listContainer);
         container.appendChild(listPanel);
 
-        // Restore scroll position
+        // スクロール位置の復元
         if (lastScrollTop > 0) {
             listContainer.scrollTop = lastScrollTop;
         }
 
-        // --- Right: Details ---
+        // --- 右: 詳細 ---
         const detailPanel = document.createElement('section');
         detailPanel.className = 'panel detail-panel';
         detailPanel.style.background = '#fdf5e6';
@@ -160,12 +160,12 @@ export class QuestScreen {
         let selectedAssignment = null;
         let isPlanning = false;
 
-        // Check Planned first
+        // 準備中を優先チェック
         selectedAssignment = (this.gameLoop.plannedQuests || []).find(a => a.quest.id === this.state.selectedQuestId);
         if (selectedAssignment) {
             isPlanning = true;
         } else {
-            // Check Ongoing
+            // 進行中をチェック
             selectedAssignment = this.gameLoop.ongoingQuests.find(a => a.quest.id === this.state.selectedQuestId);
         }
 
@@ -207,10 +207,10 @@ export class QuestScreen {
         }
 
         if (assignment) {
-            div.className += ' ongoing'; // Keep ongoing class for layout
-            // Removed planning border as requested
+            div.className += ' ongoing'; // レイアウト維持のためクラス付与
+            // 枠線は削除済み
         } else {
-            // Apply Color based on Rank (Safety)
+            // ランクに基づく色分け (安全度)
             const r = quest.difficulty.rank;
             if (r === 'E') div.className += ' border-safe';
             else if (r === 'D') div.className += ' border-normal';
@@ -310,12 +310,10 @@ export class QuestScreen {
                 btn.onclick = () => {
                     const res = this.gameLoop.assignmentService.cancelAssignment(assignment, this.gameLoop.ongoingQuests, this.gameLoop.plannedQuests);
                     if (res.success) {
-                        // Must verify if we need to put it back to activeQuests? 
-                        // AssignmentService.cancelAssignment doesn't add it back to activeQuests automatically!
-                        // We need to restore it to active list if we want it to reappear.
-                        // But assignment object has 'quest'.
+                        // キャンセル時は activeQuests に戻す必要があるか確認
+                        // AssignmentService.cancelAssignment は activeQuests への復帰は行わない仕様のため、ここで手動復帰
                         if (!this.gameLoop.activeQuests.find(q => q.id === quest.id)) {
-                            // Restore to active list if not there
+                            // リストになければ復帰させる
                             this.gameLoop.activeQuests.push(quest);
                         }
                         this.state.selectedQuestId = null; // Deselect
@@ -359,7 +357,7 @@ export class QuestScreen {
         const listDiv = panel.querySelector('#adv-select-list');
         const avail = guild.adventurers.filter(a => a.isAvailable());
 
-        // Sort by suitability score (descending)
+        // 適性スコア順にソート (降順)
         avail.sort((a, b) => {
             const sA = this.gameLoop.questService.calculateScore(quest, a);
             const sB = this.gameLoop.questService.calculateScore(quest, b);
@@ -406,7 +404,7 @@ export class QuestScreen {
                 // CHANGED: Use new signature and manual handling
                 const result = this.gameLoop.assignmentService.manualAssign(quest, this.state.selectedAdventurerIds);
                 if (result.success) {
-                    // Manual: Add to plannedQuests, remove from activeQuests
+                    // 手動: plannedQuests に追加し、activeQuests から削除
                     this.gameLoop.plannedQuests.push(result.assignment);
                     this.gameLoop.activeQuests = this.gameLoop.activeQuests.filter(q => q.id !== quest.id);
 
@@ -414,22 +412,7 @@ export class QuestScreen {
                     this.state.selectedQuestId = null;
                     this.render(panel.parentElement, guild, {});
 
-                    // Dispatch event to update MainScreen buttons if needed (though nextDay handles it usually)
-                    // But here we might flip from 0 to 1 plan, so buttons should sync.
-                    // Main.js listens to 'next-day' and 'depart'. Maybe we should trigger a UI update?
-                    // Or just let MainScreen update on next render? 
-                    // MainScreen toggleButtonState is in main.js, triggered by events.
-                    // We should trigger an event or expose update?
-                    // Simpler: dispatch a custom event 'plan-updated'
-                    document.dispatchEvent(new CustomEvent('plan-updated')); // Requires Main.js loop to listen?
-                    // Actually Main.js only has listeners for 'next-day' and 'depart'.
-                    // I should add a 'ui-update' listener or just call uiManager.render()?
-                    // The button state is outside UIManager.render() loop in Main.js.
-                    // I will modify UIManager/Main.js later if needed, but for now let's hope next render covers it?
-                    // No, the buttons are in Layout (header), managed by main.js logic.
-                    // So I SHOULD trigger something main.js catches.
-                    // Let's dispatch 'next-day' fake? No.
-                    // Let's dispatch 'plan-update'. I will need to add it to main.js.
+                    // メイン画面のボタン状態などを更新するためにイベント発火
                     document.dispatchEvent(new Event('plan-update'));
                 } else {
                     alert(result.message);

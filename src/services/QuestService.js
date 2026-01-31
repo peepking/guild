@@ -11,20 +11,20 @@ export class QuestService {
         this.simulator = new AdventureSimulator();
     }
 
-    // Method to init simulator with data
+    // シミュレーターのデータ初期化
     initSimulator(monsterMd, itemMd) {
         this.simulator.init(monsterMd, itemMd);
     }
 
     generateDailyQuests(day, reputation = 0, facilities = {}) {
-        // Administration Level controls Count
+        // 管理部はクエスト数を制御
         const admLv = facilities.administration || 0;
         let count = 2 + admLv;
 
-        // Cap safety? Maybe 10.
+        // 上限10件
         if (count > 10) count = 10;
 
-        // Determine Guild Rank
+        // ギルドランク判定
         const guildRankObj = GUILD_RANK_THRESHOLDS.find(r => reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
         const maxRankLabel = guildRankObj.label;
 
@@ -33,25 +33,22 @@ export class QuestService {
             quests.push(this._createRandomQuest(day, maxRankLabel));
         }
 
-        // Phase 12: Special Quest Chance
-        // Library Effect: +10% per level
+        // フェーズ12: 特殊クエスト発生判定
+        // 図書室効果: +10% per level
         const libraryLv = facilities.library || 0;
         const specialChance = 0.15 + (libraryLv * 0.10);
 
         if (Math.random() < specialChance) {
-            // Special quests also need rank cap? Usually special = hard.
-            // Let's pass maxRankLabel to special too if needed, or allow special to exceed?
-            // "Guild Rank limits displayed quests". Special implies it appears. 
-            // I'll leave special as is for now, or clamp it inside.
+            // 特殊クエストは通常クエストの制限に関わらず追加
             quests.push(this._createSpecialQuest(day));
         }
 
         return quests;
     }
 
-    // Still useful for internal logic or broad categorization if needed
+    // 内部ロジック用カテゴリーマッピング
     _mapTypeToCategory(typeKey) {
-        // Mappings based on QUEST_SPECS keys
+        // QUEST_SPECSキーに基づくマッピング
         const MAP = {
             'HUNT': 'HUNT', 'CULLING': 'HUNT', 'EXTERMINATION': 'HUNT', 'ANCIENT_BEAST': 'HUNT', 'OTHERWORLD': 'HUNT',
             'MAGIC': 'MAGIC', 'ECOLOGY': 'MAGIC', 'BARRIER': 'MAGIC', 'EXPERIMENT': 'MAGIC', 'ORACLE': 'MAGIC', 'RELIC_ANALYSIS': 'MAGIC',
@@ -66,14 +63,14 @@ export class QuestService {
         this.questCounter++;
         const region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
 
-        // Filter by Max Rank
+        // 最大ランクによるフィルタリング
         const maxVal = QUEST_RANK_VALUE[maxRankLabel] || 1;
         const diffKeys = Object.keys(QUEST_DIFFICULTY).filter(k => {
             const r = QUEST_DIFFICULTY[k].rank;
             return (QUEST_RANK_VALUE[r] || 0) <= maxVal;
         });
 
-        // Fallback if empty (shouldn't happen)
+        // フォールバック (通常発生しない)
         if (diffKeys.length === 0) diffKeys.push('E');
 
         const randomDiffKey = diffKeys[Math.floor(Math.random() * diffKeys.length)];
@@ -123,10 +120,10 @@ export class QuestService {
             prestige01: difficulty.powerReq / 100
         };
 
-        // --- DESCRIPTION & TARGET GENERATION (QUEST_LOGS) ---
-        // --- TARGET & BOSS DETERMINATION ---
+        // --- 説明文とターゲット生成 (QUEST_LOGS) ---
+        // --- ターゲットとボスの決定 ---
         let target = "正体不明の存在";
-        let bossTarget = null; // New property for actual boss name
+        let bossTarget = null; // 実際のボス名を格納
         const questLogData = ADVENTURE_LOG_DATA.QUEST_LOGS[typeKey];
 
         // 1. Determine Boss Candidate (for Combat/Boss Quests)
@@ -145,7 +142,7 @@ export class QuestService {
             };
             const cat = categoryMap[typeKey] || 'LOGISTICS';
 
-            // Simple Name Tables
+            // 簡易名前テーブル
             const npcNames = {
                 'LOGISTICS': ['野盗の頭目', '賞金首の強盗', '武装盗賊団長', '轟音の山賊王', '伝説の盗賊', '影の支配者'],
                 'POLITICS': ['雇われの凶行者', '冷酷な暗殺者', '反乱軍の将軍', '暗殺ギルドの幹部', '隻眼の始末屋', '国崩しの謀略家'],
@@ -163,7 +160,7 @@ export class QuestService {
         } else if (combatQuestTypes.includes(typeKey) && this.simulator.monsters && this.simulator.monsters[region]) {
             const list = this.simulator.monsters[region][rank];
             if (list && list.length > 0) {
-                // Prioritize BOSS category > Strong > Others
+                // 優先順位: BOSSカテゴリ > 強敵 > その他
                 let candidates = list.filter(m => m.category.includes('ボス'));
                 if (candidates.length === 0) candidates = list.filter(m => m.category.includes('強敵'));
                 if (candidates.length === 0) candidates = list;
@@ -173,28 +170,28 @@ export class QuestService {
             }
         }
 
-        // 2. Determine Display Target (Description)
+        // 2. 表示用ターゲットの決定 (説明文用)
         if (questLogData && questLogData.targets) {
-            // Priority 1: Specific Target List (e.g. VIP, Goods)
+            // 優先1: 特定ターゲットリスト (VIP, 物資など)
             target = questLogData.targets[Math.floor(Math.random() * questLogData.targets.length)];
         } else if (bossTarget && (typeKey === 'HUNT' || typeKey === 'DUNGEON' || typeKey === 'RUINS' || typeKey === 'CULLING' || typeKey === 'REBELLION')) {
-            // Priority 2: The Boss IS the Target
+            // 優先2: ボスそのものがターゲット
             target = bossTarget;
         } else {
-            // Priority 3: Fallbacks
+            // 優先3: フォールバック
             if (logCategory === 'GUARD') target = "商隊の荷物";
             else if (logCategory === 'NEGOTIATE') target = "トラブルの元";
             else if (logCategory === 'EXPLORE') {
-                // Item search
+                // アイテム探索
                 if (this.simulator.items && this.simulator.items[region]) {
                     const list = this.simulator.items[region][rank];
                     if (list && list.length > 0) target = list[Math.floor(Math.random() * list.length)].name;
                 }
                 if (target === "正体不明の存在") target = "未知の素材";
             }
-            else if (bossTarget) target = bossTarget; // Catch-all
+            else if (bossTarget) target = bossTarget; // キャッチオール
             else {
-                // Random monster fallback if no boss found (e.g. MAGIC?)
+                // ボスが見つからない場合のフォールバック（例：魔法実験など）
                 if (this.simulator.monsters && this.simulator.monsters[region]) {
                     const list = this.simulator.monsters[region][rank];
                     if (list && list.length > 0) target = list[Math.floor(Math.random() * list.length)].name;
@@ -217,7 +214,7 @@ export class QuestService {
         q.createdDay = day;
         q.expiresInDays = Math.floor(Math.random() * 3) + 5;
         q.region = region;
-        q.bossTarget = bossTarget; // Assign bossTarget
+        q.bossTarget = bossTarget; // ボスターゲット割り当て
 
         q.target = target;
         q.description = description;
@@ -254,34 +251,33 @@ export class QuestService {
         q.guildShareRule = { baseGuildShare: 0.30, manualPenaltyShift: 0, specialNoShift: true };
         q.region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
 
-        // Special Target Logic: Try to find a BOSS monster for this rank/region
+        // 特殊ターゲットロジック: このランク/地域のボスモンスター検索
         let target = "脅威";
         let bossTarget = null;
         let foundBoss = false;
 
-        // For 'ANCIENT_BEAST' (Monster) or 'OTHERWORLD' (Monster?), try to find a real monster
+        // 'ANCIENT_BEAST' (Monster) or 'OTHERWORLD' (Monster?) の場合、実在モンスターを検索
         if (typeKey === 'ANCIENT_BEAST' || typeKey === 'OTHERWORLD') {
             if (this.simulator.monsters && this.simulator.monsters[q.region]) {
                 const list = this.simulator.monsters[q.region][rank];
                 if (list && list.length > 0) {
                     // Prefer Boss category
-                    const bosses = list.filter(m => m.category.includes('ボス'));
                     if (bosses.length > 0) {
                         target = bosses[Math.floor(Math.random() * bosses.length)].name;
-                        bossTarget = target; // Assign to bossTarget
+                        bossTarget = target; // ボスターゲット割り当て
                         foundBoss = true;
                     } else {
-                        // If no boss found (rare), pick any
+                        // ボス不在時 (稀)、どれでも良いので選出
                         target = list[Math.floor(Math.random() * list.length)].name;
-                        bossTarget = target; // Assign to bossTarget
+                        bossTarget = target; // ボスターゲット割り当て
                         foundBoss = true;
                     }
                 }
             }
         }
 
-        // Fallback to text templates if no boss found (or if type is NOT monster-fighting like ORACLE/MISSING_ROYAL)
-        // OR if foundBoss is false
+        // フォールバック: ボスが見つからない場合、またはモンスター討伐系でない場合
+        // テキストテンプレートを使用
         if (!foundBoss) {
             const questLogData = ADVENTURE_LOG_DATA.QUEST_LOGS[typeKey];
             if (questLogData && questLogData.targets) {
@@ -376,7 +372,7 @@ export class QuestService {
         const roll = Math.random();
         let mainObjectiveSuccess = roll < successChance;
 
-        // Logic: Verify Boss Defeat for Success
+        // ロジック: 成功判定のためのボス討伐確認
         const spec = QUEST_SPECS[quest.type];
         const hasMandatoryBoss = (spec && spec.bossDays && spec.bossDays.length > 0) || !!quest.bossTarget;
 
@@ -387,7 +383,7 @@ export class QuestService {
         if (bossDefeated) {
             mainObjectiveSuccess = true;
         } else if (hasMandatoryBoss) {
-            // If a boss was required but not defeated (e.g. Escaped), Force Failure
+            // ボス必須で未討伐の場合、強制失敗
             mainObjectiveSuccess = false;
         }
 
@@ -438,44 +434,44 @@ export class QuestService {
             this._applyRankUpdate(adv, quest, successChance, mainObjectiveSuccess, modifiers);
             this._applyStatGrowth(adv, quest, mainObjectiveSuccess, modifiers);
 
-            // Phase 5: Update Records & Check Titles
+            // フェーズ5: レコード更新と称号チェック
             if (mainObjectiveSuccess) {
-                // Update Quest Counts
+                // クエスト回数更新
                 adv.records.quests[quest.type] = (adv.records.quests[quest.type] || 0) + 1;
 
-                // Update Major Achievements
+                // 主要功績更新
                 adv.addMajorAchievement(quest, quest.createdDay + totalDays);
 
-                // Update Kill Counts (Shared credit for everyone in party)
+                // 討伐数更新 (パーティ全員で共有)
                 combinedResults.monstersKilled.forEach(m => {
                     if (m.isBoss) {
-                        adv.records.bossKills.push(m.id || m.name); // Prefer ID
+                        adv.records.bossKills.push(m.id || m.name); // ID優先
                     }
-                    // Extract general type or use name
-                    const type = m.name; // Simplification
+                    // タイプまたは名前で集計
+                    const type = m.name; // 簡易化
                     adv.records.kills[type] = (adv.records.kills[type] || 0) + 1;
 
-                    // Update Major Kills
+                    // 主要討伐更新
                     adv.addMajorKill(m, quest.createdDay + totalDays);
                 });
 
-                // S-Rank Success Counter for Title Eligibility
+                // 称号資格: Sランク成功回数
                 if (quest.difficulty.rank === 'S') {
                     adv.sRankSuccessCount = (adv.sRankSuccessCount || 0) + 1;
                 }
 
-                // Title Check
+                // 称号チェック
                 if (titleService) {
-                    // Determine if any boss was killed
+                    // ボス討伐判定
                     const bossKill = combinedResults.monstersKilled.find(m => m.isBoss);
-                    // Use bossKill.id or bossKill.name. Fallback to quest.bossTarget if logic requires it.
+                    // bossKill.id または bossKill.name を使用。なければ quest.bossTarget
                     const bossId = bossKill ? (bossKill.id || bossKill.name) : quest.bossTarget;
 
                     const context = {
                         questType: quest.type,
                         rank: quest.difficulty.rank,
                         result: 'SUCCESS',
-                        isBoss: !!bossId, // Treat as boss context if we have a bossId from kill or target
+                        isBoss: !!bossId, // IDがあればボスコンテキストとして扱う
                         bossId: bossId,
                         questId: quest.id,
                         region: quest.region,
@@ -485,8 +481,7 @@ export class QuestService {
                     const newTitle = titleService.tryGenerateTitle(adv, context);
                     if (newTitle) {
                         adv.addHistory(quest.createdDay + totalDays, `二つ名「${newTitle}」を習得`);
-                        // Log locally to day log? Or return in result?
-                        // Let's add to member result so UI can show it
+                        // ローカル表示用にメンバー結果に追加
                         memberResults[memberResults.length - 1].newTitle = newTitle;
                     }
                 }
@@ -505,8 +500,8 @@ export class QuestService {
             materialReward += (i.value || 20);
         });
 
-        // Warehouse Effect: +10% Sell Value if exists
-        // (Assuming Warehouse is a single level binary or check Level>0)
+        // 倉庫効果: 売却額+10%
+        // (倉庫が存在する場合)
         if (modifiers.facilities && modifiers.facilities.warehouse > 0) {
             materialReward = Math.floor(materialReward * 1.1);
         }
@@ -516,7 +511,7 @@ export class QuestService {
             money = Math.floor(money * modifiers.reward);
         }
 
-        // --- 5. Add OUTRO Log with Narrative Bridge (QUEST_LOGS) ---
+        // --- 5. 探索ログのエピローグ (ナラティブブリッジ) ---
         const lastDayLog = dailyLogs[dailyLogs.length - 1];
         if (lastDayLog) {
             const questLogData = ADVENTURE_LOG_DATA.QUEST_LOGS[quest.type];
@@ -526,7 +521,7 @@ export class QuestService {
                 bridgeTemplates = mainObjectiveSuccess ? questLogData.end_success : questLogData.end_failure;
             }
 
-            // Fallback for safety (though all covered)
+            // 安全策としてのフォールバック
             if (!bridgeTemplates || bridgeTemplates.length === 0) {
                 bridgeTemplates = ["任務完了。帰還する。"];
             }
@@ -535,7 +530,7 @@ export class QuestService {
             const formattedBridge = bridgeText.replace(/{area}/g, this.simulator._getRegionName(quest.region) || "現地")
                 .replace(/{target}/g, quest.target || "ターゲット");
 
-            // --- CLIMAX LOG Removed (Moved to Simulator for correct order) ---
+            // --- クライマックスログは Simulator に移動済み ---
 
             lastDayLog.logs.push(`[状況] ${formattedBridge}`);
 
@@ -576,13 +571,13 @@ export class QuestService {
 
         const qRankVal = QUEST_RANK_VALUE[quest.difficulty.rank] || 1;
 
-        // 1. Base Completion Reward (Flatter Curve)
+        // 1. 基本完了報酬 (緩やかなカーブ)
         // E:6, D:7, C:9, B:12, A:14, S:20
         const baseRewardTable = [0, 6, 7, 9, 12, 14, 20];
         const baseReward = baseRewardTable[qRankVal] || 6;
 
-        // 2. Underdog Bonus & Gap Penalty
-        // Calculate Adventurer's equivalent Rank Value (0-5) using New Thresholds
+        // 2. 下克上ボーナス & ギャップペナルティ
+        // 冒険者のランク値を閾値に基づき 0-5 に変換
         let advRankVal = 0;
         if (adv.rankValue >= 1000) advRankVal = 5; // S
         else if (adv.rankValue >= 640) advRankVal = 4; // A
@@ -597,29 +592,28 @@ export class QuestService {
         const diff = qRankVal - advRankVal;
 
         if (diff > 0) {
-            // Underdog: +20% per rank difference
+            // 格上挑戦: ランク差ごとに +20%
             underdogBonus = baseReward * (diff * 0.2);
         } else if (diff < 0) {
-            // Gap Penalty: -40% per rank difference
+            // 格下周回: ランク差ごとに -40%
             gapPenaltyRate = Math.max(0, 1.0 + (diff * 0.4));
         }
 
-        // 3. Surprise Bonus (Minor kicker for low-odds wins)
+        // 3. サプライズボーナス (低確率勝利へのボーナス)
         const surpriseFactor = Math.max(0, 1.0 - chance);
         const surpriseBonus = baseReward * surpriseFactor * 0.5;
 
-        // Total Delta
+        // 合計変動値
         let delta = (baseReward + underdogBonus + surpriseBonus) * gapPenaltyRate;
 
-        // 4. Diminishing Returns (Only at very high ranks: 850+)
+        // 4. 収穫逓減 (超高ランク帯のみ: 850+)
         if (adv.rankValue > 850) {
             const ratio = Math.max(0, (1050 - adv.rankValue) / 150);
             delta *= ratio;
         }
 
-        // Training Effect: Growth bonus for Rank C or lower
-        // C rank value threshold is < 380 (B is 380). Actually C is 200-379. D is 80-199. E is <80.
-        // Training is for C and below.
+        // 訓練所効果: ランクC以下への成長ボーナス
+        // Cランク未満 (<380) に対して適用
         if (adv.rankValue < 380) { // Rank C or lower
             const trainLv = (modifiers.facilities && modifiers.facilities.training) || 0;
             if (trainLv > 0) {
@@ -689,7 +683,7 @@ export class QuestService {
         let base = success ? 0.60 : 0.25;
         if (modifiers.exp) base *= modifiers.exp;
 
-        // Training Effect: Stat Growth +10% * Lv for Rank C or lower
+        // 訓練所効果: ランクC以下のステータス成長 +10% * Lv
         if (adv.rankValue < 380) {
             const trainLv = (modifiers.facilities && modifiers.facilities.training) || 0;
             if (trainLv > 0) {

@@ -1,6 +1,6 @@
 /*
- * Title Dictionary
- * Derived from doc/title_dictionary.md
+ * 二つ名辞書
+ * doc/title_dictionary.md から派生
  */
 
 // TraitTitleDef: 全スロット必須（null/undefined/空文字禁止）

@@ -15,7 +15,7 @@ export const TRAIT_TITLES = {
     },
     'LUCKY': {
         kana: { pre: 'ラッキー', suf: 'フォーチュン' },
-        kanji: { pre: '幸運の', suf: '福男' } // Gender neutral logic later?
+        kanji: { pre: '幸運の', suf: '福男' } // 性別による分岐は未実装
     },
     'UNLUCKY': {
         kana: { pre: 'ミゼラブル', suf: 'バッドラック' },
@@ -29,7 +29,7 @@ export const TRAIT_TITLES = {
         kana: { pre: 'ロンリー', suf: 'ウルフ' },
         kanji: { pre: '孤高の', suf: '一匹狼' }
     },
-    // Advanced Traits from recent update
+    // アップデートで追加された詳細特性
     'MUSCLE_BRAIN': {
         kana: { pre: 'マッスル', suf: 'マニア' },
         kanji: { pre: '脳筋の', suf: '肉体派' }
@@ -53,7 +53,7 @@ export const TRAIT_TITLES = {
 };
 
 export const FEAT_TITLES = {
-    // S-Rank Quests (Keyed by Quest Type or ID if special)
+    // Sランククエスト (クエストタイプまたは特殊IDをキーとする)
     'HUNT': {
         kana: { word: 'スレイヤー', pos: 'SUFFIX' },
         kanji: { word: '討伐せし者', pos: 'SUFFIX' }
@@ -66,8 +66,8 @@ export const FEAT_TITLES = {
         kana: { word: 'エクスプローラー', pos: 'SUFFIX' },
         kanji: { word: '遺跡の', pos: 'PREFIX' }
     },
-    // Bosses (Keyed by Specific Boss Monster ID if possible, or Generic Type)
-    // Note: Needs coordination with logic to pass BossType
+    // ボス (可能であれば特定のボスモンスターID、または汎用タイプをキーとする)
+    // 注意: BossTypeを渡すロジックとの連携が必要
     'BOSS_DRAGON': {
         kana: { word: 'ドラグーン', pos: 'SUFFIX' },
         kanji: { word: '竜殺しの', pos: 'PREFIX' }
@@ -81,7 +81,7 @@ export const FEAT_TITLES = {
         kanji: { word: '世界樹を', pos: 'PREFIX' }
     },
 
-    // Default fallback
+    // デフォルトフォールバック
     'DEFAULT': {
         kana: { word: 'マスター', pos: 'SUFFIX' },
         kanji: { word: '達人', pos: 'SUFFIX' }

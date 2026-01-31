@@ -6,8 +6,8 @@ export class ItemDataLoader {
     }
 
     parse(markdownContent) {
-        // Deprecated: markdown parsing is removed in favor of hardcoded data
-        // Just return the hardcoded data
+        // 非推奨: マークダウン解析はハードコードデータ推奨のため削除されました
+        // ハードコードされたデータを返します
         return this.items;
     }
 

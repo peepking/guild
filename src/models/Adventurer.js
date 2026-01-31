@@ -9,14 +9,14 @@ export class Adventurer {
         this.origin = origin;
         this.joinType = joinType;
 
-        // Phase 10: Initialize Rank & Trust based on Origin/JoinType
+        // フェーズ10: 原点/加入タイプに基づくランクと信頼度の初期化
         this.rankValue = this._initRank(origin, joinType, maxRankValue);
-        this.lastPeriodRankValue = this.rankValue; // Snapshot for period tracking
+        this.lastPeriodRankValue = this.rankValue; // 期間評価追跡用スナップショット
         this.rankLabel = this._getRankLabel();
 
         this.trust = this._initTrust(origin, joinType);
 
-        // Phase 11: Pass rankValue to scale stats
+        // フェーズ11: ランク値を渡してステータスをスケーリング
         this.stats = this._generateStats(type, origin, this.rankValue);
         this.temperament = this._generateTemperament();
         this.traits = this._generateTraits();
@@ -35,14 +35,13 @@ export class Adventurer {
         // Phase 5: Titles & Legend Records
         this.title = null;
         this.history = []; // { day: N, event: "Did X" }
-        // Ensure stats has kills object if not present (though usually stats is flat, maybe add to separate prop?)
-        // Let's keep specific counters separate from base stats
+        // 特定のカウンターは基本ステータスとは別に保持
         this.records = {
             kills: {}, // { 'GOBLIN': 10, ... }
             quests: {}, // { 'HUNT': 5, ... }
-            bossKills: [], // List of boss IDs slain
-            majorAchievements: [], // Top 10 quest completions
-            majorKills: [] // New: Top 10 monster kills
+            bossKills: [], // 討伐したボスIDリスト
+            majorAchievements: [], // クエスト完了トップ10
+            majorKills: [] // モンスター討伐トップ10
         };
 
         // 新メソッド: 装備を追加
@@ -66,12 +65,11 @@ export class Adventurer {
             this.equipment.push(equip);
         };
 
-        // 主要戦績の更新 (Top 10 Kills)
         this.addMajorKill = function (monster, day) {
-            // Apply Boss Modifier (+1 Rank equivalent)
+            // ボス補正を適用 (+1 ランク相当)
             const isBoss = monster.category && (monster.category.includes('ボス') || monster.isBoss);
 
-            // Check for duplicates (Keep first kill)
+            // 重複チェック (初回の討伐を保持)
             if (this.records.majorKills.some(k => k.name === monster.name)) {
                 return;
             }
@@ -92,13 +90,13 @@ export class Adventurer {
 
             this.records.majorKills.push(record);
 
-            // Sort: Rank Value Desc, then Day Desc
+            // ソート: ランク値の降順、次に日付の降順
             this.records.majorKills.sort((a, b) => {
                 if (b.rankValue !== a.rankValue) return b.rankValue - a.rankValue;
                 return b.day - a.day;
             });
 
-            // Keep top 10
+            // トップ10を保持
             if (this.records.majorKills.length > 10) {
                 this.records.majorKills = this.records.majorKills.slice(0, 10);
             }
@@ -121,13 +119,13 @@ export class Adventurer {
 
             this.records.majorAchievements.push(record);
 
-            // Sort: Rank Desc, then Day Desc (Newer first)
+            // ソート: ランク降順、次に日付の降順（新しい順）
             this.records.majorAchievements.sort((a, b) => {
                 if (b.rankValue !== a.rankValue) return b.rankValue - a.rankValue;
                 return b.day - a.day;
             });
 
-            // Keep top 10
+            // トップ10を保持
             if (this.records.majorAchievements.length > 10) {
                 this.records.majorAchievements = this.records.majorAchievements.slice(0, 10);
             }
@@ -147,13 +145,13 @@ export class Adventurer {
             this.history.push({ day, text });
         };
 
-        // Initial Arts Check
+        // 初回アーツ習得チェック
         if (this.rankValue >= 380) this.learnRandomArt();
         if (this.rankValue >= 1000) this.learnRandomArt();
     }
 
     _initRank(origin, joinType, maxRankValue) {
-        // 4.1 JoinType Base
+        // 4.1 加入タイプベース
         let min = 0, max = 100;
         if (joinType === JOIN_TYPES.LOCAL) { min = 0; max = 160; }
         else if (joinType === JOIN_TYPES.WANDERER) { min = 0; max = 650; }
@@ -161,22 +159,22 @@ export class Adventurer {
 
         let val = Math.floor(Math.random() * (max - min)) + min;
 
-        // 4.2 Origin Bonus
+        // 4.2 出身地ボーナス
         if (origin.id === 'central') val += 30;
         else if (origin.id === 'foreign') val -= 40;
         else val += 10;
 
-        // 4.3 Clamp
+        // 4.3 クランプ（範囲制限）
         if (val < 0) val = 0;
-        // Apply Limit
+        // 上限適用
         val = Math.min(val, maxRankValue);
-        // Absolute cap for generation (optional main cap)
+        // 生成時の絶対上限 (オプション)
         if (val > 9999) val = 9999;
         return val;
     }
 
     _initTrust(origin, joinType) {
-        // 5. Initial Trust
+        // 5. 初期信頼度
         let base = origin.trust || 0;
 
         let bonus = 0;
@@ -200,8 +198,8 @@ export class Adventurer {
         if (this.rankValue < 0) this.rankValue = 0;
         if (this.rankValue > 9999) this.rankValue = 9999;
 
-        // Arts check
-        // Arts check (Prevent duplicate learning via rank fluctuation)
+        // アーツ習得チェック
+        // アーツ習得チェック (ランク変動による重複習得を防止)
         if (oldVal < 380 && this.rankValue >= 380 && this.arts.length < 1) this.learnRandomArt();
         if (oldVal < 1000 && this.rankValue >= 1000 && this.arts.length < 2) this.learnRandomArt();
 
@@ -212,7 +210,7 @@ export class Adventurer {
         const list = ARTS_DATA[this.type];
         if (!list) return;
 
-        // Filter out known
+        // 既知のアーツを除外
         const knownIds = this.arts.map(a => a.id);
         const candidates = list.filter(a => !knownIds.includes(a.id));
 
@@ -226,61 +224,61 @@ export class Adventurer {
         const base = BASE_STATS[type];
         const stats = {};
 
-        // 3.1 & 3.2 Rank Factor
+        // 3.1 & 3.2 ランク係数
         const t = rankValue / 1000; // 0..1
         // factor = 0.88 + 0.70 * (t^1.6)
         const rankFactor = 0.88 + 0.70 * Math.pow(t, 1.6);
 
-        // 4.2 Variance Rate (Higher rank = less variance)
+        // 4.2 ばらつき率 (高ランクほど安定)
         // 0.10 - 0.04 * t -> E: 10%, S: 6%
         const varianceRate = 0.10 - 0.04 * t;
 
         for (const [key, val0] of Object.entries(base)) {
-            // 4.1 Base Scaling
+            // 4.1 ベーススケーリング
             let val = val0 * rankFactor;
 
-            // 4.2 Variance
+            // 4.2 ばらつき処理
             const variance = val * varianceRate * (Math.random() * 2 - 1);
             val += variance;
 
-            // 4.3 Origin Mod
+            // 4.3 出身地補正
             const mod = origin.statMod || {};
             if (mod[key]) val += mod[key];
 
-            // 4.4 Foreign Weakener (rare boost per spec logic)
+            // 4.4 遠方出身者の弱体化 (仕様に基づく確率ブースト)
             if (origin.id === 'foreign' && Math.random() < 0.2) {
                 val += 3;
             }
 
-            // 4.5 Rounding
+            // 4.5 丸め処理
             stats[key] = Math.max(1, Math.round(val));
         }
 
-        // 5. Min Stat Guard (Insurance)
+        // 5. 最低ステータス保証 (保険)
         this._applyMinStatGuard(stats, base, rankFactor);
 
         return stats;
     }
 
     _applyMinStatGuard(stats, baseStats, rankFactor) {
-        // 5.1 Sums
+        // 5.1 合計値計算
         let sum = 0;
         let baseSum = 0;
         for (const v of Object.values(stats)) sum += v;
         for (const v of Object.values(baseStats)) baseSum += v;
 
-        // 5.2 Min Threshold
-        // 92% of expected rank average
+        // 5.2 最低閾値
+        // 期待されるランク平均の92%
         const minSum = baseSum * rankFactor * 0.92;
 
-        // 5.3 Redistribute
+        // 5.3 再分配
         let need = minSum - sum;
         if (need > 0) {
             need = Math.ceil(need);
-            // Cap guard to avoid infinite loops if config is weird
+            // 無限ループ防止用の安全キャップ
             let safety = 20;
             while (need > 0 && safety > 0) {
-                // Find lowest stat to boost
+                // 最も低いステータスを強化
                 let minKey = null;
                 let minVal = 9999;
                 for (const [k, v] of Object.entries(stats)) {

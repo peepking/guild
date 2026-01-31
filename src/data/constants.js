@@ -1,7 +1,9 @@
 export const CONSTANTS = {
     INITIAL_MONEY: 1000,
     INITIAL_REPUTATION: 0,
-    QUEST_COUNT_RANGE: [2, 5], // Min, Max quests per day
+    INITIAL_MONEY: 1000,
+    INITIAL_REPUTATION: 0,
+    QUEST_COUNT_RANGE: [2, 5], // 1日のクエスト数 (最小, 最大)
     REWARD_VARIANCE: 0.2, // +/- 20%
     BASE_QUEST_REWARD: 100,
     BASE_QUEST_REP: 5
@@ -11,11 +13,11 @@ export const CONSTANTS = {
 
 export const ADVENTURER_TYPES = {
     WARRIOR: 'WARRIOR',
-    KNIGHT: 'KNIGHT',    // Added
+    KNIGHT: 'KNIGHT',    // 追加
     MAGE: 'MAGE',
     ROGUE: 'ROGUE',      // Scout -> Rogue
     PRIEST: 'PRIEST',
-    MERCHANT: 'MERCHANT', // Added
+    MERCHANT: 'MERCHANT', // 追加
     BARD: 'BARD',
     SAMURAI: 'SAMURAI',
     SPELLBLADE: 'SPELLBLADE',
@@ -34,7 +36,7 @@ export const ORIGINS = {
     SOUTH: { id: 'south', name: '南街', statMod: { CHA: 5, INT: 5 }, trust: 10 },
     EAST: { id: 'east', name: '東街', statMod: { MAG: 5 }, trust: 10 },
     WEST: { id: 'west', name: '西街', statMod: { DEX: 5 }, trust: 10 },
-    FOREIGN: { id: 'foreign', name: '遠方', statMod: {}, trust: -10 } // Random stat mod in logic
+    FOREIGN: { id: 'foreign', name: '遠方', statMod: {}, trust: -10 } // ロジック内でランダム補正
 };
 
 export const JOIN_TYPES = {
@@ -124,6 +126,7 @@ export const TRAITS = {
     cautious: { name: "慎重派", autoPick: { danger: -0.15 }, hooks: { penalty: 0.8 } },
     bold: { name: "豪胆", autoPick: { danger: 0.15 }, hooks: { prestige: 1.1 } },
 
+    // 金銭・社会系
     // 金銭・社会系
     greedy: { name: "強欲", autoPick: { reward: 0.25 }, hooks: { guildShare: 0.9 } }, // ギルド取り分減
     frugal: { name: "清貧", autoPick: { reward: -0.20 }, hooks: { guildShare: 1.1 } }, // ギルド取り分増

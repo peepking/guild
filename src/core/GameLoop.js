@@ -1,7 +1,7 @@
 import { QuestService } from '../services/QuestService.js';
 import { RecruitmentService } from '../services/RecruitmentService.js';
 import { AssignmentService } from '../services/AssignmentService.js';
-import { LifeEventService } from '../services/LifeEventService.js'; // Added
+import { LifeEventService } from '../services/LifeEventService.js';
 
 import { titleService } from '../services/TitleService.js';
 import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS } from '../data/constants.js';
@@ -23,10 +23,10 @@ export class GameLoop {
         this.assignmentService = new AssignmentService(guild, this.questService, uiManager);
         this.lifeEventService = new LifeEventService(uiManager);
 
-        this.activeQuests = [];   // Available on board
-        this.ongoingQuests = [];  // Currently being undertaken
-        this.plannedQuests = [];  // Planned but not departed
-        this.questHistory = [];   // Completed quests archive
+        this.activeQuests = [];   // 受注可能
+        this.ongoingQuests = [];  // 進行中
+        this.plannedQuests = [];  // 出発準備中（未出発）
+        this.questHistory = [];   // 完了済みログアーカイブ
 
         // Initialize Tournament State
         if (!this.guild.tournament) {
@@ -60,8 +60,8 @@ export class GameLoop {
             this.guild.financeHistory.pop();
         }
 
-        // --- 0. Depart Planned Quests (From previous day) ---
-        // Fee Check (Tournament)
+        // --- 0. 出発処理（前日計画分） ---
+        // 参加費チェック（トーナメント等）
         for (let i = this.plannedQuests.length - 1; i >= 0; i--) {
             const plan = this.plannedQuests[i];
             if (plan.quest.entryFee) {
@@ -83,12 +83,12 @@ export class GameLoop {
         for (let i = this.guild.adventurers.length - 1; i >= 0; i--) {
             const adv = this.guild.adventurers[i];
 
-            // Phase 9: Career Growth (Applied Daily)
+            // フェーズ9: キャリア成長 (毎日適用)
             adv.careerDays = (adv.careerDays || 0) + 1;
 
             // Recovery
             if (adv.recoveryDays > 0) {
-                // Infirmary Effect: Base 1 + Lv
+                // 医務室効果: 基礎1 + Lv
                 const infirmaryLv = (this.guild.facilities && this.guild.facilities.infirmary) || 0;
                 const recoveryAmount = 1 + infirmaryLv;
 
@@ -104,7 +104,7 @@ export class GameLoop {
 
             // Leave/Retire Check (Only when IDLE)
             if (adv.state === "IDLE" && adv.isAvailable()) {
-                // Career Bonus (small drip rank increase for staying)
+                // キャリアボーナス (滞在による微量なランク上昇)
                 // 0.05 * (1 + EMA) * decay
                 const ema = adv.perfEMA || 0;
                 const cap = Math.max(0, (1000 - adv.rankValue) / 1000);
@@ -152,8 +152,8 @@ export class GameLoop {
             this.managementService.dailyUpdate(this.guild);
         }
 
-        // --- 2. Process Ongoing Quests ---
-        // Get Global Modifiers
+        // --- 2. 進行中クエストの処理 ---
+        // グローバル補正の取得
         const globalMods = this.managementService ? this.managementService.getGlobalModifiers(this.guild) : {};
         // Inject Facilities
         globalMods.facilities = this.guild.facilities;
@@ -237,21 +237,21 @@ export class GameLoop {
             }
         }
 
-        // --- 6. Auto Assign Plan (For Tomorrow) ---
-        // New plans for remaining IDLE adventurers
+        // --- 6. 自動配置計画 (翌日分) ---
+        // IDLEの冒険者を新規計画に割り当て
         this.plannedQuests = this.assignmentService.autoAssign(this.activeQuests);
 
         const plannedIds = this.plannedQuests.map(p => p.quest.id);
         if (this.plannedQuests.length > 0) {
-            // Move to "Planned" list. Remove from "Available".
+            // "Planned" リストへ移動し、"Available" から除外
             this.activeQuests = this.activeQuests.filter(q => !plannedIds.includes(q.id));
         }
 
         // --- Rank Up Check ---
-        // --- Rank Up Check ---
+        // --- ギルドランク昇格チェック ---
         const newRankObj = GUILD_RANK_THRESHOLDS.find(r => this.guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
         if (newRankObj.threshold > this.guild.highestRankThreshold) {
-            // Update Highest Achieved
+            // 最高到達ランクの更新
             this.guild.highestRankThreshold = newRankObj.threshold;
 
             this.uiManager.log(`ギルドランクが【${newRankObj.label}】に昇格しました！`, 'event');
@@ -265,12 +265,12 @@ export class GameLoop {
             }
         }
 
-        // --- 6. Check Daily Events (Scout, Apprentice) ---
+        // --- 6. デイリーイベントチェック (スカウト/弟子) ---
         if (this.recruitmentService) {
             this.recruitmentService.checkDailyEvents(this.guild.day, this.mailService);
         }
 
-        // --- 7. Monthly Award Event (Day % 30) ---
+        // --- 7. 月間表彰イベント (Day % 30) ---
         if (this.guild.day % 30 === 0 && this.guild.day > 0) {
             this._handleMonthlyAward();
         }

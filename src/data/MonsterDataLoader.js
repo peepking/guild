@@ -1,20 +1,20 @@
-// MonsterDataLoader returns hardcoded monster data for browser environment
+// MonsterDataLoader はブラウザ環境用にハードコードされたモンスターデータを返します
 import { MONSTER_DATA } from '../data/monsterData.js';
 
 export class MonsterDataLoader {
     constructor() {
-        // Load hardcoded monster data
+        // ハードコードされたモンスターデータをロード
         this.monsters = MONSTER_DATA;
     }
 
     /**
-     * In previous version this parsed markdown. Now it simply returns the hardcoded data.
+     * 以前のバージョンではマークダウンを解析していました。現在はハードコードされたデータを返します。
      */
     parse() {
         return this.monsters;
     }
 
-    /** Retrieve monsters for a specific region and rank */
+    /** 指定された地域とランクのモンスターを取得 */
     getMonsters(region, rank) {
         if (!this.monsters[region]) return [];
         return this.monsters[region][rank] || [];

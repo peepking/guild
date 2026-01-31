@@ -5,7 +5,7 @@ export const QUEST_SPECS = {
         category: 'ADVENTURE',
         rates: { battle: { min: 1.0, max: 2.0 }, gather: 0.5 },
         bossDays: ['LAST'],
-        weights: { STR: 1.0, VIT: 1.0, DEX: 0.5, INT: 0.2 }, // Default hunting weights
+        weights: { STR: 1.0, VIT: 1.0, DEX: 0.5, INT: 0.2 }, // デフォルトの狩猟ウェイト
         ranks: ['E', 'D', 'C', 'B', 'A', 'S']
     },
     CULLING: {
@@ -20,7 +20,7 @@ export const QUEST_SPECS = {
         label: 'ダンジョン探索',
         category: 'ADVENTURE',
         rates: { battle: 1.5, gather: 1.5 },
-        bossDays: ['LAST'], // Special flag for last day boss
+        bossDays: ['LAST'], // 最終日ボス出現フラグ
         weights: { DEX: 2.5, INT: 2.0, VIT: 1.5, MAG: 1.0, STR: 1.0, CHA: 0.5 },
         ranks: ['D', 'C', 'B', 'A', 'S']
     },
@@ -28,11 +28,9 @@ export const QUEST_SPECS = {
         label: '遺跡調査',
         category: 'ADVENTURE',
         rates: { battle: 0.5, gather: 1.0 },
-        // "Chance" of boss (Guardian) based on progress, simulated as random chance each day?
-        // Or specific logic. For now, let's say 20% chance per day to meet Guardian?
-        // Spec says "Event: Guardian Battle" in context of progress. 
-        // Let's implement as a rare battle event in simulation.
-        bossModifier: 0.1, // 10% chance per day for boss encounter
+        // 進捗に基づいたボス(守護者)遭遇チャンス。シミュレーションでは日毎のランダム確率として処理？
+        // 守護者バトルイベントの実装。レアバトルイベントとする。
+        bossModifier: 0.1, // ボス遭遇率 10%/日
         weights: { INT: 3.0, MAG: 2.0, DEX: 1.5, CHA: 1.0, VIT: 0.5, STR: 0.5 },
         ranks: ['C', 'B', 'A', 'S']
     },
@@ -84,7 +82,7 @@ export const QUEST_SPECS = {
         label: '井戸の怪異調査',
         category: 'CITIZEN',
         rates: { battle: 1.0, gather: 0.1 },
-        bossModifier: 0.5, // 50% chance for mini-boss
+        bossModifier: 0.5, // 中ボス遭遇率 50%
         weights: { INT: 2.0, MAG: 1.5, STR: 1.5, VIT: 1.0, DEX: 1.0, CHA: 0.5 },
         ranks: ['E', 'D']
     },
@@ -92,7 +90,7 @@ export const QUEST_SPECS = {
         label: '家屋の魔物駆除',
         category: 'CITIZEN',
         rates: { battle: { min: 1.0, max: 2.0 }, gather: 0 },
-        bossModifier: 0.05, // Rare Queen
+        bossModifier: 0.05, // 希にクイーン出現
         weights: { DEX: 2.5, STR: 1.5, VIT: 1.0, INT: 1.0, MAG: 0.5, CHA: 0.5 },
         ranks: ['E', 'D']
     },
@@ -246,8 +244,8 @@ export const QUEST_SPECS = {
         label: '異界出現',
         category: 'SPECIAL',
         rates: { battle: { min: 3.0, max: 10.0 }, gather: 3.0 },
-        bossDays: [], // Gatekeeper handles by specialized logic? Or add 'LAST'
-        bossModifier: 1.0, // Always boss
+        bossDays: [], // ゲートキーパーは専用ロジックで処理
+        bossModifier: 1.0, // 常時ボス判定
         weights: { MAG: 2.0, STR: 2.0, VIT: 2.0, DEX: 2.0, INT: 2.0, CHA: 1.0 },
         ranks: ['A', 'S']
     },
@@ -255,7 +253,7 @@ export const QUEST_SPECS = {
         label: '古代生物の目覚め',
         category: 'SPECIAL',
         rates: { battle: 1.0, gather: 0.1 },
-        bossDays: ['LAST'], // Or every day is boss? Spec says "Raid boss". Typically 1 big fight.
+        bossDays: ['LAST'], // レイドボス想定
         weights: { STR: 3.0, VIT: 3.0, MAG: 2.0, DEX: 1.0, INT: 1.0, CHA: 0.5 },
         ranks: ['S']
     },

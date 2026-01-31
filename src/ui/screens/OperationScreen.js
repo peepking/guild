@@ -10,7 +10,7 @@ export class OperationScreen {
 
     render(container, guild, state, logs) {
         this.container = container;
-        this.guild = guild; // Cache guild
+        this.guild = guild; // ギルド情報をキャッシュ
 
         container.innerHTML = `
             <div class="panel h-full">
@@ -31,7 +31,7 @@ export class OperationScreen {
 
         this._renderContent(guild);
 
-        // Restore & Track Scroll Logic
+        // スクロール位置の復元と追跡
         const newContentEl = container.querySelector('#operation-content');
         if (newContentEl) {
             // Restore
@@ -45,7 +45,7 @@ export class OperationScreen {
             });
         }
 
-        // Bind Tabs
+        // タブ設定
         container.querySelectorAll('.tab').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.currentTab = btn.getAttribute('data-tab');
@@ -81,10 +81,10 @@ export class OperationScreen {
         const hqList = container.querySelector('#hq-list');
         const facilityList = container.querySelector('#facility-list');
 
-        // 1. Capacity (HQ)
+        // 1. 収容人数 (HQ)
         this._renderCapacityCard(hqList, guild);
 
-        // 2. HQ Facilities (PR & Admin)
+        // 2. 本部施設 (PR & Admin)
         const hqIds = ['PUBLIC_RELATIONS', 'ADMINISTRATION'];
         hqIds.forEach(id => {
             if (FACILITIES[id]) {
@@ -176,7 +176,7 @@ export class OperationScreen {
                 </div>
             `;
 
-        // Bind Build Button
+        // 建設/強化ボタンのバインド
         el.querySelector('.btn-build')?.addEventListener('click', () => {
             if (guild.money >= cost) {
                 guild.money -= cost;
@@ -250,7 +250,7 @@ export class OperationScreen {
             list.appendChild(item);
         });
 
-        // Bind Change Buttons
+        // 変更ボタンのバインド
         list.querySelectorAll('.btn-change-policy').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const pid = e.target.dataset.id;
@@ -270,7 +270,7 @@ export class OperationScreen {
     _renderPersonnel(container, guild) {
         const ms = this.gameLoop.managementService;
 
-        // Header
+        // ヘッダー
         const header = document.createElement('div');
         header.innerHTML = `
             <div class="policy-desc mb-md">
@@ -329,7 +329,7 @@ export class OperationScreen {
             });
         }
 
-        // Candidates
+        // 候補者一覧
         const candidateSection = document.createElement('div');
         candidateSection.innerHTML = `
             <h3 class="section-header inline-block">顧問候補 (引退者)</h3>
@@ -419,7 +419,7 @@ export class OperationScreen {
             if (guild.money >= cost && !activePR) {
                 guild.money -= cost;
 
-                // Log Finance
+                // 財務ログ
                 if (guild.todayFinance) {
                     guild.todayFinance.expense += cost;
                     guild.todayFinance.balance = guild.money;

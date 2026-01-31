@@ -33,12 +33,12 @@ export const POLICIES = {
 };
 
 export const ADVISOR_ROLES = {
-    // Generated based on Adventurer High Stats
+    // 冒険者の高ステータスに基づいて生成
     TACTICIAN: { id: 'TACTICIAN', name: '戦術顧問', stat: 'INT', effect: { winRate: 1.05 }, desc: '作戦立案により勝率を底上げする' },
     INSTRUCTOR: { id: 'INSTRUCTOR', name: '技術教官', stat: 'DEX', effect: { exp: 1.1 }, desc: '新人の訓練効率を高める' },
     GUARD_CAPTAIN: { id: 'GUARD_CAPTAIN', name: '警備隊長', stat: 'VIT', effect: { injury: 0.8 }, desc: '冒険者の安全管理を徹底する' },
-    SCOUT_MASTER: { id: 'SCOUT_MASTER', name: '探索主任', stat: 'STR', effect: { dropRate: 1.1 }, desc: '素材発見のノウハウを共有する' }, // STR? maybe AGI/DEX but keeping simple
-    // Maybe better mapping: Warrior->G.Captain, Mage->Tactician, etc.
+    SCOUT_MASTER: { id: 'SCOUT_MASTER', name: '探索主任', stat: 'STR', effect: { dropRate: 1.1 }, desc: '素材発見のノウハウを共有する' }, // STR? おそらくAGI/DEXだがシンプルに
+    // マッピング案: Warrior->G.Captain, Mage->Tactician など
 };
 
 export const RANDOM_EVENTS = [
@@ -78,7 +78,7 @@ export const FACILITIES = {
         name: '売店',
         maxLevel: 5,
         baseCost: 500,
-        costMult: 1, // Cost = baseCost * Level
+        costMult: 1, // コスト = 基本コスト * レベル
         description: '冒険者に物資を提供する売店。日々の売上でギルド財政を支える。',
         effectDesc: '日次収入: 冒険者数 × Lv × 2G',
         type: 'INCOME'
@@ -118,7 +118,7 @@ export const FACILITIES = {
         name: '巨大倉庫',
         maxLevel: 1,
         baseCost: 3000,
-        costMult: 0, // Fixed cost
+        costMult: 0, // 固定コスト
         description: '大量の物資を保管・管理し、市場への供給を最適化する。',
         effectDesc: 'アイテム売却益 +10%',
         type: 'ECONOMY'

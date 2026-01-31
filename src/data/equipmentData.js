@@ -1,5 +1,5 @@
 export const EQUIPMENT_DATA = [
-    // LONG_SWORD
+    // 長剣 (LONG_SWORD)
     { "name": "ロングソード", "type": "LONG_SWORD", "rank": "E" },
     { "name": "ロングシミター", "type": "LONG_SWORD", "rank": "E" },
     { "name": "冷鉄の長剣", "type": "LONG_SWORD", "rank": "D" },
@@ -13,7 +13,7 @@ export const EQUIPMENT_DATA = [
     { "name": "天霜鋼のグレートソード", "type": "LONG_SWORD", "rank": "S" },
     { "name": "神樹の儀礼剣", "type": "LONG_SWORD", "rank": "S" },
 
-    // SHORT_SWORD
+    // 短剣 (SHORT_SWORD)
     { "name": "ダガー", "type": "SHORT_SWORD", "rank": "E" },
     { "name": "スティレット", "type": "SHORT_SWORD", "rank": "E" },
     { "name": "呪塩のナイフ", "type": "SHORT_SWORD", "rank": "D" },
@@ -41,7 +41,7 @@ export const EQUIPMENT_DATA = [
     { "name": "終焉火種の終末斧", "type": "AXE", "rank": "S" },
     { "name": "冥王石の奈落斧", "type": "AXE", "rank": "S" },
 
-    // MACE
+    // 槌・メイス (MACE)
     { "name": "メイス", "type": "MACE", "rank": "E" },
     { "name": "ウォーハンマー", "type": "MACE", "rank": "E" },
     { "name": "冷鉄のクラブ", "type": "MACE", "rank": "D" },
@@ -55,7 +55,7 @@ export const EQUIPMENT_DATA = [
     { "name": "太陽神核の裁定槌", "type": "MACE", "rank": "S" },
     { "name": "虚無心核の封槌", "type": "MACE", "rank": "S" },
 
-    // STAFF
+    // 杖 (USE_ITEM -> STAFF treated as weapon)
     { "name": "スタッフ", "type": "STAFF", "rank": "E" },
     { "name": "ワンド", "type": "STAFF", "rank": "E" },
     { "name": "良質木材のワンド", "type": "STAFF", "rank": "D" },
@@ -69,7 +69,7 @@ export const EQUIPMENT_DATA = [
     { "name": "創炎心臓の業火杖", "type": "STAFF", "rank": "S" },
     { "name": "冬神の心核の氷封杖", "type": "STAFF", "rank": "S" },
 
-    // BOW
+    // 弓 (BOW)
     { "name": "ショートボウ", "type": "BOW", "rank": "E" },
     { "name": "ロングボウ", "type": "BOW", "rank": "E" },
     { "name": "良質木材のハンティングボウ", "type": "BOW", "rank": "D" },
@@ -153,7 +153,7 @@ export const EQUIPMENT_DATA = [
     { "name": "創生の蜜染め古式礼装", "type": "CLOTHES", "rank": "S" },
     { "name": "魂魄核縫いのクローク", "type": "CLOTHES", "rank": "S" },
 
-    // ROBE
+    // ローブ (ROBE)
     { "name": "ローブ", "type": "ROBE", "rank": "E" },
     { "name": "フードローブ", "type": "ROBE", "rank": "E" },
     { "name": "発光胞子のローブ", "type": "ROBE", "rank": "D" },

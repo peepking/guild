@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load Data for Simulator
     questService.initSimulator(MONSTER_DATA, ITEM_DATA);
-    console.log("Quest Simulator Initialized with JS data.");
+    // console.log("Quest Simulator Initialized with JS data.");
 
     // 2. Initialize UI Manager
     const uiManager = new UIManager(guild, null);

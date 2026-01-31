@@ -8,7 +8,7 @@ export class ArchivesScreen {
     render(container, guild, state, logs) {
         this.container = container;
 
-        // Capture scroll position before wiping (Finance Tab)
+        // スクロール位置の保持 (財務タブ)
         const financeList = container.querySelector('#finance-table-container');
         if (financeList) {
             this.financeScrollTop = financeList.scrollTop;
@@ -69,7 +69,7 @@ export class ArchivesScreen {
         const end = start + PAGE_SIZE;
         const pageItems = history.slice(start, end);
 
-        // Layout: Left (Detail), Right (List)
+        // レイアウト: 左(詳細)、右(リスト)
         container.innerHTML = `
             <div class="archives-layout">
                 
@@ -227,7 +227,7 @@ export class ArchivesScreen {
             return;
         }
 
-        // Aggregate items
+        // アイテム集計
         const allItems = [];
         const regions = ['EAST', 'NORTH', 'SOUTH', 'WEST', 'CENTRAL'];
         regions.forEach(r => {

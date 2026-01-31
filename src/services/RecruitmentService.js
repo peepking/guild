@@ -9,7 +9,7 @@ export class RecruitmentService {
     }
 
     dailyRecruit() {
-        // 1. Process Active Buffs (Remove expired)
+        // 1. アクティブなバフの処理（期限切れ削除）
         this.guild.activeBuffs = this.guild.activeBuffs.filter(buff => buff.expiresDay > this.guild.day);
 
         const prBuff = this.guild.activeBuffs.find(b => b.type === 'PR_CAMPAIGN');
@@ -18,35 +18,32 @@ export class RecruitmentService {
             buffMod = prBuff.effect; // e.g., 1.5 or 2.0
         }
 
-        // 2. Base Check (Modified for PUBLIC_RELATIONS)
+        // 2. 基礎確率チェック (PUBLIC_RELATIONS対応)
         const prLv = (this.guild.facilities && this.guild.facilities.public_relations) || 0;
 
-        // Base: 1% + 3% per Level. Max (Lv5) = 16% + Rep Bonus
-        // Old formula was approx 15-20%.
+        // 基礎: 1% + Lv毎に3%。最大Lv5で16% + 評判ボーナス
+        // 旧計算式: 約15-20%
         let chance = 0.01 + (prLv * 0.03);
 
-        // Small Rep Bonus (0.01% per 200 Rep)
+        // 微量の評判ボーナス (200 Reputation毎に0.01%)
         chance += this.guild.reputation * 0.00005;
 
         // Apply Buff
         chance *= buffMod;
 
-        // 3. Soft Cap Logic
+        // 3. ソフトキャップ（収容人数制限）ロジック
         const count = this.guild.adventurers.length;
         const cap = this.guild.softCap || 10;
 
         if (count >= cap) {
-            // Soft Limit: 50% chance
+            // ソフトリミット: 確率50%
             chance *= 0.5;
 
-            // Saturation: 1.5x Cap -> 10% chance
+            // 飽和状態: 1.5倍以上 -> 確率10%
             if (count >= Math.floor(cap * 1.5)) {
-                chance *= 0.2; // Severely reduced
+                chance *= 0.2; // 大幅減衰
             }
         }
-
-        // Debug Log (can be removed later or keep for tuning)
-        // console.log(`Recruit Check: Chance=${chance.toFixed(3)} (Count:${count}/${cap}, Buff:${buffMod})`);
 
         if (Math.random() < chance) {
             return this.generateNewAdventurer();
@@ -62,11 +59,11 @@ export class RecruitmentService {
         const types = Object.values(ADVENTURER_TYPES);
         const type = types[Math.floor(Math.random() * types.length)];
 
-        // Random Origin
+        // ランダムな出身地
         const origins = Object.values(ORIGINS);
         const origin = origins[Math.floor(Math.random() * origins.length)];
 
-        // Select Name List based on Origin
+        // 出身地に基づく名前リストの選択
         let regionKey = 'CENTRAL'; // Fallback
 
         switch (origin.id) {
@@ -84,27 +81,26 @@ export class RecruitmentService {
         const nameList = REGIONAL_NAMES[regionKey];
         const name = nameList[Math.floor(Math.random() * nameList.length)];
 
-        // Phase 10: Join Type Logic
-        // Select Join Type first? Or random?
-        // Weights: Local 40%, Wanderer 40%, Contract 20%
+        // フェーズ10: 加入タイプのロジック
+        // 重み: 地元 40%, 流れ者 40%, 契約 20%
         const roll = Math.random();
         let joinType = JOIN_TYPES.LOCAL;
         if (roll < 0.4) joinType = JOIN_TYPES.LOCAL;
         else if (roll < 0.8) joinType = JOIN_TYPES.WANDERER;
         else joinType = JOIN_TYPES.CONTRACT;
 
-        // Determine Max Rank Value based on Guild Reputation
+        // ギルド評判に基づく最大ランク値の決定
         const guildRep = (this.guild && this.guild.reputation) || 0;
         const guildRankObj = GUILD_RANK_THRESHOLDS.find(r => guildRep >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
 
-        // Find corresponding Adventurer Rank index
-        // Assuming labels match (S, A, B, C, D, E)
+        // 対応する冒険者ランクインデックスを検索
+        // ラベル一致を前提 (S, A, B, C, D, E)
         const advRankIdx = ADVENTURER_RANKS.findIndex(r => r.label === guildRankObj.label);
 
         let maxRankValue = 9999;
         if (advRankIdx > 0) {
-            // Cap to just below the NEXT rank threshold
-            // e.g. if C (idx 3), next is B (idx 2). Cap = B.threshold - 1.
+            // 次のランク閾値直前までキャップする
+            // 例: C (idx 3) の場合、次は B (idx 2)。Cap = B.threshold - 1。
             const nextRank = ADVENTURER_RANKS[advRankIdx - 1];
             maxRankValue = nextRank.threshold - 1;
         }
@@ -115,7 +111,7 @@ export class RecruitmentService {
         return adv;
     }
 
-    // Verification method for "100 templates"
+    // "100 templates" 検証用メソッド
     generateTemplateBatch(count = 100, originId = null) {
         const results = [];
         for (let i = 0; i < count; i++) {

@@ -1,8 +1,8 @@
-// EquipmentDataLoader returns hardcoded equipment data for browser environment
+// EquipmentDataLoader はブラウザ環境用にハードコードされた装備データを返します
 import { EQUIPMENT_DATA } from '../data/equipmentData.js';
 
 export class EquipmentDataLoader {
-    /** Return the hardcoded equipment list. */
+    /** ハードコードされた装備リストを返します。 */
     parse() {
         return EQUIPMENT_DATA;
     }

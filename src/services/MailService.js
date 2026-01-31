@@ -5,8 +5,7 @@ export class MailService {
         this.toastQueue = [];
         this.mailCounter = 0;
 
-        // Initial Tutorial Mail
-        // Initial Tutorial Mail
+        // 初回チュートリアルメール
         this.send(
             "ギルドへようこそ",
             "ギルド運営へようこそ！\nまずは「依頼」メニューからクエストを発注し、冒険者を派遣してみましょう。\n日数が経過すると結果が届きます。",
@@ -16,11 +15,11 @@ export class MailService {
     }
 
     /**
-     * Send a new mail (and trigger toast notification)
+     * 新しいメールを送信（トースト通知もトリガー）
      * @param {string} title 
      * @param {string} body 
      * @param {string} type - 'SYSTEM', 'EVENT', 'IMPORTANT', 'NORMAL'
-     * @param {object} meta - Optional data for events
+     * @param {object} meta - イベント用オプションデータ
      */
     send(title, body, type = 'NORMAL', meta = {}) {
         this.mailCounter++;
@@ -31,7 +30,7 @@ export class MailService {
             type,
             meta,
             isRead: false,
-            date: new Date().toISOString(), // In-game day might be better if available context
+            date: new Date().toISOString(), // ゲーム内Dayがあればコンテキストから取得推奨
             timestamp: Date.now()
         };
         this.mails.unshift(mail); // Newest first
@@ -43,8 +42,7 @@ export class MailService {
             id: Date.now()
         });
 
-        // Notify Listeners (if any) - For now handled by polling or manual refresh UI
-        // Ideally we dispatch an event
+        // リスナーへの通知（イベント発火）
         document.dispatchEvent(new CustomEvent('mail-received', { detail: { mail } }));
     }
 
@@ -76,7 +74,7 @@ export class MailService {
         return this.toastQueue.shift();
     }
 
-    // Debug method
+    // デバッグ用
     clear() {
         this.mails = [];
         this.toastQueue = [];
