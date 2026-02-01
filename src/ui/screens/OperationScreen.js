@@ -1,4 +1,4 @@
-import { POLICIES, FACILITIES } from '../../data/ManagementData.js';
+import { POLICIES, FACILITIES, EFFECT_LABELS, CAMPAIGNS } from '../../data/ManagementData.js';
 
 export class OperationScreen {
     constructor(gameLoop) {
@@ -230,7 +230,7 @@ export class OperationScreen {
             for (const [k, v] of Object.entries(p.mod)) {
                 let val = Math.round((v - 1.0) * 100);
                 let sign = val > 0 ? '+' : '';
-                modStr.push(`${k} ${sign}${val}%`);
+                modStr.push(`${EFFECT_LABELS[k] || k} ${sign}${val}%`);
             }
 
             item.innerHTML = `
@@ -305,7 +305,7 @@ export class OperationScreen {
 
                 let effStr = [];
                 for (const [k, v] of Object.entries(adv.effect)) {
-                    effStr.push(`${k} x${v}`);
+                    effStr.push(`${EFFECT_LABELS[k] || k} x${v}`);
                 }
 
                 el.innerHTML = `
@@ -347,7 +347,7 @@ export class OperationScreen {
 
                 let effStr = [];
                 for (const [k, v] of Object.entries(cand.effect)) {
-                    effStr.push(`${k} x${v}`);
+                    effStr.push(`${EFFECT_LABELS[k] || k} x${v}`);
                 }
 
                 el.innerHTML = `
@@ -375,71 +375,109 @@ export class OperationScreen {
     }
 
     _renderPR(container, guild) {
-        const activePR = guild.activeBuffs.find(b => b.type === 'PR_CAMPAIGN');
-        const cost = 200;
-        const duration = 7;
+        // Find if any campaign is active
+        const activeCampaign = guild.activeEvents.find(e => CAMPAIGNS[e.id]);
 
-        container.innerHTML = `
-            <div class="operation-grid">
-                ${activePR ? `
-                    <div class="operation-card hero">
-                        <h3>現在実施中のキャンペーン</h3>
-                        <div class="operation-header-row">
-                            <span>新規加入率アップ (効果1.5倍)</span>
-                            <span class="status-badge bg-accent text-wood">実施中</span>
-                        </div>
-                        <div class="text-right mt-md">残り ${activePR.expiresDay - guild.day} 日</div>
-                    </div>
-                ` : `
-                     <div class="operation-card" style="background:var(--bg-light); border-style:dashed;">
-                        <h3 class="text-sub">キャンペーン未実施</h3>
-                        <div class="policy-desc">現在実施中の広報キャンペーンはありません。</div>
-                    </div>
-                `}
-
-                <div class="operation-card">
-                    <h3>新規冒険者募集キャンペーン</h3>
-                    <div class="policy-desc">
-                        街中にポスターを掲示し、呼び込みを行います。<br>
-                        7日間、冒険者の加入希望率が大幅に上昇します。
-                    </div>
-                    
-                    <div class="flex-col-end gap-sm mt-auto">
-                        <span class="font-bold text-status-${guild.money >= cost ? 'safe' : 'danger'}">${cost} G</span>
-                        <button id="btn-pr" class="btn btn-primary w-full"
-                        ${guild.money < cost || activePR ? 'disabled' : ''}>
-                        ${activePR ? '実施中' : '実施'}
-                        </button>
-                    </div>
-                </div>
+        // Header
+        const header = document.createElement('div');
+        header.innerHTML = `
+            <div class="policy-desc mb-md">
+                ギルドの資金を使って、様々なキャンペーンを実施できます。<br>
+                キャンペーンは一度に1つしか実施できません。期間中は特別な効果が得られます。
             </div>
+            ${activeCampaign ? `
+                <div class="operation-card hero mb-lg">
+                    <h3>現在実施中のキャンペーン</h3>
+                    <div class="operation-header-row">
+                        <span class="font-bold text-lg">${activeCampaign.name}</span>
+                        <span class="status-badge bg-accent text-wood">実施中</span>
+                    </div>
+                    <div class="policy-desc">${activeCampaign.description}</div>
+                    <div class="text-right mt-md">残り ${activeCampaign.remainingDays} 日</div>
+                </div>
+            ` : `
+                 <div class="operation-card mb-lg" style="background:var(--bg-light); border-style:dashed;">
+                    <h3 class="text-sub">キャンペーン未実施</h3>
+                    <div class="policy-desc">現在実施中のキャンペーンはありません。</div>
+                </div>
+            `}
+            <h3 class="section-header">実施可能なキャンペーン</h3>
         `;
 
-        container.querySelector('#btn-pr')?.addEventListener('click', () => {
-            if (guild.money >= cost && !activePR) {
-                guild.money -= cost;
+        container.innerHTML = '';
+        container.appendChild(header);
 
-                // 財務ログ
-                if (guild.todayFinance) {
-                    guild.todayFinance.expense += cost;
-                    guild.todayFinance.balance = guild.money;
-                    guild.todayFinance.details.push({
-                        reason: `広報活動: 新規募集CP`,
-                        amount: -cost
-                    });
-                }
+        const list = document.createElement('div');
+        list.className = 'operation-grid';
 
-                guild.activeBuffs.push({
-                    type: 'PR_CAMPAIGN',
-                    expiresDay: guild.day + duration,
-                    effect: 1.5
-                });
-                this.gameLoop.uiManager.log(`新規募集キャンペーンを開始しました。(7日間)`, 'success');
-                this.gameLoop.mailService.send("キャンペーン開始", `広報活動を開始しました。\n今後7日間、冒険者の加入率が上昇します。`, 'EVENT', { day: guild.day });
+        Object.values(CAMPAIGNS).forEach(cmp => {
+            // Skip if active (already shown) - or show as disabled? Show as disabled.
+            const isActive = activeCampaign && activeCampaign.id === cmp.id;
+            const isOtherActive = activeCampaign && !isActive;
 
-                // Update Top Bar
-                this.gameLoop.uiManager.render();
-            }
+            const el = document.createElement('div');
+            el.className = `operation-card ${isActive ? 'hero' : ''}`;
+
+            el.innerHTML = `
+                <div class="operation-header-row">
+                    <span class="font-bold">${cmp.name}</span>
+                    <span class="text-sm font-bold">${cmp.cost} G</span>
+                </div>
+                <div class="policy-desc" style="min-height:3em;">${cmp.description}</div>
+                <div class="policy-effects">${cmp.effectDesc}</div>
+                
+                <div class="flex-col-end gap-sm mt-auto">
+                    <button class="btn-start-campaign btn btn-primary w-full" 
+                        data-id="${cmp.id}" 
+                        ${isOtherActive || isActive || guild.money < cmp.cost ? 'disabled' : ''}>
+                        ${isActive ? '実施中' : '実施'}
+                    </button>
+                </div>
+             `;
+
+            el.querySelector('.btn-start-campaign').addEventListener('click', () => {
+                this._startCampaign(guild, cmp);
+            });
+
+            list.appendChild(el);
         });
+
+        container.appendChild(list);
+    }
+
+    _startCampaign(guild, cmp) {
+        if (guild.money < cmp.cost) return;
+
+        // Double check active
+        if (guild.activeEvents.some(e => CAMPAIGNS[e.id])) return;
+
+        guild.money -= cmp.cost;
+
+        // 財務ログ
+        if (guild.todayFinance) {
+            guild.todayFinance.expense += cmp.cost;
+            guild.todayFinance.balance = guild.money;
+            guild.todayFinance.details.push({
+                reason: `広報活用: ${cmp.name}`,
+                amount: -cmp.cost
+            });
+        }
+
+        // Add as Event
+        guild.activeEvents.push({
+            id: cmp.id,
+            name: cmp.name,
+            description: cmp.description,
+            mod: cmp.mod,
+            remainingDays: cmp.duration
+        });
+
+        this.gameLoop.uiManager.log(`${cmp.name}を開始しました。(期間: ${cmp.duration}日)`, 'success');
+
+        // Send Mail (Optional, maybe for severe ones?)
+        // Just log is fine for now, or unified mail?
+        // Let's stick to log unless it's very important.
+
+        this.gameLoop.uiManager.render();
     }
 }

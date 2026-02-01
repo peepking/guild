@@ -9,13 +9,19 @@ export class RecruitmentService {
     }
 
     dailyRecruit() {
-        // 1. アクティブなバフの処理（期限切れ削除）
-        this.guild.activeBuffs = this.guild.activeBuffs.filter(buff => buff.expiresDay > this.guild.day);
+        // 1. アクティブなバフの処理（期限切れ削除） -> GameLoop/ManagementServiceで一元管理されるためここでは参照のみ
 
-        const prBuff = this.guild.activeBuffs.find(b => b.type === 'PR_CAMPAIGN');
         let buffMod = 1.0;
-        if (prBuff) {
-            buffMod = prBuff.effect; // e.g., 1.5 or 2.0
+        this.guild.activeEvents.forEach(evt => {
+            if (evt.mod && evt.mod.recruit) {
+                buffMod *= evt.mod.recruit;
+            }
+        });
+
+        // 旧 activeBuffs の後方互換性 (念のため)
+        if (this.guild.activeBuffs) {
+            const prBuff = this.guild.activeBuffs.find(b => b.type === 'PR_CAMPAIGN');
+            if (prBuff) buffMod *= (prBuff.effect || 1.5);
         }
 
         // 2. 基礎確率チェック (PUBLIC_RELATIONS対応)
@@ -84,13 +90,24 @@ export class RecruitmentService {
         const nameList = REGIONAL_NAMES[regionKey];
         const name = nameList[Math.floor(Math.random() * nameList.length)];
 
-        // フェーズ10: 加入タイプのロジック
-        // 重み: 地元 40%, 流れ者 40%, 契約 20%
+        // フェーズ10: 加入タイプのロジック (出身地依存)
+        let joinType = JOIN_TYPES.WANDERER;
         const roll = Math.random();
-        let joinType = JOIN_TYPES.LOCAL;
-        if (roll < 0.4) joinType = JOIN_TYPES.LOCAL;
-        else if (roll < 0.8) joinType = JOIN_TYPES.WANDERER;
-        else joinType = JOIN_TYPES.CONTRACT;
+
+        if (origin.id === ORIGINS.CENTRAL.id) {
+            // 中央: 地元80%, 流浪10%, 契約10%
+            if (roll < 0.8) joinType = JOIN_TYPES.LOCAL;
+            else if (roll < 0.9) joinType = JOIN_TYPES.WANDERER;
+            else joinType = JOIN_TYPES.CONTRACT;
+        } else if ([ORIGINS.NORTH.id, ORIGINS.SOUTH.id, ORIGINS.EAST.id, ORIGINS.WEST.id].includes(origin.id)) {
+            // 東西南北: 流浪80%, 契約20%
+            if (roll < 0.8) joinType = JOIN_TYPES.WANDERER;
+            else joinType = JOIN_TYPES.CONTRACT;
+        } else {
+            // 遠方(Foreign): 流浪50%, 契約50%
+            if (roll < 0.5) joinType = JOIN_TYPES.WANDERER;
+            else joinType = JOIN_TYPES.CONTRACT;
+        }
 
         // ギルド評判に基づく最大ランク値の決定
         const guildRep = (this.guild && this.guild.reputation) || 0;

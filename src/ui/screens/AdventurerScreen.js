@@ -1,4 +1,4 @@
-import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES } from '../../data/constants.js';
+import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, JOIN_TYPE_NAMES } from '../../data/constants.js';
 
 export class AdventurerScreen {
     constructor() {
@@ -423,7 +423,7 @@ export class AdventurerScreen {
             <div class="sub-header">基本情報</div>
             <p>職業: ${ADVENTURER_JOB_NAMES[adv.type] || adv.type}</p>
             <p>出身地: ${originName}</p>
-            <p>契約: ${adv.joinType}</p>
+            <p>雇用形態: ${JOIN_TYPE_NAMES[adv.joinType] || adv.joinType}</p>
             <p>在籍: ${adv.careerDays}日</p>
             <hr>
             <div class="sub-header">評価</div>

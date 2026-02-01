@@ -64,11 +64,39 @@ export const JOIN_TYPES = {
     CONTRACT: 'contract'
 };
 
+export const JOIN_TYPE_NAMES = {
+    [JOIN_TYPES.LOCAL]: '地元',
+    [JOIN_TYPES.WANDERER]: '流浪',
+    [JOIN_TYPES.CONTRACT]: '契約'
+};
+
 export const LEAVE_TYPES = {
     RETIRE: 'retire',
     LEAVE: 'leave',
     EXPIRE: 'expire',
     DISAPPEAR: 'disappear'
+};
+
+export const LEAVE_TYPE_NAMES = {
+    [LEAVE_TYPES.LEAVE]: '脱退',
+    [LEAVE_TYPES.RETIRE]: '引退',
+    [LEAVE_TYPES.DISAPPEAR]: '失踪',
+    'DEATH': '殉職'
+};
+
+export const RETIREMENT_CONFIG = {
+    MIN_CAREER_DAYS: 30,
+    BASE_LEAVE_CHANCE: {
+        LOCAL: 0.0001,    // 0.01%
+        WANDERER: 0.005,  // 0.5%
+        CONTRACT: 0.008   // 0.8%
+    },
+    TRUST_MODIFIER: {
+        HIGH_THRESHOLD: 60,
+        HIGH_REDUCTION: 0.004,
+        LOW_THRESHOLD: 10,
+        LOW_INCREASE: 0.02
+    }
 };
 
 export const QUEST_TYPES = {

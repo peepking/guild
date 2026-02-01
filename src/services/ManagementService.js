@@ -68,11 +68,15 @@ export class ManagementService {
         let totalIncome = 0;
         const details = [];
 
+        // グローバル補正 (市場需要)
+        const globalMods = this.getGlobalModifiers(guild);
+        const marketMod = globalMods.market || 1.0;
+
         // Shop Income: 2G * Lv * Count
         // 売店収益: 2G * Lv * Count
         const shopLv = (guild.facilities && guild.facilities.shop) || 0;
         if (shopLv > 0) {
-            const income = 2 * shopLv * advCount;
+            const income = Math.floor(2 * shopLv * advCount * marketMod);
             totalIncome += income;
             details.push({ reason: `売店売上 (Lv.${shopLv})`, amount: income });
         }
@@ -81,7 +85,7 @@ export class ManagementService {
         // 酒場収益: 3G * Lv * Count
         const tavernLv = (guild.facilities && guild.facilities.tavern) || 0;
         if (tavernLv > 0) {
-            const income = 3 * tavernLv * advCount;
+            const income = Math.floor(3 * tavernLv * advCount * marketMod);
             totalIncome += income;
             details.push({ reason: `酒場売上 (Lv.${tavernLv})`, amount: income });
         }

@@ -150,7 +150,70 @@ export const FACILITIES = {
         baseCost: 1000,
         costMult: 1,
         description: '依頼の受付・管理体制を強化し、より多くの依頼を処理する。',
-        effectDesc: '1日の依頼発生数増加 (Count = 2 + Lv)',
+        effectDesc: '1日の依頼発生数増加 (Lvにより変動)',
         type: 'QUEST'
     }
+};
+
+export const CAMPAIGNS = {
+    PR_CAMPAIGN: {
+        id: 'PR_CAMPAIGN',
+        name: '新規冒険者募集',
+        description: '街中にポスターを掲示し、呼び込みを行います。冒険者の加入希望率が大幅に上昇します。',
+        effectDesc: '加入率 x1.5',
+        cost: 200,
+        duration: 7,
+        mod: { recruit: 1.5 }
+    },
+    SAFETY_CAMPAIGN: {
+        id: 'SAFETY_CAMPAIGN',
+        name: '安全啓発週間',
+        description: '冒険者に安全講習を行い、無理のない冒険を推奨します。負傷率が低下します。',
+        effectDesc: '負傷率 x0.7',
+        cost: 100,
+        duration: 7,
+        mod: { injury: 0.7 }
+    },
+    TRAINING_CAMPAIGN: {
+        id: 'TRAINING_CAMPAIGN',
+        name: '強化合宿週間',
+        description: '特別講師を招き、集中訓練を行います。獲得経験値が増加します。',
+        effectDesc: '経験値 x1.5',
+        cost: 500,
+        duration: 7,
+        mod: { exp: 1.5 }
+    },
+    SUBJUGATION_CAMPAIGN: {
+        id: 'SUBJUGATION_CAMPAIGN',
+        name: '魔物討伐週間',
+        description: '魔物の討伐を推奨し、報奨金を上乗せします。危険度も増しますが、実入りは良くなります。',
+        effectDesc: '報酬 x1.2, 危険度 x1.1',
+        cost: 300,
+        duration: 7,
+        mod: { reward: 1.2, danger: 1.1 }
+    },
+    MARKET_CAMPAIGN: {
+        id: 'MARKET_CAMPAIGN',
+        name: '市場開放市週間',
+        description: 'ギルド主催の市場を開き、交易を活性化させます。アイテムや施設からの収益が増加します。',
+        effectDesc: '売却益・施設収益 x1.2',
+        cost: 400,
+        duration: 7,
+        mod: { market: 1.2 }
+    }
+};
+
+export const EFFECT_LABELS = {
+    danger: '危険度',
+    reward: '報酬',
+    injury: '負傷率',
+    recovery: '回復率',
+    recruit: '加入率',
+    exp: '経験値',
+    xp: '経験値',
+    market: '市場需要',
+    guildShare: 'ギルドシェア',
+    prestige: '名声',
+    dropRate: 'ドロップ率',
+    winRate: '勝率'
 };

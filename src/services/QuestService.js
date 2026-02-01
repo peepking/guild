@@ -533,6 +533,9 @@ export class QuestService {
             materialReward = Math.floor(materialReward * 1.1);
         }
 
+        const marketMod = modifiers.market || 1.0;
+        materialReward = Math.floor(materialReward * marketMod);
+
         let money = quest.rewards.money + freeHuntReward + materialReward;
         if (modifiers.reward) {
             money = Math.floor(money * modifiers.reward);

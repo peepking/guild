@@ -1,10 +1,16 @@
-import { ADVENTURER_JOB_NAMES } from '../../data/constants.js';
+import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, JOIN_TYPE_NAMES, LEAVE_TYPE_NAMES } from '../../data/constants.js';
 
 export class ArchivesScreen {
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
         this.container = null;
         this.currentTab = 'FINANCE'; // FINANCE | RETIRED | MARKET | STATS
+        this.state = {
+            selectedRetiredId: null,
+            sortKey: 'ID',
+            sortOrder: 'DESC',
+            currentDetailTab: 'STATUS' // STATUS | HISTORY | MEIKAN
+        };
     }
 
     render(container, guild, state, logs) {
@@ -188,38 +194,277 @@ export class ArchivesScreen {
 
     _renderRetired(container, guild) {
         const list = guild.retiredAdventurers || [];
+
+        container.innerHTML = '';
+        container.classList.add('grid-2-col-fixed-right');
+
+        // --- Left: List ---
+        const listPanel = document.createElement('section');
+        listPanel.className = 'panel flex-col';
+        listPanel.innerHTML = `<div class="panel-header">過去帳 (${list.length}名)</div>`;
+
+        const listContainer = document.createElement('div');
+        listContainer.className = 'scroll-list flex-1 scroll-y';
+        listPanel.appendChild(listContainer);
+        container.appendChild(listPanel);
+
+        // --- Right: Detail ---
+        const detailPanel = document.createElement('section');
+        detailPanel.className = 'panel detail-panel flex-col';
+        container.appendChild(detailPanel);
+
+        // Render List
+        this._renderRetiredList(listContainer, list, detailPanel);
+
+        // Restore Selection
+        if (this.state.selectedRetiredId) {
+            const adv = list.find(a => a.id === this.state.selectedRetiredId);
+            if (adv) {
+                this._renderRetiredDetail(detailPanel, adv);
+            } else {
+                this.state.selectedRetiredId = null;
+            }
+        }
+    }
+
+    _renderRetiredList(container, list, detailPanel) {
+        container.innerHTML = '';
+
         if (list.length === 0) {
             container.innerHTML = '<div class="empty-state">引退者はまだいません</div>';
             return;
         }
 
-        container.innerHTML = list.map(adv => `
-            <div class="list-item-history bg-light border-sub">
-                <div class="flex justify-between items-center mb-xs">
-                    <span class="list-item-title font-bold text-main">
-                        ${adv.title ? `<span class="text-sm text-accent">《${adv.title}》</span> ` : ''}${adv.name}
-                    </span>
-                    <span class="status-badge bg-normal">${ADVENTURER_JOB_NAMES[adv.type] || adv.type}</span>
-                </div>
-                <div class="list-item-meta">
-                    <span>Rank ${adv.rank}</span>
-                    <span>出身: ${adv.origin.name}</span>
-                </div>
-                <div class="text-meta mt-sm pt-sm border-t-dashed">
-                    ${adv.leftDay}日目に記録: ${this._getReasonText(adv.reason)}
-                </div>
-            </div>
-        `).join('');
+        // Sort: Newest first (by leftDay or id)
+        const sorted = [...list].sort((a, b) => b.leftDay - a.leftDay);
+
+        sorted.forEach(adv => {
+            const el = this._createRetiredItem(adv);
+            el.addEventListener('click', () => {
+                this.state.selectedRetiredId = adv.id;
+                container.querySelectorAll('.list-item').forEach(item => item.classList.remove('selected'));
+                el.classList.add('selected');
+                this._renderRetiredDetail(detailPanel, adv);
+            });
+            if (this.state.selectedRetiredId === adv.id) {
+                el.classList.add('selected');
+            }
+            container.appendChild(el);
+        });
     }
 
-    _getReasonText(reason) {
-        const map = {
-            'LEAVE': '一身上の都合により脱退',
-            'RETIRE': '円満な引退',
-            'DISAPPEAR': '行方不明',
-            'DEATH': '殉職'
+    _createRetiredItem(adv) {
+        const div = document.createElement('div');
+        div.className = 'list-item list-item-history';
+
+        // Reason Text
+        const reasonStr = LEAVE_TYPE_NAMES[adv.reason] || adv.reason || '不明';
+
+        div.innerHTML = `
+            <div class="list-item-header">
+                <span class="list-item-title font-bold text-main">
+                    ${adv.title ? `<span class="text-xs text-accent">《${adv.title}》</span> ` : ''}${adv.name}
+                </span>
+                <span class="status-badge bg-normal text-xs">${ADVENTURER_JOB_NAMES[adv.type] || adv.type}</span>
+            </div>
+            <div class="list-item-meta">
+                <span>Rank ${adv.rankLabel || '?'}</span>
+                <span>出身: ${adv.origin ? adv.origin.name : '不明'}</span>
+            </div>
+            <div class="text-meta mt-xs pt-xs border-t-dashed text-right">
+                Day ${adv.leftDay}: ${reasonStr}
+            </div>
+        `;
+        return div;
+    }
+
+    _renderRetiredDetail(panel, adv) {
+        const titlePart = adv.title ? `<span style="font-size:0.8em; color:#d84315;">《${adv.title}》</span>` : '';
+
+        panel.innerHTML = `
+            <div class="panel-header flex-no-shrink">
+                ${titlePart}${adv.name} の記録
+            </div>
+        `;
+
+        // Tabs
+        const tabs = document.createElement('div');
+        tabs.className = 'tabs flex-no-shrink';
+        tabs.innerHTML = `
+            <button class="tab ${this.state.currentDetailTab === 'STATUS' ? 'active' : ''}" data-tab="STATUS">ステータス</button>
+            <button class="tab ${this.state.currentDetailTab === 'HISTORY' ? 'active' : ''}" data-tab="HISTORY">経歴</button>
+            <button class="tab ${this.state.currentDetailTab === 'MEIKAN' ? 'active' : ''}" data-tab="MEIKAN">名鑑</button>
+        `;
+        panel.appendChild(tabs);
+
+        // Content
+        const content = document.createElement('div');
+        content.className = 'scroll-y flex-1 p-sm';
+        panel.appendChild(content);
+
+        this._renderRetiredTabContent(content, adv);
+
+        tabs.querySelectorAll('.tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.state.currentDetailTab = btn.dataset.tab;
+                tabs.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this._renderRetiredTabContent(content, adv);
+            });
+        });
+    }
+
+    _renderRetiredTabContent(container, adv) {
+        container.innerHTML = '';
+        if (this.state.currentDetailTab === 'STATUS') {
+            this._renderStatusTab(container, adv);
+        } else if (this.state.currentDetailTab === 'HISTORY') {
+            this._renderHistoryTab(container, adv);
+        } else if (this.state.currentDetailTab === 'MEIKAN') {
+            this._renderMeikanTab(container, adv);
+        }
+    }
+
+    _renderStatusTab(container, adv) {
+        const originName = adv.origin ? (adv.origin.name || adv.origin.id) : '不明';
+        const reasonStr = LEAVE_TYPE_NAMES[adv.reason] || adv.reason || '-';
+
+        // Basic Info
+        const info = document.createElement('div');
+        info.innerHTML = `
+            <div class="sub-header">基本情報</div>
+            <p>職業: ${ADVENTURER_JOB_NAMES[adv.type] || adv.type}</p>
+            <p>出身地: ${originName}</p>
+            <p>雇用形態: ${JOIN_TYPE_NAMES[adv.joinType] || adv.joinType || '-'}</p>
+            <p>在籍期間: ${adv.careerDays || 0}日</p>
+            <p>引退日: Day ${adv.leftDay} (${reasonStr})</p>
+            <hr>
+            <div class="sub-header">最終評価</div>
+            <p>ランク: <b>${adv.rankLabel}</b> (評価値 ${Math.floor(adv.rankValue)})</p>
+            <p>信頼度: ${adv.trust}</p>
+        `;
+        container.appendChild(info);
+
+        // Stats
+        if (adv.stats) {
+            const statsDiv = document.createElement('div');
+            statsDiv.innerHTML = `<div class="sub-header">能力値</div>`;
+            for (const [key, val] of Object.entries(adv.stats)) {
+                const barWidth = Math.min(100, (val / 120) * 100);
+                statsDiv.innerHTML += `
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-header">
+                            <span>${key}</span>
+                            <span>${val.toFixed(1)}</span>
+                        </div>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill" style="width:${barWidth}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.appendChild(statsDiv);
+        }
+
+        // Traits
+        if (adv.temperament && adv.traits) {
+            const t = adv.temperament;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = `
+                <div class="sub-header">気質・特性</div>
+                <div style="font-size:0.9em;">
+                    危険志向:${t.risk} / 金銭欲:${t.greed} / 社交性:${t.social}
+                </div>
+                <div style="margin-top:0.5rem;">
+                    ${adv.traits.map(tKey => {
+                const tr = TRAITS[tKey];
+                return tr ? `<span class="trait-tag" title="${tr.effects}">[${tr.name}]</span>` : '';
+            }).join(' ')}
+                </div>
+            `;
+            container.appendChild(tempDiv);
+        }
+
+        // Arts
+        if (adv.arts) {
+            const artsDiv = document.createElement('div');
+            artsDiv.innerHTML = `<div class="sub-header">習得奥義</div>`;
+            if (adv.arts.length > 0) {
+                artsDiv.innerHTML += `<div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
+                    ${adv.arts.map(art => `
+                        <div style="background:#fff3e0; border:1px solid #ffcc80; color:#e65100; padding:2px 6px; border-radius:4px; font-size:0.9em; font-weight:bold;">
+                            ⚡ ${art.name}
+                        </div>
+                    `).join('')}
+                </div>`;
+            } else {
+                artsDiv.innerHTML += `<div class="text-sm text-muted">なし</div>`;
+            }
+            container.appendChild(artsDiv);
+        }
+    }
+
+    _renderHistoryTab(container, adv) {
+        const list = document.createElement('div');
+        if (!adv.history || adv.history.length === 0) {
+            list.innerHTML = '<div class="empty-state">記録なし</div>';
+        } else {
+            list.innerHTML = adv.history.map(h => `
+                <div style="padding:0.5rem; border-left:2px solid #bdbdbd; margin-left:0.5rem; position:relative;">
+                    <div style="position:absolute; left:-6px; top:0.8rem; width:10px; height:10px; background:#757575; border-radius:50%;"></div>
+                    <div class="text-meta">Day ${h.day}</div>
+                    <div style="color:#424242;">${h.text}</div>
+                </div>
+            `).join('');
+        }
+        container.appendChild(list);
+
+        // Summary
+        if (adv.records) {
+            const statsSummary = document.createElement('div');
+            statsSummary.style.marginTop = '1rem';
+            statsSummary.style.padding = '1rem';
+            statsSummary.style.background = '#fafafa';
+            statsSummary.style.border = '1px dashed #ccc';
+
+            // Similar logic to AdventurerScreen for achievements/kills...
+            let achievementHtml = "";
+            if (adv.records.majorAchievements && adv.records.majorAchievements.length > 0) {
+                achievementHtml = adv.records.majorAchievements.map(a =>
+                    `<div><span style="color:#666; font-size:0.9em;">[Day${a.day}]</span> <span style="font-weight:bold;">${a.title}</span> <span style="font-size:0.8em; color:#e65100;">(Rank ${a.rank})</span></div>`
+                ).join('');
+            } else {
+                achievementHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+            }
+
+            statsSummary.innerHTML = `
+                <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な功績</div>
+                <div class="text-sm" style="margin-bottom:1rem;">${achievementHtml}</div>
+            `;
+            container.appendChild(statsSummary);
+        }
+    }
+
+    _renderMeikanTab(container, adv) {
+        // Reuse logic from AdventurerScreen (Simplified)
+        const bio = adv.bio || {};
+        const createSection = (title, content) => {
+            if (!content) return '';
+            let htmlContent = Array.isArray(content) ? content.map(l => `<p>${l}</p>`).join('') : `<p>${content}</p>`;
+            return `<div class="mb-md"><div class="sub-header">${title}</div><div class="serif">${htmlContent}</div></div>`;
         };
-        return map[reason] || reason;
+
+        let html = '<div class="p-sm">';
+        html += createSection('人物', bio.intro);
+        html += createSection('主な経歴', bio.career);
+        if (bio.flavor) html += createSection('評価', bio.flavor);
+        html += '</div>';
+
+        if (html === '<div class="p-sm"></div>') {
+            container.innerHTML = '<div class="empty-state">名鑑データなし</div>';
+        } else {
+            container.innerHTML = html;
+        }
     }
 
     _renderMarket(container, guild) {

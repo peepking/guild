@@ -1,4 +1,5 @@
 import { GUILD_RANK_THRESHOLDS } from '../../data/constants.js';
+import { EFFECT_LABELS } from '../../data/ManagementData.js';
 
 export class MainScreen {
     constructor() {
@@ -28,7 +29,7 @@ export class MainScreen {
                 let modStr = [];
                 if (evt.mod) {
                     for (const [k, v] of Object.entries(evt.mod)) {
-                        modStr.push(`${k} x${v}`);
+                        modStr.push(`${EFFECT_LABELS[k] || k} x${v}`);
                     }
                 }
                 return `

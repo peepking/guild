@@ -4,7 +4,7 @@ import { AssignmentService } from '../services/AssignmentService.js';
 import { LifeEventService } from '../services/LifeEventService.js';
 
 import { titleService } from '../services/TitleService.js';
-import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS } from '../data/constants.js';
+import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS, LEAVE_TYPE_NAMES, RETIREMENT_CONFIG, JOIN_TYPES } from '../data/constants.js';
 
 export class GameLoop {
     constructor(guild, uiManager, questService, mailService, managementService, equipmentService, recruitmentService) {
@@ -112,26 +112,40 @@ export class GameLoop {
                 careerBonus *= cap;
                 if (careerBonus > 0) adv.updateRank(careerBonus);
 
-                let leaveChance = 0.005; // Base 0.5%
-                if (adv.trust < 10) leaveChance += 0.02;
-                if (adv.trust > 50) leaveChance -= 0.002;
+                // --- 離脱判定 ---
+                // 最低在籍日数チェック (短期離脱防止)
+                if ((adv.careerDays || 0) < RETIREMENT_CONFIG.MIN_CAREER_DAYS) continue;
+
+                // 基本離脱率 (雇用形態依存)
+                let leaveChance = RETIREMENT_CONFIG.BASE_LEAVE_CHANCE[adv.joinType] || RETIREMENT_CONFIG.BASE_LEAVE_CHANCE.WANDERER;
+
+                // 信頼度補正
+                if (adv.trust >= RETIREMENT_CONFIG.TRUST_MODIFIER.HIGH_THRESHOLD) {
+                    leaveChance -= RETIREMENT_CONFIG.TRUST_MODIFIER.HIGH_REDUCTION;
+                } else if (adv.trust < RETIREMENT_CONFIG.TRUST_MODIFIER.LOW_THRESHOLD) {
+                    leaveChance += RETIREMENT_CONFIG.TRUST_MODIFIER.LOW_INCREASE;
+                }
+
+                // 確率の下限は 0 (信頼度が高くても完全定着ではないかもしれないが、現状データではマイナスになりうるのでクランプ)
+                // Local (0.0001) - HighTrust (0.004) < 0 -> 0% (安全)
+                if (leaveChance < 0) leaveChance = 0;
 
                 if (Math.random() < leaveChance) {
                     let type = LEAVE_TYPES.LEAVE;
                     if (adv.trust > 60) type = LEAVE_TYPES.RETIRE;
                     else if (adv.trust < 0) type = LEAVE_TYPES.DISAPPEAR;
 
-                    const reason = type;
-                    this.guild.retiredAdventurers.push({
-                        id: adv.id,
-                        name: adv.name,
-                        type: adv.type,
-                        origin: adv.origin,
-                        rank: adv.rank,
-                        rankValue: adv.rankValue,
-                        leftDay: this.guild.day,
-                        reason: reason
+                    const reasonStr = LEAVE_TYPE_NAMES[type] || type;
+                    adv.history.push({
+                        day: this.guild.day,
+                        text: `${this.guild.day}日目に記録: ${reasonStr}`
                     });
+
+                    // Add metadata for archive
+                    adv.leftDay = this.guild.day;
+                    adv.reason = type;
+
+                    this.guild.retiredAdventurers.push(adv);
 
                     // 引退時は顧問候補に追加
                     if (type === LEAVE_TYPES.RETIRE && this.managementService) {
@@ -406,16 +420,16 @@ export class GameLoop {
                 const adv = mr.adventurer;
                 this.uiManager.log(`【訃報】${adv.name} は任務中に命を落としました...`, 'error');
 
-                this.guild.retiredAdventurers.push({
-                    id: adv.id,
-                    name: adv.name,
-                    type: adv.type,
-                    origin: adv.origin,
-                    rank: adv.rank,
-                    rankValue: adv.rankValue,
-                    leftDay: this.guild.day,
-                    reason: 'DEATH'
+                const reasonStr = LEAVE_TYPE_NAMES['DEATH'] || '殉職';
+                adv.history.push({
+                    day: this.guild.day,
+                    text: `${this.guild.day}日目に記録: ${reasonStr}`
                 });
+
+                adv.leftDay = this.guild.day;
+                adv.reason = 'DEATH';
+
+                this.guild.retiredAdventurers.push(adv);
 
                 const idx = this.guild.adventurers.findIndex(a => a.id === adv.id);
                 if (idx !== -1) {

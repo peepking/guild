@@ -42,9 +42,9 @@ export const ARTS_DATA = {
         { id: 'ITEM_THROW', name: '商品投擲', logs: ['{name}は在庫の商品を力任せに投げつけた！', '{name}の商魂たくましい攻撃がヒット！'] }
     ],
     BARD: [
-        { id: 'HEAL_SONG', name: '回復の歌', logs: ['{name}は癒やしの歌を奏でた！', '{name}の優しい歌声が傷を塞いでいく！'] },
+        { id: 'HEAL_SONG', name: '癒しの音色', logs: ['{name}は癒やしの音色を奏でた！', '{name}の優しい音色が傷を塞いでいく！'] },
         { id: 'DEEP_LULLABY', name: 'ディープララバイ', logs: ['{name}は深い眠りのララバイを歌った！', '{name}の歌声に敵は強烈な眠気に襲われる！'] },
-        { id: 'BATTLE_SONG', name: '戦いの歌', logs: ['{name}は激しい戦いの歌を歌い上げた！', '{name}の歌が味方の闘争心を極限まで高める！'] },
+        { id: 'BATTLE_SONG', name: '戦場の賛歌', logs: ['{name}は戦場の賛歌を歌い上げた！', '{name}の歌が味方の闘争心を極限まで高める！'] },
         { id: 'SONIC_BLAST', name: '指向性音波撃', logs: ['{name}は楽器をかき鳴らし衝撃波を放った！', '{name}の放つ音の刃が敵を切り裂く！'] },
         { id: 'REQUIEM', name: 'レクイエム', logs: ['{name}は永眠への鎮魂歌を歌った...！', '{name}の呪いの歌が敵の命を奪う！'] }
     ],

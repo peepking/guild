@@ -17,8 +17,14 @@ export class Guild {
             library: 0
         }; // 施設レベル
         this.activeBuffs = [];
-        this.financeHistory = []; // 日次集計履歴 [{day, income, expense, balance, details:[]}]
-        this.todayFinance = null; // 本日の記録
+        this.todayFinance = {
+            day: this.day,
+            income: 0,
+            expense: 0,
+            balance: this.money,
+            details: []
+        };
+        this.financeHistory = [this.todayFinance];
         this.retiredAdventurers = []; // 引退/死亡した冒険者
 
         // フェーズ6: 運営 & 方針
