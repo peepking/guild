@@ -127,9 +127,7 @@ export class QuestScreen {
         if (displayActive.length === 0) {
             const empty = document.createElement('div');
             empty.textContent = '依頼はありません';
-            empty.style.color = '#777';
-            empty.style.textAlign = 'center';
-            empty.style.padding = '2rem';
+            empty.className = 'empty-state-text';
             listContainer.appendChild(empty);
         } else {
             displayActive.forEach(q => {
@@ -153,8 +151,7 @@ export class QuestScreen {
 
         // --- 右: 詳細 ---
         const detailPanel = document.createElement('section');
-        detailPanel.className = 'panel detail-panel';
-        detailPanel.style.background = '#fdf5e6';
+        detailPanel.className = 'panel detail-panel bg-parchment';
 
         let selectedQuest = null;
         let selectedAssignment = null;
@@ -180,8 +177,8 @@ export class QuestScreen {
             }
         } else {
             detailPanel.innerHTML = `
-                <div style="text-align:center; margin-top:50%; transform:translateY(-50%); color:#8d6e63;">
-                    <div style="font-size:3rem; opacity:0.3;">📜</div>
+                <div class="empty-state-centered">
+                    <div class="empty-state-icon">📜</div>
                     <p>依頼を選択してください</p>
                 </div>
             `;
@@ -258,14 +255,14 @@ export class QuestScreen {
         let html = `<div class="panel-header">${quest.title}</div>`;
 
         let badgesHtml = '';
-        if (quest.isSpecial) badgesHtml += `<span class="status-badge status-badge-special" style="margin-right:4px;">特殊依頼</span>`;
+        if (quest.isSpecial) badgesHtml += `<span class="status-badge status-badge-special mr-xs">特殊依頼</span>`;
         if (quest.manualOnly) badgesHtml += `<span class="status-badge status-badge-manual">手動必須</span>`;
 
         if (badgesHtml) {
             html += `<div class="mb-md">${badgesHtml}</div>`;
         }
 
-        html += `<hr style="border:0; border-top:1px dashed #a1887f; margin:1rem 0;">`;
+        html += `<hr class="separator">`;
 
         html += `
             <div class="text-desc">
@@ -288,11 +285,11 @@ export class QuestScreen {
 
         if (isOngoing) {
             html += `<div class="sub-header">遂行状況</div>`;
-            html += `<div style="margin-top:0.5rem;">担当: ${assignment.members.map(m => m.name).join(', ')}</div>`;
+            html += `<div class="mt-sm">担当: ${assignment.members.map(m => m.name).join(', ')}</div>`;
 
             if (isPlanning) {
-                html += `<div style="color:#2e7d32; font-weight:bold; margin-top:0.5rem;">状態: 出発準備中</div>`;
-                html += `<button id="btn-cancel" class="btn btn-secondary" style="margin-top:1rem;">計画を取り消す</button>`;
+                html += `<div class="text-success font-bold mt-sm">状態: 出発準備中</div>`;
+                html += `<button id="btn-cancel" class="btn btn-secondary mt-md">計画を取り消す</button>`;
             } else {
                 html += `<div>進捗: 残り ${assignment.remainingDays}日</div>`;
                 // 無効化ボタンは削除済み

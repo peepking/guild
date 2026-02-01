@@ -173,12 +173,12 @@ export class OperationScreen {
                     <div class="font-bold">${def.name}</div>
                     <span class="text-sm">Lv.${currentLv} / ${def.maxLevel}</span>
                 </div>
-                <div class="policy-desc" style="min-height:3em;">${def.description}</div>
+                <div class="policy-desc min-h-3em">${def.description}</div>
                 <div class="policy-effects">${def.effectDesc}</div>
                 
                 <div class="flex-col-end gap-sm mt-auto">
                     ${isMax
-                ? '<span style="color:var(--text-main);">最大レベル</span>'
+                ? '<span class="text-main-color">最大レベル</span>'
                 : `<span class="font-bold text-status-${guild.money >= cost ? 'safe' : 'danger'}">改良: ${cost} G</span>`
             }
                     ${!isMax ? `<button class="btn-build btn btn-primary w-full" data-id="${def.id}" ${guild.money < cost ? 'disabled' : ''}>${currentLv === 0 ? '建設' : '強化'}</button>` : ''}
@@ -277,16 +277,13 @@ export class OperationScreen {
     }
 
     _renderPersonnel(container, guild) {
-        // Layout: Use same grid structure as AdventurerScreen
+        // レイアウト: AdventurerScreenと同じグリッド構造を使用
         container.innerHTML = '';
         container.className = 'operation-layout flex-1 scroll-y p-md grid-2-col-fixed-right';
-        // Note: operation-layout might conflict if it has display:block/flex, but grid-2-col-fixed-right sets display:grid. 
-        // To be safe, we should probably overwrite className or ensure grid wins.
-        // Let's reset className to be sure, keeping padding.
+        // Note: operation-layoutがdisplay:block/flexを持つ場合競合する可能性があるが、
+        // grid-2-col-fixed-rightはdisplay:gridを設定する。
+        // 安全のため、classNameをリセットしてpaddingだけ維持する。
         container.className = 'grid-2-col-fixed-right p-md panel-reset';
-        // Note: operation-layout might conflict if it has display:block/flex, but grid-2-col-fixed-right sets display:grid. 
-        // To be safe, we should probably overwrite className or ensure grid wins.
-        // Let's reset className to be sure, keeping padding.
 
         // Remove style overrides if any were lingering (though innerHTML='' clears content, wrapper styles persist if set on container)
         container.style.gap = '';
@@ -318,7 +315,7 @@ export class OperationScreen {
             <button id="btn-headhunt" class="btn btn-primary w-full" ${canAfford && !isFull ? '' : 'disabled'}>
                 外部招聘 (${headhuntCost}G)
             </button>
-            <div class="text-xs text-center mt-xs text-muted">即戦力の専門家を90日契約で雇用します</div>
+            <div class="text-xs mt-xs text-muted">即戦力の専門家を90日契約で雇用します</div>
         `;
 
         footer.querySelector('#btn-headhunt').addEventListener('click', () => {
@@ -367,7 +364,7 @@ export class OperationScreen {
             const jobName = ADVENTURER_JOB_NAMES[adv.type] || adv.type;
             const effectDesc = adv.effect ? adv.effect.desc : '効果なし';
 
-            // Match Adventurer Item structure
+            // 冒険者アイテム構造に合わせる
             row.innerHTML = `
                 <div class="list-item-header">
                     <span class="list-item-title">${adv.name}</span>
@@ -399,7 +396,7 @@ export class OperationScreen {
 
         const jobName = ADVENTURER_JOB_NAMES[adv.type] || adv.type;
 
-        // Header
+        // ヘッダー
         const header = document.createElement('div');
         header.className = 'panel-header flex-no-shrink';
         header.innerHTML = `
@@ -534,12 +531,12 @@ export class OperationScreen {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = `
             <div class="sub-header">気質・特性</div>
-            <div style="font-size:0.9em;">
+            <div class="text-sm">
                 危険志向: ${t.risk > 0 ? '+' + t.risk : t.risk}<br>
                 金銭欲: ${t.greed > 0 ? '+' + t.greed : t.greed}<br>
                 社交性: ${t.social > 0 ? '+' + t.social : t.social}
             </div>
-            <div style="margin-top:0.5rem;">
+            <div class="mt-sm">
                 ${(adv.traits || []).map(tKey => {
             const tr = TRAITS[tKey];
             return tr ? `<span class="trait-tag" title="${tr.effects}">[${tr.name}]</span>` : '';
@@ -567,9 +564,9 @@ export class OperationScreen {
         const artsDiv = document.createElement('div');
         artsDiv.innerHTML = `<div class="sub-header">習得奥義</div>`;
         if (adv.arts && adv.arts.length > 0) {
-            artsDiv.innerHTML += `<div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
+            artsDiv.innerHTML += `<div class="flex-wrap-gap-xs">
                 ${adv.arts.map(art => `
-                    <div style="background:#fff3e0; border:1px solid #ffcc80; color:#e65100; padding:2px 6px; border-radius:4px; font-size:0.9em; font-weight:bold;">
+                    <div class="art-tag">
                         ⚡ ${art.name}
                     </div>
                 `).join('')}
@@ -584,14 +581,14 @@ export class OperationScreen {
         const list = document.createElement('div');
 
         if (!adv.history || adv.history.length === 0) {
-            list.innerHTML = '<div class="empty-state" style="padding:1rem; color:#999;">特筆すべき出来事はまだありません</div>';
+            list.innerHTML = '<div class="empty-state text-muted p-md">特筆すべき出来事はまだありません</div>';
         } else {
             // 冒険者画面/アーカイブと同じタイムラインスタイル
             list.innerHTML = adv.history.map(h => `
-                <div style="padding:0.5rem; border-left:2px solid #d7ccc8; margin-left:0.5rem; position:relative;">
-                    <div style="position:absolute; left:-6px; top:0.8rem; width:10px; height:10px; background:#8d6e63; border-radius:50%;"></div>
+                <div class="history-item">
+                    <div class="history-dot"></div>
                     <div class="text-meta">Day ${h.day || '?'}</div>
-                    <div style="color:#3e2723;">${h.text || h}</div>
+                    <div class="text-wood">${h.text || h}</div>
                 </div>
             `).join('');
         }
@@ -599,36 +596,33 @@ export class OperationScreen {
 
         // 統計サマリー
         const statsSummary = document.createElement('div');
-        statsSummary.style.marginTop = '1rem';
-        statsSummary.style.padding = '1rem';
-        statsSummary.style.background = '#fafafa';
-        statsSummary.style.border = '1px dashed #ccc';
+        statsSummary.className = 'stats-summary-box';
 
         let achievementHtml = "";
         if (adv.records && adv.records.majorAchievements && adv.records.majorAchievements.length > 0) {
             achievementHtml = adv.records.majorAchievements.map(a =>
-                `<div><span style="color:#666; font-size:0.9em;">[Day${a.day}]</span> <span style="font-weight:bold;">${a.title}</span> <span style="font-size:0.8em; color:#e65100;">(Rank ${a.rank})</span></div>`
+                `<div><span class="text-meta">[Day${a.day}]</span> <span class="font-bold">${a.title}</span> <span class="text-xs text-accent-dangerous">(Rank ${a.rank})</span></div>`
             ).join('');
         } else {
-            achievementHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+            achievementHtml = '<div class="text-muted text-sm">なし</div>';
         }
 
         let battleHtml = "";
         if (adv.records && adv.records.majorKills && adv.records.majorKills.length > 0) {
             battleHtml = adv.records.majorKills.map(k =>
-                `<div><span style="color:#666; font-size:0.9em;">[Day${k.day}]</span> <span style="font-weight:bold;">${k.name}</span> <span style="font-size:0.8em; color:#d32f2f;">(Rank ${k.rank}${k.isBoss ? ' BOSS' : ''})</span></div>`
+                `<div><span class="text-meta">[Day${k.day}]</span> <span class="font-bold">${k.name}</span> <span class="text-xs text-accent-red-bright">(Rank ${k.rank}${k.isBoss ? ' BOSS' : ''})</span></div>`
             ).join('');
         } else {
-            battleHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+            battleHtml = '<div class="text-muted text-sm">なし</div>';
         }
 
         statsSummary.innerHTML = `
-            <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な功績</div>
+            <div class="text-sm font-bold stats-summary-header">主な功績</div>
             <div class="text-sm" style="margin-bottom:1rem;">
                 ${achievementHtml}
             </div>
 
-            <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な戦績 (討伐ランク順)</div>
+            <div class="text-sm font-bold stats-summary-header">主な戦績 (討伐ランク順)</div>
             <div class="text-sm">
                 ${battleHtml}
             </div>
@@ -642,29 +636,29 @@ export class OperationScreen {
             if (!content || (Array.isArray(content) && content.length === 0)) return '';
             let htmlContent = '';
             if (Array.isArray(content)) {
-                htmlContent = content.map(line => `<p style="margin-bottom:0.4rem; line-height:1.6;">${line}</p>`).join('');
+                htmlContent = content.map(line => `<p class="meikan-text">${line}</p>`).join('');
             } else {
-                htmlContent = `<p style="line-height:1.6;">${content}</p>`;
+                htmlContent = `<p class="meikan-text">${content}</p>`;
             }
-            if (isItalic) htmlContent = `<div style="font-style:italic; color:#555;">${htmlContent}</div>`;
+            if (isItalic) htmlContent = `<div class="text-italic-muted">${htmlContent}</div>`;
             return `
-                <div style="margin-bottom:1.5rem;">
-                    <div class="sub-header" style="color:#5D4037; border-bottom:1px solid #d7ccc8; margin-bottom:0.5rem;">${title}</div>
-                    <div style="padding:0 0.5rem; font-family:'Yu Mincho', serif;">
+                <div class="mb-lg">
+                    <div class="sub-header border-bottom-soft text-sub-color">${title}</div>
+                    <div class="font-serif-padded">
                         ${htmlContent}
                     </div>
                 </div>
              `;
         };
 
-        let html = '<div style="padding:0.5rem;">';
+        let html = '<div class="p-sm">';
         html += createSection('人物', bio.intro);
         if (bio.arts && bio.arts.length > 0) html += createSection('奥義・魔法', bio.arts);
         if (bio.traits && bio.traits.length > 0) html += createSection('特性・人柄', bio.traits);
         if (bio.career && bio.career.length > 0) html += createSection('主な経歴', bio.career);
         if (bio.nickname) html += createSection('二つ名', bio.nickname);
         if (bio.flavor) html += createSection('評価', bio.flavor, true);
-        if (html === '<div style="padding:0.5rem;">') html += '<div class="text-muted" style="padding:1rem;">まだ記録された情報はありません。</div>';
+        if (html === '<div class="p-sm">') html += '<div class="text-muted p-md">まだ記録された情報はありません。</div>';
         html += '</div>';
         container.innerHTML = html;
     }
@@ -691,7 +685,7 @@ export class OperationScreen {
                     <div class="text-right mt-md">残り ${activeCampaign.remainingDays} 日</div>
                 </div>
             ` : `
-                 <div class="operation-card mb-lg" style="background:var(--bg-light); border-style:dashed;">
+                 <div class="operation-card mb-lg card-empty-dashed">
                     <h3 class="text-sub">キャンペーン未実施</h3>
                     <div class="policy-desc">現在実施中のキャンペーンはありません。</div>
                 </div>
@@ -718,7 +712,7 @@ export class OperationScreen {
                     <span class="font-bold">${cmp.name}</span>
                     <span class="text-sm font-bold">${cmp.cost} G</span>
                 </div>
-                <div class="policy-desc" style="min-height:3em;">${cmp.description}</div>
+                <div class="policy-desc min-h-3em">${cmp.description}</div>
                 <div class="policy-effects">${cmp.effectDesc}</div>
                 
                 <div class="flex-col-end gap-sm mt-auto">

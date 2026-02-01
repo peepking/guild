@@ -10,17 +10,11 @@ export class QuestHistoryScreen {
 
     render(container, guild, globalState) {
         container.innerHTML = '';
-        container.className = 'screen-container';
-        container.style.display = 'grid';
-        container.style.gridTemplateColumns = '1.3fr 1fr';
-        container.style.gap = '1.5rem';
+        container.className = 'screen-container grid-history';
 
         // --- 左: 履歴リスト ---
         const listPanel = document.createElement('section');
-        listPanel.className = 'panel';
-        listPanel.style.padding = '0.5rem';
-        listPanel.style.display = 'flex';
-        listPanel.style.flexDirection = 'column';
+        listPanel.className = 'panel flex-col p-sm';
 
         // ヘッダー
         const header = document.createElement('div');
@@ -30,9 +24,8 @@ export class QuestHistoryScreen {
 
         // リストコンテナ
         const listContainer = document.createElement('div');
-        listContainer.className = 'scroll-list';
+        listContainer.className = 'scroll-list flex-1';
         listContainer.id = 'history-list-container'; // 必要に応じてアクセスしやすくするID
-        listContainer.style.flex = '1';
 
         const history = this.gameLoop.questHistory || [];
         const totalPages = Math.ceil(history.length / this.ITEMS_PER_PAGE) || 1;
@@ -48,9 +41,7 @@ export class QuestHistoryScreen {
         if (displayItems.length === 0) {
             const empty = document.createElement('div');
             empty.textContent = '履歴はありません';
-            empty.style.color = '#777';
-            empty.style.textAlign = 'center';
-            empty.style.padding = '2rem';
+            empty.className = 'empty-state-text';
             listContainer.appendChild(empty);
         } else {
             displayItems.forEach(item => {
@@ -78,15 +69,10 @@ export class QuestHistoryScreen {
 
         // ページネーション制御
         const pagination = document.createElement('div');
-        pagination.style.display = 'flex';
-        pagination.style.justifyContent = 'space-between';
-        pagination.style.padding = '0.5rem';
-        pagination.style.borderTop = '1px solid #d7ccc8';
+        pagination.className = 'flex-between p-sm border-t-soft';
 
         const prevBtn = document.createElement('button');
-        prevBtn.className = 'btn-secondary'; // スタイル合わせ
-        prevBtn.style.padding = '0.2rem 0.5rem';
-        prevBtn.style.width = 'auto';
+        prevBtn.className = 'btn-secondary py-xs w-auto'; // スタイル合わせ
         prevBtn.textContent = '<< 前へ';
         prevBtn.disabled = this.state.currentPage === 0;
         prevBtn.onclick = () => {
@@ -99,9 +85,7 @@ export class QuestHistoryScreen {
         pageLabel.textContent = `Page ${this.state.currentPage + 1} / ${totalPages}`;
 
         const nextBtn = document.createElement('button');
-        nextBtn.className = 'btn-secondary'; // スタイル合わせ
-        nextBtn.style.padding = '0.2rem 0.5rem';
-        nextBtn.style.width = 'auto';
+        nextBtn.className = 'btn-secondary py-xs w-auto'; // スタイル合わせ
         nextBtn.textContent = '次へ >>';
         nextBtn.disabled = this.state.currentPage >= totalPages - 1;
         nextBtn.onclick = () => {
@@ -119,8 +103,7 @@ export class QuestHistoryScreen {
 
         // --- 右: 詳細 ---
         const detailPanel = document.createElement('section');
-        detailPanel.className = 'panel detail-panel';
-        detailPanel.style.background = '#fdf5e6';
+        detailPanel.className = 'panel detail-panel bg-parchment';
 
         const selectedItem = history.find(h => h.id === this.state.selectedHistoryId);
 
@@ -128,8 +111,8 @@ export class QuestHistoryScreen {
             this._renderDetail(detailPanel, selectedItem);
         } else {
             detailPanel.innerHTML = `
-                <div style="text-align:center; margin-top:50%; transform:translateY(-50%); color:#8d6e63;">
-                    <div style="font-size:3rem; opacity:0.3;">📜</div>
+                <div class="empty-state-centered">
+                    <div class="empty-state-icon">📜</div>
                     <p>履歴を選択してください</p>
                 </div>
             `;
@@ -153,20 +136,20 @@ export class QuestHistoryScreen {
             div.className += ' selected';
         }
 
-        let statusColor = '#757575'; // 期限切れ/不明
+        let statusColorClass = 'text-grey'; // 期限切れ/不明
         let statusText = '終了';
         if (item.result === 'SUCCESS') {
-            statusColor = '#2e7d32'; // 緑
+            statusColorClass = 'text-success'; // 緑
             statusText = '成功';
         } else if (item.result === 'FAILURE') {
-            statusColor = '#c62828'; // 赤
+            statusColorClass = 'text-reckless'; // 赤
             statusText = '失敗';
         } else if (item.result === 'EXPIRED') {
-            statusColor = '#ef6c00'; // オレンジ
+            statusColorClass = 'text-warning'; // オレンジ
             statusText = '期限切れ';
         }
 
-        const specialBadge = item.isSpecial ? '<span class="status-badge" style="background:#263238; color:#efebe9;">特務</span> ' : '';
+        const specialBadge = item.isSpecial ? '<span class="status-badge bg-dark-grey text-parchment">特務</span> ' : '';
 
         div.innerHTML = `
             <div class="list-item-header">
@@ -174,9 +157,9 @@ export class QuestHistoryScreen {
                 <span class="list-item-title">${item.title}</span>
             </div>
             <div class="list-item-meta">
-                <span style="font-weight:bold; color:${statusColor};">${statusText}</span>
-                <span style="color:#777;">Day ${item.date}</span>
-                <span class="status-badge" style="background:#efebe9; border:1px solid #d7ccc8;">Rank ${item.rank}</span>
+                <span class="font-bold ${statusColorClass}">${statusText}</span>
+                <span class="text-sub">Day ${item.date}</span>
+                <span class="status-badge bg-parchment border-soft">Rank ${item.rank}</span>
             </div>
         `;
         return div;
@@ -186,19 +169,19 @@ export class QuestHistoryScreen {
         panel.innerHTML = `<div class="panel-header">${item.title}</div>`;
 
         let resultLabel = '';
-        if (item.result === 'SUCCESS') resultLabel = '<span style="color:#2e7d32; font-weight:bold;">依頼達成</span>';
-        else if (item.result === 'FAILURE') resultLabel = '<span style="color:#c62828; font-weight:bold;">依頼失敗</span>';
-        else resultLabel = '<span style="color:#ef6c00; font-weight:bold;">期限切れ</span>';
+        if (item.result === 'SUCCESS') resultLabel = '<span class="text-success font-bold">依頼達成</span>';
+        else if (item.result === 'FAILURE') resultLabel = '<span class="text-reckless font-bold">依頼失敗</span>';
+        else resultLabel = '<span class="text-warning font-bold">期限切れ</span>';
 
         panel.innerHTML += `
-            <div style="margin-bottom:1rem;">
+            <div class="mb-md">
                 ${resultLabel}
-                <span style="margin-left:10px;">完了日: Day ${item.date}</span>
+                <span class="ml-sm">完了日: Day ${item.date}</span>
             </div>
-            <div class="text-base text-sub" style="margin-bottom:0.8rem; font-style:italic;">
+            <div class="text-base text-sub mb-sm italic">
                 ${item.description || "詳細不明"}
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;" class="text-base text-sub">
+            <div class="grid-2-col gap-sm text-base text-sub">
                 <div>ランク: <b>${item.rank}</b></div>
                 <div>参加: ${item.members.length > 0 ? item.members.length + '人' : 'なし'}</div>
             </div>
@@ -207,27 +190,19 @@ export class QuestHistoryScreen {
 
         if (item.result !== 'EXPIRED') {
             panel.innerHTML += `
-                <div style="background:#efebe9; padding:0.8rem; border-radius:4px; border:1px solid #d7ccc8;" class="text-base">
+                <div class="reward-box text-base">
                     <b>報酬:</b> ${item.reward.money}G / 評判 ${item.reward.reputation > 0 ? '+' : ''}${item.reward.reputation}
                 </div>
-                <div style="margin-top:0.5rem;">
+                <div class="mt-sm">
                     <b>担当者:</b> ${item.members.join(', ')}
                 </div>
             `;
         }
 
         // 冒険日誌エリア
-        panel.innerHTML += `<div class="sub-header" style="margin-top:1.5rem;">冒険日誌</div>`;
+        panel.innerHTML += `<div class="sub-header mt-lg">冒険日誌</div>`;
         const logArea = document.createElement('div');
-        logArea.style.background = '#fff';
-        logArea.style.border = '1px solid #d7ccc8';
-        logArea.style.padding = '0.5rem';
-        logArea.style.height = '200px';
-        logArea.style.overflowY = 'auto';
-        logArea.style.fontSize = '0.9em';
-        logArea.style.color = '#3e2723';
-        logArea.style.whiteSpace = 'pre-wrap';
-        logArea.style.fontFamily = 'serif';
+        logArea.className = 'log-area';
 
         if (item.logs && item.logs.length > 0) {
             logArea.textContent = this._formatLogs(item.logs);

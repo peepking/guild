@@ -26,11 +26,11 @@ export class Layout {
                     
                     <div class="stat-group">
                         <span class="stat-label">方針</span>
-                        <span id="display-policy" class="stat-value text-sm" style="min-width:auto;">Balanced</span>
+                        <span id="display-policy" class="stat-value text-sm min-w-auto">Balanced</span>
                     </div>
                     
-                    <div id="display-event-container" class="stat-group hidden" style="color:#ffcc80;">
-                        <span style="font-size:1.2em;">⚠️</span>
+                    <div id="display-event-container" class="stat-group hidden text-warning-light">
+                        <span class="text-lg">⚠️</span>
                         <span id="display-event" class="event-notice">Event</span>
                     </div>
                 </div>
@@ -80,7 +80,7 @@ export class Layout {
         document.getElementById('display-money').textContent = `${guild.money} G`;
 
         const rankObj = GUILD_RANK_THRESHOLDS.find(r => guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
-        document.getElementById('display-reputation').innerHTML = `${guild.reputation} <span style="font-size:0.8em; color:#ddd;">(Rank ${rankObj.label})</span>`;
+        document.getElementById('display-reputation').innerHTML = `${guild.reputation} <span class="text-rank-sub">(Rank ${rankObj.label})</span>`;
 
         // 方針
         const pName = { BALANCED: '標準', AGGRESSIVE: '利益', SAFE: '安全', TRAINING: '育成', COMMERCIAL: '商業' };

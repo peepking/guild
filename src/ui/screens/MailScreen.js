@@ -122,11 +122,11 @@ export class MailScreen {
 
         detailContainer.innerHTML = `
             <div class="mail-detail-header">
-                <div class="mail-header-top" style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 class="mail-detail-title" style="margin:0;">${mail.title}</h3>
+                <div class="mail-header-top flex-between flex-center">
+                    <h3 class="mail-detail-title m-0">${mail.title}</h3>
                     <button id="delete-mail-btn" class="btn btn-danger btn-sm">削除</button>
                 </div>
-                <div class="mail-detail-meta" style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+                <div class="mail-detail-meta mt-sm flex-row gap-sm">
                     <span class="mail-type-badge ${mail.type.toLowerCase()}">${this._getTypeLabel(mail.type)}</span>
                     <span class="mail-date">Day ${mail.meta && mail.meta.day ? mail.meta.day : ''}</span>
                 </div>

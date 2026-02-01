@@ -81,12 +81,12 @@ export class ArchivesScreen {
         container.innerHTML = `
             <div class="archives-layout">
                 
-                <!-- LEFT: Details -->
+                <!-- 左: 詳細 -->
                 <div id="finance-detail-view" class="finance-detail">
                     <div class="text-center text-sub mt-lg">右側のリストから日付を選択してください</div>
                 </div>
 
-                <!-- RIGHT: List -->
+                <!-- 右: リスト -->
                 <div class="finance-list-wrapper">
                     <!-- Controls -->
                     <div class="finance-controls">
@@ -110,10 +110,10 @@ export class ArchivesScreen {
                                 ${pageItems.map((item, idx) => {
             const realIdx = start + idx;
             const isSelected = this.selectedDayIndex === realIdx;
-            const bg = isSelected ? 'style="background:#ffe0b2;"' : ((idx % 2 === 0) ? 'style="background:#fafafa;"' : '');
+            const bgClass = isSelected ? 'bg-selected-orange' : ((idx % 2 === 0) ? 'bg-white-smoke' : '');
             return `
-                                        <tr class="finance-row" data-idx="${realIdx}" ${bg}>
-                                            <td style="text-align:center;">${item.day}</td>
+                                        <tr class="finance-row ${bgClass}" data-idx="${realIdx}">
+                                            <td class="text-center">${item.day}</td>
                                             <td class="finance-income">${item.income > 0 ? '+' + item.income : '-'}</td>
                                             <td class="finance-expense">${item.expense < 0 ? item.expense : (item.expense > 0 ? '-' + item.expense : '-')}</td>
                                             <td class="finance-balance">${item.balance}</td>
@@ -165,15 +165,19 @@ export class ArchivesScreen {
             <div class="finance-summary-box">
                 <div class="finance-summary-item">
                     <div class="text-meta">収入</div>
-                    <div style="color:#2e7d32; font-weight:bold;">+${dayData.income}</div>
+                    <div class="text-success font-bold">+${dayData.income}</div>
+                </div>
+                <div class="finance-summary-item">
+                    <div class="text-meta">収入</div>
+                    <div class="text-success font-bold">+${dayData.income}</div>
                 </div>
                 <div class="finance-summary-item">
                     <div class="text-meta">支出</div>
-                    <div style="color:#c62828; font-weight:bold;">${dayData.expense}</div>
+                    <div class="text-reckless font-bold">${dayData.expense}</div>
                 </div>
                 <div class="finance-summary-item">
                     <div class="text-meta">日次収支</div>
-                    <div style="font-weight:bold;">${(dayData.income + dayData.expense) >= 0 ? '+' : ''}${dayData.income + dayData.expense}</div>
+                    <div class="font-bold">${(dayData.income + dayData.expense) >= 0 ? '+' : ''}${dayData.income + dayData.expense}</div>
                 </div>
             </div>
 
@@ -182,7 +186,7 @@ export class ArchivesScreen {
                 dayData.details.map(d => `
                         <div class="finance-detail-row">
                             <span>${d.reason}</span>
-                            <span style="font-weight:bold; color:${d.amount >= 0 ? '#2e7d32' : '#c62828'};">
+                            <span class="font-bold ${d.amount >= 0 ? 'text-success' : 'text-reckless'}">
                                 ${d.amount >= 0 ? '+' : ''}${d.amount}
                             </span>
                         </div>
@@ -198,7 +202,7 @@ export class ArchivesScreen {
         container.innerHTML = '';
         container.classList.add('grid-2-col-fixed-right');
 
-        // --- Left: List ---
+        // --- 左: リスト ---
         const listPanel = document.createElement('section');
         listPanel.className = 'panel flex-col';
         listPanel.innerHTML = `<div class="panel-header">過去帳 (${list.length}名)</div>`;
@@ -208,7 +212,7 @@ export class ArchivesScreen {
         listPanel.appendChild(listContainer);
         container.appendChild(listPanel);
 
-        // --- Right: Detail ---
+        // --- 右: 詳細 ---
         const detailPanel = document.createElement('section');
         detailPanel.className = 'panel detail-panel flex-col';
         container.appendChild(detailPanel);
@@ -279,7 +283,7 @@ export class ArchivesScreen {
     }
 
     _renderRetiredDetail(panel, adv) {
-        const titlePart = adv.title ? `<span style="font-size:0.8em; color:#d84315;">《${adv.title}》</span>` : '';
+        const titlePart = adv.title ? `<span class="text-title-part">《${adv.title}》</span>` : '';
 
         panel.innerHTML = `
             <div class="panel-header flex-no-shrink">
@@ -372,10 +376,10 @@ export class ArchivesScreen {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = `
                 <div class="sub-header">気質・特性</div>
-                <div style="font-size:0.9em;">
+                <div class="text-sm">
                     危険志向:${t.risk} / 金銭欲:${t.greed} / 社交性:${t.social}
                 </div>
-                <div style="margin-top:0.5rem;">
+                <div class="mt-xs">
                     ${adv.traits.map(tKey => {
                 const tr = TRAITS[tKey];
                 return tr ? `<span class="trait-tag" title="${tr.effects}">[${tr.name}]</span>` : '';
@@ -390,9 +394,9 @@ export class ArchivesScreen {
             const artsDiv = document.createElement('div');
             artsDiv.innerHTML = `<div class="sub-header">習得奥義</div>`;
             if (adv.arts.length > 0) {
-                artsDiv.innerHTML += `<div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
+                artsDiv.innerHTML += `<div class="flex-wrap-gap-xs">
                     ${adv.arts.map(art => `
-                        <div style="background:#fff3e0; border:1px solid #ffcc80; color:#e65100; padding:2px 6px; border-radius:4px; font-size:0.9em; font-weight:bold;">
+                        <div class="art-tag">
                             ⚡ ${art.name}
                         </div>
                     `).join('')}
@@ -410,10 +414,10 @@ export class ArchivesScreen {
             list.innerHTML = '<div class="empty-state">記録なし</div>';
         } else {
             list.innerHTML = adv.history.map(h => `
-                <div style="padding:0.5rem; border-left:2px solid #bdbdbd; margin-left:0.5rem; position:relative;">
-                    <div style="position:absolute; left:-6px; top:0.8rem; width:10px; height:10px; background:#757575; border-radius:50%;"></div>
+                <div class="history-item">
+                    <div class="history-dot"></div>
                     <div class="text-meta">Day ${h.day}</div>
-                    <div style="color:#424242;">${h.text}</div>
+                    <div class="text-grey-dark">${h.text}</div>
                 </div>
             `).join('');
         }
@@ -422,24 +426,21 @@ export class ArchivesScreen {
         // サマリー
         if (adv.records) {
             const statsSummary = document.createElement('div');
-            statsSummary.style.marginTop = '1rem';
-            statsSummary.style.padding = '1rem';
-            statsSummary.style.background = '#fafafa';
-            statsSummary.style.border = '1px dashed #ccc';
+            statsSummary.className = 'stats-summary-box';
 
             // 冒険者画面と同様のロジック (実績/討伐)
             let achievementHtml = "";
             if (adv.records.majorAchievements && adv.records.majorAchievements.length > 0) {
                 achievementHtml = adv.records.majorAchievements.map(a =>
-                    `<div><span style="color:#666; font-size:0.9em;">[Day${a.day}]</span> <span style="font-weight:bold;">${a.title}</span> <span style="font-size:0.8em; color:#e65100;">(Rank ${a.rank})</span></div>`
+                    `<div><span class="text-meta">[Day${a.day}]</span> <span class="font-bold">${a.title}</span> <span class="text-xs text-accent-dangerous">(Rank ${a.rank})</span></div>`
                 ).join('');
             } else {
-                achievementHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+                achievementHtml = '<div class="text-muted text-sm">なし</div>';
             }
 
             statsSummary.innerHTML = `
-                <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な功績</div>
-                <div class="text-sm" style="margin-bottom:1rem;">${achievementHtml}</div>
+                <div class="text-sm font-bold stats-summary-header">主な功績</div>
+                <div class="text-sm mb-md">${achievementHtml}</div>
             `;
             container.appendChild(statsSummary);
         }

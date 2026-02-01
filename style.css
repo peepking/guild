@@ -1745,3 +1745,228 @@ h2 {
 .text-xs {
     font-size: 0.75rem;
 }
+
+/* --- AdventurerScreen Refactoring Classes --- */
+.text-title-part {
+    font-size: 0.8em;
+    color: #d84315;
+}
+
+.meikan-text {
+    margin-bottom: 0.4rem;
+    line-height: 1.6;
+}
+
+.text-italic-muted {
+    font-style: italic;
+    color: #555;
+}
+
+.border-bottom-soft {
+    border-bottom: 1px solid #d7ccc8;
+    margin-bottom: 0.5rem;
+}
+
+.font-serif-padded {
+    padding: 0 0.5rem;
+    font-family: 'Yu Mincho', serif;
+}
+
+.flex-wrap-gap-xs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.art-tag {
+    background: #fff3e0;
+    border: 1px solid #ffcc80;
+    color: #e65100;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.history-item {
+    padding: 0.5rem;
+    border-left: 2px solid #d7ccc8;
+    margin-left: 0.5rem;
+    position: relative;
+}
+
+.history-dot {
+    position: absolute;
+    left: -6px;
+    top: 0.8rem;
+    width: 10px;
+    height: 10px;
+    background: #8d6e63;
+    border-radius: 50%;
+}
+
+.stats-summary-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #fafafa;
+    border: 1px dashed #ccc;
+}
+
+.stats-summary-header {
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.2rem;
+}
+
+.mt-xs {
+    margin-top: 4px;
+}
+
+.mb-md {
+    margin-bottom: 1rem;
+}
+
+.text-accent-dangerous {
+    color: #e65100;
+}
+
+.text-accent-red-bright {
+    color: #d32f2f;
+}
+
+/* --- Batch 2 Refactoring Classes --- */
+.card {
+    background: #fff;
+    border: 1px solid #d7ccc8;
+    border-radius: 4px;
+}
+
+.separator {
+    border: 0;
+    border-top: 1px dashed #d7ccc8;
+    margin: 1rem 0;
+}
+
+.text-warning {
+    color: #f57f17;
+}
+
+.text-success {
+    color: #2e7d32;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.mt-lg {
+    margin-top: 2rem;
+}
+
+.w-auto {
+    width: auto !important;
+}
+
+.bg-selected-orange {
+    background: #ffe0b2 !important;
+}
+
+.bg-white-smoke {
+    background: #fafafa;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-reckless {
+    color: #c62828;
+}
+
+.text-grey-dark {
+    color: #424242;
+}
+
+.text-grey {
+    color: #9e9e9e;
+}
+
+.mb-sm {
+    margin-bottom: 0.5rem;
+}
+
+/* --- Batch 3 Refactoring Classes --- */
+.min-h-3em {
+    min-height: 3em;
+}
+
+.card-empty-dashed {
+    background: #fafafa;
+    border-style: dashed;
+}
+
+.text-main-color {
+    color: var(--text-main);
+}
+
+/* --- Batch 4 Refactoring Classes --- */
+.bg-parchment {
+    background: #fdf5e6;
+}
+
+.empty-state-centered {
+    text-align: center;
+    margin-top: 50%;
+    transform: translateY(-50%);
+    color: #8d6e63;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.mr-xs {
+    margin-right: 0.25rem;
+}
+
+.grid-history {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 1.5rem;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.log-area {
+    background: #fff;
+    border: 1px solid #d7ccc8;
+    padding: 0.5rem;
+    height: 200px;
+    overflow-y: auto;
+    font-size: 0.9em;
+    color: #3e2723;
+    white-space: pre-wrap;
+    font-family: serif;
+}
+
+.min-w-auto {
+    min-width: auto !important;
+}
+
+.text-warning-light {
+    color: #ffcc80;
+}
+
+.text-rank-sub {
+    font-size: 0.8em;
+    color: #ddd;
+}
+
+.footer-actions {
+    border-top: 1px dashed #d7ccc8;
+}

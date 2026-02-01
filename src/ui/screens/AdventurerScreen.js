@@ -130,7 +130,7 @@ export class AdventurerScreen {
 
         // 3. 描画
         if (filtered.length === 0) {
-            container.innerHTML = '<div style="padding:1rem; color:#888; font-style:italic;">条件に合致する者はおりません。</div>';
+            container.innerHTML = '<div class="text-muted italic p-md">条件に合致する者はおりません。</div>';
             return;
         }
 
@@ -154,7 +154,7 @@ export class AdventurerScreen {
         const toolbar = document.createElement('div');
         toolbar.className = 'panel-frame flex-between gap-sm font-header text-sm';
 
-        // Helper for Selects
+        // セレクトボックス用ヘルパー
         const createSelect = (options, value, onChange, width = 'auto') => {
             const sel = document.createElement('select');
             sel.className = 'select-sm';
@@ -172,11 +172,11 @@ export class AdventurerScreen {
             return sel;
         };
 
-        // --- Left Group: Filters ---
+        // --- 左グループ: フィルタ ---
         const leftGroup = document.createElement('div');
         leftGroup.className = 'flex-wrap gap-xs';
 
-        // Class Filter
+        // クラスフィルタ
         const classOpts = [{ val: 'ALL', label: '全部署' }];
         Object.values(ADVENTURER_TYPES).forEach(t => classOpts.push({ val: t, label: t }));
         leftGroup.appendChild(createSelect(classOpts, this.state.filterClass, (v) => {
@@ -184,7 +184,7 @@ export class AdventurerScreen {
             this._refreshList(guild);
         }));
 
-        // Rank Filter
+        // ランクフィルタ
         leftGroup.appendChild(createSelect([
             { val: 'ALL', label: '全等級' },
             { val: 'S', label: 'Rank S' },
@@ -198,7 +198,7 @@ export class AdventurerScreen {
             this._refreshList(guild);
         }));
 
-        // Status Filter
+        // 状態フィルタ
         leftGroup.appendChild(createSelect([
             { val: 'ALL', label: '全状況' },
             { val: 'AVAILABLE', label: '待機中' },
@@ -211,11 +211,11 @@ export class AdventurerScreen {
 
         toolbar.appendChild(leftGroup);
 
-        // --- Right Group: Sorting ---
+        // --- 右グループ: ソート ---
         const rightGroup = document.createElement('div');
         rightGroup.className = 'flex-row gap-xs';
 
-        // Sort Key
+        // ソートキー
         rightGroup.appendChild(createSelect([
             { val: 'RANK', label: '評価順' },
             { val: 'TRUST', label: '信頼順' },
@@ -226,7 +226,7 @@ export class AdventurerScreen {
             this._refreshList(guild);
         }));
 
-        // Sort Order Button
+        // ソート順ボタン
         const orderBtn = document.createElement('button');
         orderBtn.className = 'btn-icon-sm';
 
@@ -255,18 +255,18 @@ export class AdventurerScreen {
         }
     }
 
-    // deleted duplicate or misplaced code
+    // 重複または誤配置コードの削除
 
     _createAdventurerItem(adv) {
         const div = document.createElement('div');
         div.className = 'list-item list-item-adventure';
 
-        // Highlight if selected
+        // 選択状態のハイライト
         if (this.state.selectedAdventurerId === adv.id) {
             div.classList.add('selected');
         }
 
-        // Ranks
+        // ランク
         const getRank = (val) => {
             if (val >= 100) return 'S';
             if (val >= 80) return 'A';
@@ -277,7 +277,7 @@ export class AdventurerScreen {
         };
         const ranks = Object.entries(adv.stats).map(([k, v]) => `${k}:${getRank(v)}`).join(' ');
 
-        // Status text
+        // ステータステキスト
         let statusText = `状態: ${adv.state}`;
         if (adv.recoveryDays > 0) {
             statusText = `療養中 (あと${adv.recoveryDays}日)`;
@@ -286,7 +286,7 @@ export class AdventurerScreen {
             statusText = `遠征中`;
             div.classList.add('bg-safe');
         } else {
-            // Idle state
+            // 待機状態
             div.classList.add('bg-parchment');
         }
 
@@ -295,8 +295,8 @@ export class AdventurerScreen {
             return t ? `<span class="trait-tag" title="${t.effects}">${t.name}</span>` : '';
         }).join('');
 
-        // Title formatting
-        const titleStr = adv.title ? ` <span class="text-accent-orange text-sm">《${adv.title}》</span>` : '';
+        // 二つ名フォーマット
+        const titleStr = adv.title ? ` <span class="text-title-part text-sm font-bold">《${adv.title}》</span>` : '';
 
         div.innerHTML = `
             <div class="list-item-header">
@@ -314,8 +314,8 @@ export class AdventurerScreen {
     }
 
     _renderDetail(panel, adv, guild) {
-        // Header with Title
-        const titlePart = adv.title ? `<span style="font-size:0.8em; color:#d84315;">《${adv.title}》</span>` : '';
+        // タイトル付きヘッダー
+        const titlePart = adv.title ? `<span class="text-title-part">《${adv.title}》</span>` : '';
 
         panel.innerHTML = `
             <div class="panel-header flex-no-shrink flex-between flex-center adv-header">
@@ -324,14 +324,9 @@ export class AdventurerScreen {
             </div>
         `;
 
-        // Appointment Button (Rank B+ only)
+        // 任命ボタン (ランクB以上のみ)
         if (guild && ['S', 'A', 'B'].includes(adv.rankLabel)) {
-            const isFull = guild.advisors.length >= 20; // ADVISOR_CONFIG.MAX_ADVISORS (hardcoded or imported?)
-            // We import ADVISOR_CONFIG in file? No. Import it at top?
-            // ADVISOR_CONFIG is not imported. I should check imports.
-            // It uses ADVENTURER_JOB_NAMES etc.
-            // Let's assume 20 or check existing code. ADVISOR_CONFIG is exported from constants.js.
-            // I should add ADVISOR_CONFIG to imports.
+            const isFull = guild.advisors.length >= 20; // ADVISOR_CONFIG.MAX_ADVISORS
 
             const btn = document.createElement('button');
             btn.className = 'btn btn-secondary py-xs btn-sm';
@@ -346,7 +341,7 @@ export class AdventurerScreen {
                             this.gameLoop.uiManager.render();
                         }
                     } else if (window.gameLoop && window.gameLoop.managementService) {
-                        // Fallback
+                        // フォールバック
                         const result = window.gameLoop.managementService.appointAdvisor(guild, adv.id);
                         if (result && result.success) {
                             window.gameLoop.uiManager.render();
@@ -357,7 +352,7 @@ export class AdventurerScreen {
             panel.querySelector('#action-area').appendChild(btn);
         }
 
-        // Tabs
+        // タブ
         const tabs = document.createElement('div');
         tabs.className = 'tabs flex-no-shrink';
         tabs.innerHTML = `
@@ -367,16 +362,16 @@ export class AdventurerScreen {
         `;
         panel.appendChild(tabs);
 
-        // Content Area
+        // コンテンツエリア
         const content = document.createElement('div');
         content.id = 'detail-content';
         content.className = 'scroll-y flex-1 p-sm';
         panel.appendChild(content);
 
-        // Render Initial Tab
+        // 初期タブの描画
         this._renderTabContent(content, adv);
 
-        // Bind Tab Events
+        // タブイベントのバインド
         tabs.querySelectorAll('.tab').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.state.currentTab = btn.dataset.tab;
@@ -408,55 +403,55 @@ export class AdventurerScreen {
 
             let htmlContent = '';
             if (Array.isArray(content)) {
-                htmlContent = content.map(line => `<p style="margin-bottom:0.4rem; line-height:1.6;">${line}</p>`).join('');
+                htmlContent = content.map(line => `<p class="meikan-text">${line}</p>`).join('');
             } else {
-                htmlContent = `<p style="line-height:1.6;">${content}</p>`;
+                htmlContent = `<p class="meikan-text">${content}</p>`;
             }
 
-            if (isItalic) htmlContent = `<div style="font-style:italic; color:#555;">${htmlContent}</div>`;
+            if (isItalic) htmlContent = `<div class="text-italic-muted">${htmlContent}</div>`;
 
             return `
-                <div style="margin-bottom:1.5rem;">
-                    <div class="sub-header" style="color:#5D4037; border-bottom:1px solid #d7ccc8; margin-bottom:0.5rem;">${title}</div>
-                    <div style="padding:0 0.5rem; font-family:'Yu Mincho', serif;">
+                <div class="mb-lg">
+                    <div class="sub-header border-bottom-soft text-sub-color">${title}</div>
+                    <div class="font-serif-padded">
                         ${htmlContent}
                     </div>
                 </div>
              `;
         };
 
-        let html = '<div style="padding:0.5rem;">';
+        let html = '<div class="p-sm">';
 
-        // 1. Intro
+        // 1. 自己紹介
         html += createSection('人物', bio.intro);
 
-        // 2. Arts
+        // 2. 奥義
         if (bio.arts && bio.arts.length > 0) {
             html += createSection('奥義・魔法', bio.arts);
         }
 
-        // 3. Traits
+        // 3. 特性
         if (bio.traits && bio.traits.length > 0) {
             html += createSection('特性・人柄', bio.traits);
         }
 
-        // 4. Career
+        // 4. 経歴
         if (bio.career && bio.career.length > 0) {
             html += createSection('主な経歴', bio.career);
         }
 
-        // 5. Nickname
+        // 5. 二つ名
         if (bio.nickname) {
             html += createSection('二つ名', bio.nickname);
         }
 
-        // 6. Flavor (B Rank+)
+        // 6. 評価 (ランクB以上)
         if (bio.flavor) {
             html += createSection('評価', bio.flavor, true);
         }
 
-        if (html === '<div style="padding:0.5rem;">') {
-            html += '<div class="text-muted" style="padding:1rem;">まだ記録された情報はありません。</div>';
+        if (html === '<div class="p-sm">') {
+            html += '<div class="text-muted p-sm">まだ記録された情報はありません。</div>';
         }
 
         html += '</div>';
@@ -464,7 +459,7 @@ export class AdventurerScreen {
     }
 
     _renderStatusTab(container, adv) {
-        // 8.2 Basic Info
+        // 8.2 基本情報
         const originName = adv.origin.name || adv.origin.id;
         const info = document.createElement('div');
         info.innerHTML = `
@@ -481,7 +476,7 @@ export class AdventurerScreen {
         `;
         container.appendChild(info);
 
-        // 8.4 Stats (Bars)
+        // 8.4 能力値 (バー)
         const statsDiv = document.createElement('div');
         statsDiv.innerHTML = `<div class="sub-header">能力値</div>`;
         for (const [key, val] of Object.entries(adv.stats)) {
@@ -500,17 +495,17 @@ export class AdventurerScreen {
         }
         container.appendChild(statsDiv);
 
-        // 8.5 Temperament & Traits
+        // 8.5 気質・特性
         const t = adv.temperament;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = `
             <div class="sub-header">気質・特性</div>
-            <div style="font-size:0.9em;">
+            <div class="text-sm">
                 危険志向: ${t.risk > 0 ? '+' + t.risk : t.risk}<br>
                 金銭欲: ${t.greed > 0 ? '+' + t.greed : t.greed}<br>
                 社交性: ${t.social > 0 ? '+' + t.social : t.social}
             </div>
-            <div style="margin-top:0.5rem;">
+            <div class="mt-xs">
                 ${adv.traits.map(tKey => {
             const tr = TRAITS[tKey];
             return `<span class="trait-tag" title="${tr.effects}">[${tr.name}]</span>`;
@@ -519,7 +514,7 @@ export class AdventurerScreen {
         `;
         container.appendChild(tempDiv);
 
-        // 8.6 Equipment
+        // 8.6 装備
         const equipDiv = document.createElement('div');
         equipDiv.innerHTML = `<div class="sub-header">装備品</div>`;
         if (adv.equipment && adv.equipment.length > 0) {
@@ -534,13 +529,13 @@ export class AdventurerScreen {
         }
         container.appendChild(equipDiv);
 
-        // 8.7 Ultimate Arts
+        // 8.7 奥義
         const artsDiv = document.createElement('div');
         artsDiv.innerHTML = `<div class="sub-header">習得奥義</div>`;
         if (adv.arts && adv.arts.length > 0) {
-            artsDiv.innerHTML += `<div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
+            artsDiv.innerHTML += `<div class="flex-wrap-gap-xs">
                 ${adv.arts.map(art => `
-                    <div style="background:#fff3e0; border:1px solid #ffcc80; color:#e65100; padding:2px 6px; border-radius:4px; font-size:0.9em; font-weight:bold;">
+                    <div class="art-tag">
                         ⚡ ${art.name}
                     </div>
                 `).join('')}
@@ -562,52 +557,49 @@ export class AdventurerScreen {
         const list = document.createElement('div');
 
         if (!adv.history || adv.history.length === 0) {
-            list.innerHTML = '<div class="empty-state" style="padding:1rem; color:#999;">特筆すべき出来事はまだありません</div>';
+            list.innerHTML = '<div class="empty-state">特筆すべき出来事はまだありません</div>';
         } else {
-            // Simple timeline
+            // 簡易タイムライン
             list.innerHTML = adv.history.map(h => `
-                <div style="padding:0.5rem; border-left:2px solid #d7ccc8; margin-left:0.5rem; position:relative;">
-                    <div style="position:absolute; left:-6px; top:0.8rem; width:10px; height:10px; background:#8d6e63; border-radius:50%;"></div>
+                <div class="history-item">
+                    <div class="history-dot"></div>
                     <div class="text-meta">Day ${h.day}</div>
-                    <div style="color:#3e2723;">${h.text}</div>
+                    <div class="text-wood">${h.text}</div>
                 </div>
             `).join('');
         }
 
         container.appendChild(list);
 
-        // Stats summary if needed
+        // 必要に応じて統計サマリー
         const statsSummary = document.createElement('div');
-        statsSummary.style.marginTop = '1rem';
-        statsSummary.style.padding = '1rem';
-        statsSummary.style.background = '#fafafa';
-        statsSummary.style.border = '1px dashed #ccc';
+        statsSummary.className = 'stats-summary-box';
 
         let achievementHtml = "";
         if (adv.records && adv.records.majorAchievements && adv.records.majorAchievements.length > 0) {
             achievementHtml = adv.records.majorAchievements.map(a =>
-                `<div><span style="color:#666; font-size:0.9em;">[Day${a.day}]</span> <span style="font-weight:bold;">${a.title}</span> <span style="font-size:0.8em; color:#e65100;">(Rank ${a.rank})</span></div>`
+                `<div><span class="text-meta">[Day${a.day}]</span> <span class="font-bold">${a.title}</span> <span class="text-xs text-accent-dangerous">(Rank ${a.rank})</span></div>`
             ).join('');
         } else {
-            achievementHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+            achievementHtml = '<div class="text-muted text-sm">なし</div>';
         }
 
         let battleHtml = "";
         if (adv.records && adv.records.majorKills && adv.records.majorKills.length > 0) {
             battleHtml = adv.records.majorKills.map(k =>
-                `<div><span style="color:#666; font-size:0.9em;">[Day${k.day}]</span> <span style="font-weight:bold;">${k.name}</span> <span style="font-size:0.8em; color:#d32f2f;">(Rank ${k.rank}${k.isBoss ? ' BOSS' : ''})</span></div>`
+                `<div><span class="text-meta">[Day${k.day}]</span> <span class="font-bold">${k.name}</span> <span class="text-xs text-accent-red-bright">(Rank ${k.rank}${k.isBoss ? ' BOSS' : ''})</span></div>`
             ).join('');
         } else {
-            battleHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+            battleHtml = '<div class="text-muted text-sm">なし</div>';
         }
 
         statsSummary.innerHTML = `
-            <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な功績</div>
-            <div class="text-sm" style="margin-bottom:1rem;">
+            <div class="text-sm font-bold stats-summary-header">主な功績</div>
+            <div class="text-sm mb-md">
                 ${achievementHtml}
             </div>
 
-            <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な戦績 (討伐ランク順)</div>
+            <div class="text-sm font-bold stats-summary-header">主な戦績 (討伐ランク順)</div>
             <div class="text-sm">
                 ${battleHtml}
             </div>

@@ -23,7 +23,7 @@ export class MainScreen {
         const policyName = pName[guild.activePolicy] || guild.activePolicy;
 
         // 発生中のイベント
-        let eventHtml = '<span style="color:#9e9e9e;">特になし</span>';
+        let eventHtml = '<span class="text-grey">特になし</span>';
         if (guild.activeEvents && guild.activeEvents.length > 0) {
             eventHtml = guild.activeEvents.map(evt => {
                 let modStr = [];
@@ -43,20 +43,20 @@ export class MainScreen {
         }
 
         mgmtContent.innerHTML = `
-            <div style="margin-bottom:0.5rem;">
+            <div class="mb-sm">
                 <strong>ギルドランク:</strong> ${(() => {
                 const r = GUILD_RANK_THRESHOLDS.find(r => guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
                 return `<span class="text-status-safe">${r.name}</span> (Rank ${r.label})`;
             })()}
             </div>
-            <div style="margin-bottom:0.5rem;">
+            <div class="mb-sm">
                 <strong>現在の方針:</strong> ${policyName}
             </div>
-            <div style="margin-bottom:0.5rem;">
+            <div class="mb-sm">
                 <strong>発生中のイベント:</strong><br>
                 ${eventHtml}
             </div>
-            <div style="margin-bottom:0.5rem; font-size:0.85em; color:#666;">
+            <div class="mb-sm text-sm text-meta">
                 ※運営方針やイベントの詳細は「運営」メニューで確認・変更できます。
             </div>
         `;

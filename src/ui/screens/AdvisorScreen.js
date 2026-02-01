@@ -38,7 +38,7 @@ export class AdvisorScreen {
         const content = document.createElement('div');
         content.className = 'screen-content-wrapper';
 
-        // --- Left: List ---
+        // --- 左: リスト ---
         const listPanel = document.createElement('section');
         listPanel.className = 'panel flex-col side-panel-sm';
 
@@ -53,7 +53,7 @@ export class AdvisorScreen {
             }, 0);
         }
 
-        // --- Right: Detail ---
+        // --- 右: 詳細 ---
         const detailPanel = document.createElement('section');
         detailPanel.className = 'panel detail-panel flex-col flex-1';
 
@@ -201,7 +201,7 @@ export class AdvisorScreen {
     }
 
     // 冒険者画面/アーカイブ画面のロジックを再利用
-    // Or just implement simplified versions.
+    // 簡易版の実装
 
     _renderStatusTab(container, adv) {
         // ... (Status rendering similar to AdventurerScreen) ...
@@ -220,14 +220,14 @@ export class AdvisorScreen {
                     <div class="stat-item"><span class="label">STR:</span> ${stats.STR || 0}</div>
                     <div class="stat-item"><span class="label">VIT:</span> ${stats.VIT || 0}</div>
                     <div class="stat-item"><span class="label">DEX:</span> ${stats.DEX || 0}</div>
-                    <div class="stat-item"><span class="label">AGI:</span> ${stats.AGI || 0}</div> <!-- AGI is valid? 6 stats were proposed but 4 used? Let's assume standard. Wait, proposal said 6 stats. -->
+                    <div class="stat-item"><span class="label">AGI:</span> ${stats.AGI || 0}</div>
                     <div class="stat-item"><span class="label">INT:</span> ${stats.INT || 0}</div>
-                    <div class="stat-item"><span class="label">MND:</span> ${stats.MND || 0}</div> <!-- or CHA/LUK. Using basic set from older code if needed, but advisor candidates should have full stats. -->
+                    <div class="stat-item"><span class="label">MND:</span> ${stats.MND || 0}</div>
                 </div>
             </div>
         `;
 
-        // Try to match actual stats keys from logic: STR, VIT, MAG, DEX, INT, CHA
+        // ロジックからの実際のステータスキーに対応: STR, VIT, MAG, DEX, INT, CHA
         if (stats.MAG !== undefined) {
             container.querySelector('.stats-grid').innerHTML = `
                 <div class="stat-item"><span class="label">STR:</span> ${stats.STR}</div>
@@ -248,11 +248,11 @@ export class AdvisorScreen {
 
         const ul = document.createElement('ul');
         ul.className = 'history-list';
-        // Show reverse order?
+        // 逆順表示?
         [...adv.history].reverse().forEach(h => {
             const li = document.createElement('li');
-            li.textContent = h.text || h; // Handle string or object
-            // Object format: {day, text}
+            li.textContent = h.text || h; // 文字列またはオブジェクトを処理
+            // オブジェクト形式: {day, text}
             if (h.day !== undefined) {
                 li.textContent = `Day ${h.day}: ${h.text}`;
             }
@@ -262,7 +262,7 @@ export class AdvisorScreen {
     }
 
     _renderMeikanTab(container, adv) {
-        // Meikan (Bio) logic
+        // 名鑑 (人物) ロジック
         const bio = adv.bio || {};
         container.innerHTML = `
             <div class="card p-md">
