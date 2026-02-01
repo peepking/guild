@@ -1,20 +1,26 @@
-import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, JOIN_TYPE_NAMES } from '../../data/constants.js';
+import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, JOIN_TYPE_NAMES, ADVISOR_CONFIG } from '../../data/constants.js';
 
 export class AdventurerScreen {
-    constructor() {
+    constructor(gameLoop) {
+        this.gameLoop = gameLoop;
         this.state = {
             selectedAdventurerId: null,
-            currentTab: 'STATUS', // STATUS | HISTORY
+            currentTab: 'STATUS', // ステータス | 経歴
             // ソート & フィルタ状態
-            sortKey: 'RANK', // RANK, DAYS, TRUST, STATE, ID
-            sortOrder: 'DESC', // ASC, DESC
+            sortKey: 'RANK', // ランク, 日数, 信頼度, 状態, ID
+            sortOrder: 'DESC', // 降順, 昇順
             filterClass: 'ALL',
             filterRank: 'ALL',
-            filterStatus: 'ALL' // ALL, AVAILABLE, QUESTING, RECOVERY
+            filterStatus: 'ALL' // ALL, AVAILABLE (待機), QUESTING (冒険), RECOVERY (療養)
         };
     }
 
     render(container, guild, globalState) {
+        // スクロール位置の保持
+        let lastScrollTop = 0;
+        const existingList = container.querySelector('.scroll-list');
+        if (existingList) lastScrollTop = existingList.scrollTop;
+
         // 重複防止のためコンテナをクリア
         container.innerHTML = '';
 
@@ -36,6 +42,14 @@ export class AdventurerScreen {
         listContainer.className = 'scroll-list flex-1 scroll-y';
         listPanel.appendChild(listContainer);
 
+        // スクロール位置の復元
+        if (lastScrollTop > 0) {
+            // setTimeout(0) でDOM描画待ちをする必要があるかもしれないが、同期的ならこれでOK
+            setTimeout(() => {
+                listContainer.scrollTop = lastScrollTop;
+            }, 0);
+        }
+
         container.appendChild(listPanel);
 
         // --- 右: 詳細 ---
@@ -49,7 +63,7 @@ export class AdventurerScreen {
         if (this.state.selectedAdventurerId) {
             const adv = guild.adventurers.find(a => a.id === this.state.selectedAdventurerId);
             if (adv) {
-                this._renderDetail(detailPanel, adv);
+                this._renderDetail(detailPanel, adv, guild);
             } else {
                 this.state.selectedAdventurerId = null; // 存在しない場合はリセット
             }
@@ -130,7 +144,7 @@ export class AdventurerScreen {
                 el.classList.add('selected');
 
                 // 詳細描画
-                this._renderDetail(detailPanel, adv);
+                this._renderDetail(detailPanel, adv, guild);
             });
             container.appendChild(el);
         });
@@ -299,15 +313,49 @@ export class AdventurerScreen {
         return div;
     }
 
-    _renderDetail(panel, adv) {
+    _renderDetail(panel, adv, guild) {
         // Header with Title
         const titlePart = adv.title ? `<span style="font-size:0.8em; color:#d84315;">《${adv.title}》</span>` : '';
 
         panel.innerHTML = `
-            <div class="panel-header flex-no-shrink">
-                ${titlePart}${adv.name} の詳細
+            <div class="panel-header flex-no-shrink flex-between flex-center adv-header">
+                <div>${titlePart}${adv.name} の詳細</div>
+                <div id="action-area"></div>
             </div>
         `;
+
+        // Appointment Button (Rank B+ only)
+        if (guild && ['S', 'A', 'B'].includes(adv.rankLabel)) {
+            const isFull = guild.advisors.length >= 20; // ADVISOR_CONFIG.MAX_ADVISORS (hardcoded or imported?)
+            // We import ADVISOR_CONFIG in file? No. Import it at top?
+            // ADVISOR_CONFIG is not imported. I should check imports.
+            // It uses ADVENTURER_JOB_NAMES etc.
+            // Let's assume 20 or check existing code. ADVISOR_CONFIG is exported from constants.js.
+            // I should add ADVISOR_CONFIG to imports.
+
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-secondary py-xs btn-sm';
+            btn.textContent = '顧問に任命';
+            if (isFull) btn.disabled = true;
+
+            btn.addEventListener('click', () => {
+                if (confirm(`${adv.name} を顧問に任命しますか？\n(現役を引退し、顧問として契約します)`)) {
+                    if (this.gameLoop && this.gameLoop.managementService) {
+                        const result = this.gameLoop.managementService.appointAdvisor(guild, adv.id);
+                        if (result && result.success) {
+                            this.gameLoop.uiManager.render();
+                        }
+                    } else if (window.gameLoop && window.gameLoop.managementService) {
+                        // Fallback
+                        const result = window.gameLoop.managementService.appointAdvisor(guild, adv.id);
+                        if (result && result.success) {
+                            window.gameLoop.uiManager.render();
+                        }
+                    }
+                }
+            });
+            panel.querySelector('#action-area').appendChild(btn);
+        }
 
         // Tabs
         const tabs = document.createElement('div');

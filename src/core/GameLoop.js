@@ -148,8 +148,11 @@ export class GameLoop {
                     this.guild.retiredAdventurers.push(adv);
 
                     // 引退時は顧問候補に追加
+                    // 引退時は顧問候補としてメール送信 (ランクB以上など条件を入れるならここかサービス内)
                     if (type === LEAVE_TYPES.RETIRE && this.managementService) {
-                        this.managementService.checkAndAddCandidate(this.guild, adv);
+                        // ランク条件などは sendAdvisorOfferMail 内でチェックしても良いが、
+                        // ここでは無条件または簡易チェックでサービスに委譲
+                        this.managementService.sendAdvisorOfferMail(this.guild, adv, this.mailService);
                     }
 
                     this.guild.adventurers.splice(i, 1);
@@ -522,6 +525,11 @@ export class GameLoop {
         if (actionId === 'APPRENTICE_JOIN') {
             if (this.recruitmentService) {
                 return this.recruitmentService.executeApprentice(data);
+            }
+        }
+        if (actionId === 'ADVISOR_OFFER') {
+            if (this.managementService) {
+                return this.managementService.hireAdvisor(this.guild, data);
             }
         }
         return { success: false, message: '不明なアクションです' };

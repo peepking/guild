@@ -1,11 +1,16 @@
 import { POLICIES, FACILITIES, EFFECT_LABELS, CAMPAIGNS } from '../../data/ManagementData.js';
+import { ADVISOR_CONFIG, ADVENTURER_JOB_NAMES, TRAITS, JOIN_TYPE_NAMES } from '../../data/constants.js';
 
 export class OperationScreen {
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
         this.container = null;
-        this.currentTab = 'FACILITY'; // FACILITY | POLICY | PERSONNEL | PR
+        this.currentTab = 'FACILITY'; // 施設 | 方針 | 人事 | 広報
         this.scrollPositions = {}; // タブごとのスクロール位置保持
+        this.advisorState = {
+            selectedId: null,
+            detailTab: 'EFFECT' // 効果, ステータス, 経歴, 名鑑
+        };
     }
 
     render(container, guild, state, logs) {
@@ -46,12 +51,16 @@ export class OperationScreen {
         }
 
         // タブ設定
-        container.querySelectorAll('.tab').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.currentTab = btn.getAttribute('data-tab');
-                this.render(container, guild, state, logs);
+        // タブ設定 (メインタブのみを対象にする)
+        const mainTabsCtx = container.querySelector('.tabs');
+        if (mainTabsCtx) {
+            mainTabsCtx.querySelectorAll('.tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.currentTab = btn.getAttribute('data-tab');
+                    this.render(container, guild, state, logs);
+                });
             });
-        });
+        }
     }
 
     _renderContent(guild) {
@@ -268,114 +277,400 @@ export class OperationScreen {
     }
 
     _renderPersonnel(container, guild) {
-        const ms = this.gameLoop.managementService;
+        // Layout: Use same grid structure as AdventurerScreen
+        container.innerHTML = '';
+        container.className = 'operation-layout flex-1 scroll-y p-md grid-2-col-fixed-right';
+        // Note: operation-layout might conflict if it has display:block/flex, but grid-2-col-fixed-right sets display:grid. 
+        // To be safe, we should probably overwrite className or ensure grid wins.
+        // Let's reset className to be sure, keeping padding.
+        container.className = 'grid-2-col-fixed-right p-md panel-reset';
+        // Note: operation-layout might conflict if it has display:block/flex, but grid-2-col-fixed-right sets display:grid. 
+        // To be safe, we should probably overwrite className or ensure grid wins.
+        // Let's reset className to be sure, keeping padding.
 
-        // ヘッダー
+        // Remove style overrides if any were lingering (though innerHTML='' clears content, wrapper styles persist if set on container)
+        container.style.gap = '';
+        container.style.height = '100%';
+        container.style.overflow = 'hidden';
+
+        const advisors = guild.advisors || [];
+
+        // --- Left: List ---
+        const listPanel = document.createElement('section');
+        listPanel.className = 'panel flex-col h-full';
+        listPanel.innerHTML = `
+            <div class="panel-header text-center">顧問一覧 (${advisors.length}/${ADVISOR_CONFIG.MAX_ADVISORS})</div>
+        `;
+
+        const listContainer = document.createElement('div');
+        listContainer.className = 'scroll-list flex-1 scroll-y'; // 冒険者リストコンテナと一致
+        listPanel.appendChild(listContainer);
+
+        // フッター: 外部招聘ボタン
+        const footer = document.createElement('div');
+        footer.className = 'mt-sm footer-actions';
+
+        const headhuntCost = ADVISOR_CONFIG.HEADHUNT_COST || 2000;
+        const canAfford = guild.money >= headhuntCost;
+        const isFull = advisors.length >= ADVISOR_CONFIG.MAX_ADVISORS;
+
+        footer.innerHTML = `
+            <button id="btn-headhunt" class="btn btn-primary w-full" ${canAfford && !isFull ? '' : 'disabled'}>
+                外部招聘 (${headhuntCost}G)
+            </button>
+            <div class="text-xs text-center mt-xs text-muted">即戦力の専門家を90日契約で雇用します</div>
+        `;
+
+        footer.querySelector('#btn-headhunt').addEventListener('click', () => {
+            if (confirm(`外部から顧問を招聘しますか？ (費用: ${headhuntCost}G)`)) {
+                if (this.gameLoop.managementService && this.gameLoop.managementService.headhuntAdvisor(guild)) {
+                    this.gameLoop.uiManager.render();
+                }
+            }
+        });
+
+        listPanel.appendChild(footer);
+
+        // --- Right: Detail ---
+        const detailPanel = document.createElement('section');
+        detailPanel.className = 'panel detail-panel flex-col flex-1 h-full';
+
+        // リスト描画
+        this._renderAdvisorList(listContainer, advisors, detailPanel);
+
+        // 詳細デフォルト描画
+        if (advisors.length > 0) {
+            if (!this.advisorState.selectedId) {
+                this.advisorState.selectedId = advisors[0].id;
+            }
+            const selected = advisors.find(a => a.id === this.advisorState.selectedId) || advisors[0];
+            this._renderAdvisorDetail(detailPanel, selected);
+        } else {
+            detailPanel.innerHTML = `
+                <div class="p-lg text-center text-muted">
+                    <p>現在、契約中の顧問はいません。</p>
+                </div>
+            `;
+        }
+
+        container.appendChild(listPanel);
+        container.appendChild(detailPanel);
+    }
+
+    _renderAdvisorList(container, advisors, detailPanel) {
+        container.innerHTML = '';
+        advisors.forEach(adv => {
+            const row = document.createElement('div');
+            // 冒険者リストと同じクラスを使用: list-item, list-item-adventure
+            row.className = `list-item list-item-adventure ${adv.id === this.advisorState.selectedId ? 'selected' : ''}`;
+
+            const jobName = ADVENTURER_JOB_NAMES[adv.type] || adv.type;
+            const effectDesc = adv.effect ? adv.effect.desc : '効果なし';
+
+            // Match Adventurer Item structure
+            row.innerHTML = `
+                <div class="list-item-header">
+                    <span class="list-item-title">${adv.name}</span>
+                    <span class="text-sm">(${jobName})</span>
+                    ${adv.remainingContract ? `<span class="text-xs badge-adv badge-warn ml-auto">残り${adv.remainingContract}日</span>` : ''}
+                </div>
+                <div class="text-meta">
+                   <div>Rank ${adv.rankLabel}</div>
+                   <div class="text-status-safe font-bold">${effectDesc}</div>
+                </div>
+            `;
+
+            row.addEventListener('click', () => {
+                this.advisorState.selectedId = adv.id;
+                // 完全再描画なしで選択状態を視覚的に更新
+                container.querySelectorAll('.list-item').forEach(el => el.classList.remove('selected'));
+                row.classList.add('selected');
+
+                this._renderAdvisorDetail(detailPanel, adv);
+            });
+
+            container.appendChild(row);
+        });
+    }
+
+    _renderAdvisorDetail(panel, adv) {
+        if (!adv) return;
+        panel.innerHTML = '';
+
+        const jobName = ADVENTURER_JOB_NAMES[adv.type] || adv.type;
+
+        // Header
         const header = document.createElement('div');
+        header.className = 'panel-header flex-no-shrink';
         header.innerHTML = `
-            <div class="policy-desc mb-md">
-                上位ランクで引退した冒険者を「顧問」として雇用できます。<br>
-                顧問は名声や育成などにボーナスを与えますが、日給が必要です。
+            <div class="flex-row flex-between flex-center">
+                <span>${adv.name} <span class="text-sm font-normal">(${jobName})</span></span>
+                <span class="text-sm">
+                    ${adv.remainingContract ? `任期: 残り${adv.remainingContract}日` : `契約: ${adv.hiredDay || '?'}日目 (無期限)`}
+                </span>
             </div>
         `;
-        container.appendChild(header);
+        panel.appendChild(header);
 
-        // 契約中の顧問
-        const advisorSection = document.createElement('div');
-        advisorSection.style.marginBottom = '2rem';
-
-        let advisorListHtml = '';
-        if (guild.advisors.length === 0) {
-            advisorListHtml = `<div class="empty-state">契約中の顧問はいません</div>`;
-        } else {
-            advisorListHtml = `<div class="operation-grid"></div>`;
-        }
-
-        advisorSection.innerHTML = `
-            <h3 class="section-header inline-block">契約中の顧問</h3>
-            ${advisorListHtml}
+        // タブ
+        const tabs = document.createElement('div');
+        tabs.className = 'tabs flex-no-shrink';
+        tabs.innerHTML = `
+            <button class="tab ${this.advisorState.detailTab === 'EFFECT' ? 'active' : ''}" data-tab="EFFECT">効果・給与</button>
+            <button class="tab ${this.advisorState.detailTab === 'STATUS' ? 'active' : ''}" data-tab="STATUS">ステータス</button>
+            <button class="tab ${this.advisorState.detailTab === 'HISTORY' ? 'active' : ''}" data-tab="HISTORY">経歴</button>
+            <button class="tab ${this.advisorState.detailTab === 'MEIKAN' ? 'active' : ''}" data-tab="MEIKAN">名鑑</button>
         `;
-        container.appendChild(advisorSection);
+        panel.appendChild(tabs);
 
-        if (guild.advisors.length > 0) {
-            const grid = advisorSection.querySelector('.operation-grid');
-            guild.advisors.forEach(adv => {
-                const el = document.createElement('div');
-                el.className = 'operation-card hero';
+        // コンテンツ
+        const content = document.createElement('div');
+        content.className = 'scroll-y flex-1 p-sm';
+        panel.appendChild(content);
 
-                let effStr = [];
-                for (const [k, v] of Object.entries(adv.effect)) {
-                    effStr.push(`${EFFECT_LABELS[k] || k} x${v}`);
-                }
+        this._renderAdvisorTabContent(content, adv);
 
-                el.innerHTML = `
-                    <div class="operation-header-row">
-                        <b>${adv.name}</b>
-                        <span>${adv.roleName}</span>
-                    </div>
-                    <div class="policy-effects">効果: ${effStr.join(', ')}</div>
-                    <div class="operation-header-row mt-auto">
-                        <span class="text-sm">日給: ${adv.salary} G</span>
-                        <button class="btn-fire btn-danger py-xs text-sm">解任</button>
-                    </div>
-                `;
-                el.querySelector('.btn-fire').addEventListener('click', () => {
-                    if (confirm(`${adv.name} を解任しますか？`)) {
-                        ms.fireAdvisor(guild, adv.id);
-                        this.gameLoop.uiManager.render();
-                    }
-                });
-                grid.appendChild(el);
+        tabs.querySelectorAll('.tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.advisorState.detailTab = btn.dataset.tab;
+                this._renderAdvisorDetail(panel, adv);
             });
-        }
+        });
+    }
 
-        // 候補者一覧
-        const candidateSection = document.createElement('div');
-        candidateSection.innerHTML = `
-            <h3 class="section-header inline-block">顧問候補 (引退者)</h3>
+    _renderAdvisorTabContent(container, adv) {
+        switch (this.advisorState.detailTab) {
+            case 'EFFECT':
+                this._renderAdvisorEffectTab(container, adv);
+                break;
+            case 'STATUS':
+                this._renderAdvisorStatusTab(container, adv);
+                break;
+            case 'HISTORY':
+                this._renderAdvisorHistoryTab(container, adv);
+                break;
+            case 'MEIKAN':
+                this._renderAdvisorMeikanTab(container, adv);
+                break;
+        }
+    }
+
+    _renderAdvisorEffectTab(container, adv) {
+        const desc = adv.effect ? adv.effect.desc : '効果なし';
+
+        // 重複減衰の計算
+        const guild = this.guild; // キャッシュ
+        const sameTypeAdvisors = guild.advisors.filter(a => a.type === adv.type);
+        const index = sameTypeAdvisors.findIndex(a => a.id === adv.id);
+        const factor = 1 / Math.pow(2, index);
+        const efficiency = factor * 100;
+
+        container.innerHTML = `
+            <div class="card p-md">
+                <div class="info-row">
+                    <span class="label">発動効果:</span>
+                    <span class="value font-bold text-lg">${desc}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">現在の効果率:</span>
+                    <span class="value ${factor < 1 ? 'text-warning' : 'text-success'}">${efficiency}%</span>
+                </div>
+                ${factor < 1 ? `<div class="text-sm text-warning mt-sm">※ 同職の顧問が複数いるため効果が減衰しています (${index + 1}人目)</div>` : ''}
+                
+                <hr class="separator">
+                
+                <div class="info-row">
+                    <span class="label">契約賃金:</span>
+                    <span class="value">${ADVISOR_CONFIG.SALARY} G / 30日</span>
+                </div>
+                 <div class="text-xs text-muted mt-sm">
+                    顧問契約は終身雇用です。原則として解雇はできません。
+                </div>
+            </div>
         `;
+    }
 
-        if (!guild.advisorCandidates || guild.advisorCandidates.length === 0) {
-            candidateSection.innerHTML += `<div class="empty-state">候補者はいません (ランクB以上で引退した冒険者が候補になります)</div>`;
-        } else {
-            const grid = document.createElement('div');
-            grid.className = 'operation-grid';
+    _renderAdvisorStatusTab(container, adv) {
+        // 基本情報
+        const originName = (adv.origin && adv.origin.name) ? adv.origin.name : (adv.origin ? adv.origin.id : '不明');
 
-            guild.advisorCandidates.forEach(cand => {
-                const el = document.createElement('div');
-                el.className = 'operation-card';
+        const info = document.createElement('div');
+        info.innerHTML = `
+            <div class="sub-header">基本情報</div>
+            <p>職業: ${ADVENTURER_JOB_NAMES[adv.type] || adv.type}</p>
+            <p>出身地: ${originName}</p>
+            <p>雇用形態: ${adv.joinType ? (JOIN_TYPE_NAMES[adv.joinType] || adv.joinType) : '特別契約'}</p>
+            <p>契約日: ${adv.hiredDay || '?'}日目</p>
+            <hr>
+            <div class="sub-header">評価</div>
+            <p>ランク: <b>${adv.rankLabel}</b> (評価値 ${Math.floor(adv.rankValue || 0)})</p>
+            <p>信頼度: ${adv.trust || 0}</p>
+             <p>調子(EMA): ${(adv.perfEMA || 0).toFixed(2)}</p>
+        `;
+        container.appendChild(info);
 
-                let effStr = [];
-                for (const [k, v] of Object.entries(cand.effect)) {
-                    effStr.push(`${EFFECT_LABELS[k] || k} x${v}`);
-                }
-
-                el.innerHTML = `
-                    <div class="operation-header-row">
-                        <span>${cand.name}</span>
-                        <span class="text-sm">Rank ${cand.rankLabel} / ${cand.roleName}</span>
+        // ステータス (バー)
+        const stats = adv.stats || {};
+        const statsDiv = document.createElement('div');
+        statsDiv.innerHTML = `<div class="sub-header">能力値</div>`;
+        for (const [key, val] of Object.entries(stats)) {
+            const barWidth = Math.min(100, (val / 120) * 100);
+            statsDiv.innerHTML += `
+                <div class="stat-bar-container">
+                    <div class="stat-bar-header">
+                        <span>${key}</span>
+                        <span>${val.toFixed(1)}</span>
                     </div>
-                    <div class="policy-effects">効果: ${effStr.join(', ')}</div>
-                    <div class="operation-header-row mt-auto">
-                        <span class="text-sm">日給: ${cand.salary}G</span>
-                        <button class="btn-hire btn btn-primary py-xs">雇用</button>
+                    <div class="stat-bar-bg">
+                        <div class="stat-bar-fill" style="width:${barWidth}%;"></div>
                     </div>
-                `;
-
-                el.querySelector('.btn-hire').addEventListener('click', () => {
-                    if (ms.hireAdvisor(guild, cand.id)) {
-                        this.gameLoop.uiManager.render();
-                    }
-                });
-                grid.appendChild(el);
-            });
-            candidateSection.appendChild(grid);
+                </div>
+            `;
         }
-        container.appendChild(candidateSection);
+        container.appendChild(statsDiv);
+
+        // 気質・特性
+        const t = adv.temperament || { risk: 0, greed: 0, social: 0 };
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = `
+            <div class="sub-header">気質・特性</div>
+            <div style="font-size:0.9em;">
+                危険志向: ${t.risk > 0 ? '+' + t.risk : t.risk}<br>
+                金銭欲: ${t.greed > 0 ? '+' + t.greed : t.greed}<br>
+                社交性: ${t.social > 0 ? '+' + t.social : t.social}
+            </div>
+            <div style="margin-top:0.5rem;">
+                ${(adv.traits || []).map(tKey => {
+            const tr = TRAITS[tKey];
+            return tr ? `<span class="trait-tag" title="${tr.effects}">[${tr.name}]</span>` : '';
+        }).join(' ')}
+            </div>
+        `;
+        container.appendChild(tempDiv);
+
+        // 装備
+        const equipDiv = document.createElement('div');
+        equipDiv.innerHTML = `<div class="sub-header">装備品</div>`;
+        if (adv.equipment && adv.equipment.length > 0) {
+            const listHtml = adv.equipment.map(eq => {
+                return `<div class="text-sm mb-xs">
+                    <span class="text-sub-color">[${eq.rank}]</span> ${eq.name}
+                </div>`;
+            }).join('');
+            equipDiv.innerHTML += `<div>${listHtml}</div>`;
+        } else {
+            equipDiv.innerHTML += `<div class="text-sm text-muted">なし</div>`;
+        }
+        container.appendChild(equipDiv);
+
+        // 奥義
+        const artsDiv = document.createElement('div');
+        artsDiv.innerHTML = `<div class="sub-header">習得奥義</div>`;
+        if (adv.arts && adv.arts.length > 0) {
+            artsDiv.innerHTML += `<div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
+                ${adv.arts.map(art => `
+                    <div style="background:#fff3e0; border:1px solid #ffcc80; color:#e65100; padding:2px 6px; border-radius:4px; font-size:0.9em; font-weight:bold;">
+                        ⚡ ${art.name}
+                    </div>
+                `).join('')}
+            </div>`;
+        } else {
+            artsDiv.innerHTML += `<div class="text-sm text-muted">なし</div>`;
+        }
+        container.appendChild(artsDiv);
+    }
+
+    _renderAdvisorHistoryTab(container, adv) {
+        const list = document.createElement('div');
+
+        if (!adv.history || adv.history.length === 0) {
+            list.innerHTML = '<div class="empty-state" style="padding:1rem; color:#999;">特筆すべき出来事はまだありません</div>';
+        } else {
+            // 冒険者画面/アーカイブと同じタイムラインスタイル
+            list.innerHTML = adv.history.map(h => `
+                <div style="padding:0.5rem; border-left:2px solid #d7ccc8; margin-left:0.5rem; position:relative;">
+                    <div style="position:absolute; left:-6px; top:0.8rem; width:10px; height:10px; background:#8d6e63; border-radius:50%;"></div>
+                    <div class="text-meta">Day ${h.day || '?'}</div>
+                    <div style="color:#3e2723;">${h.text || h}</div>
+                </div>
+            `).join('');
+        }
+        container.appendChild(list);
+
+        // 統計サマリー
+        const statsSummary = document.createElement('div');
+        statsSummary.style.marginTop = '1rem';
+        statsSummary.style.padding = '1rem';
+        statsSummary.style.background = '#fafafa';
+        statsSummary.style.border = '1px dashed #ccc';
+
+        let achievementHtml = "";
+        if (adv.records && adv.records.majorAchievements && adv.records.majorAchievements.length > 0) {
+            achievementHtml = adv.records.majorAchievements.map(a =>
+                `<div><span style="color:#666; font-size:0.9em;">[Day${a.day}]</span> <span style="font-weight:bold;">${a.title}</span> <span style="font-size:0.8em; color:#e65100;">(Rank ${a.rank})</span></div>`
+            ).join('');
+        } else {
+            achievementHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+        }
+
+        let battleHtml = "";
+        if (adv.records && adv.records.majorKills && adv.records.majorKills.length > 0) {
+            battleHtml = adv.records.majorKills.map(k =>
+                `<div><span style="color:#666; font-size:0.9em;">[Day${k.day}]</span> <span style="font-weight:bold;">${k.name}</span> <span style="font-size:0.8em; color:#d32f2f;">(Rank ${k.rank}${k.isBoss ? ' BOSS' : ''})</span></div>`
+            ).join('');
+        } else {
+            battleHtml = '<div style="color:#999; font-size:0.9em;">なし</div>';
+        }
+
+        statsSummary.innerHTML = `
+            <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な功績</div>
+            <div class="text-sm" style="margin-bottom:1rem;">
+                ${achievementHtml}
+            </div>
+
+            <div class="text-sm font-bold" style="margin-bottom:0.5rem; border-bottom:1px solid #ddd; padding-bottom:0.2rem;">主な戦績 (討伐ランク順)</div>
+            <div class="text-sm">
+                ${battleHtml}
+            </div>
+        `;
+        container.appendChild(statsSummary);
+    }
+
+    _renderAdvisorMeikanTab(container, adv) {
+        const bio = adv.bio || {};
+        const createSection = (title, content, isItalic = false) => {
+            if (!content || (Array.isArray(content) && content.length === 0)) return '';
+            let htmlContent = '';
+            if (Array.isArray(content)) {
+                htmlContent = content.map(line => `<p style="margin-bottom:0.4rem; line-height:1.6;">${line}</p>`).join('');
+            } else {
+                htmlContent = `<p style="line-height:1.6;">${content}</p>`;
+            }
+            if (isItalic) htmlContent = `<div style="font-style:italic; color:#555;">${htmlContent}</div>`;
+            return `
+                <div style="margin-bottom:1.5rem;">
+                    <div class="sub-header" style="color:#5D4037; border-bottom:1px solid #d7ccc8; margin-bottom:0.5rem;">${title}</div>
+                    <div style="padding:0 0.5rem; font-family:'Yu Mincho', serif;">
+                        ${htmlContent}
+                    </div>
+                </div>
+             `;
+        };
+
+        let html = '<div style="padding:0.5rem;">';
+        html += createSection('人物', bio.intro);
+        if (bio.arts && bio.arts.length > 0) html += createSection('奥義・魔法', bio.arts);
+        if (bio.traits && bio.traits.length > 0) html += createSection('特性・人柄', bio.traits);
+        if (bio.career && bio.career.length > 0) html += createSection('主な経歴', bio.career);
+        if (bio.nickname) html += createSection('二つ名', bio.nickname);
+        if (bio.flavor) html += createSection('評価', bio.flavor, true);
+        if (html === '<div style="padding:0.5rem;">') html += '<div class="text-muted" style="padding:1rem;">まだ記録された情報はありません。</div>';
+        html += '</div>';
+        container.innerHTML = html;
     }
 
     _renderPR(container, guild) {
-        // Find if any campaign is active
+        // 実施中のキャンペーンがあるか確認
         const activeCampaign = guild.activeEvents.find(e => CAMPAIGNS[e.id]);
 
         // Header
@@ -411,7 +706,7 @@ export class OperationScreen {
         list.className = 'operation-grid';
 
         Object.values(CAMPAIGNS).forEach(cmp => {
-            // Skip if active (already shown) - or show as disabled? Show as disabled.
+            // 実施中ならスキップ (または無効表示)
             const isActive = activeCampaign && activeCampaign.id === cmp.id;
             const isOtherActive = activeCampaign && !isActive;
 
@@ -448,7 +743,7 @@ export class OperationScreen {
     _startCampaign(guild, cmp) {
         if (guild.money < cmp.cost) return;
 
-        // Double check active
+        // 実施中か再確認
         if (guild.activeEvents.some(e => CAMPAIGNS[e.id])) return;
 
         guild.money -= cmp.cost;
@@ -463,7 +758,7 @@ export class OperationScreen {
             });
         }
 
-        // Add as Event
+        // イベントとして追加
         guild.activeEvents.push({
             id: cmp.id,
             name: cmp.name,
@@ -474,9 +769,9 @@ export class OperationScreen {
 
         this.gameLoop.uiManager.log(`${cmp.name}を開始しました。(期間: ${cmp.duration}日)`, 'success');
 
-        // Send Mail (Optional, maybe for severe ones?)
-        // Just log is fine for now, or unified mail?
-        // Let's stick to log unless it's very important.
+        // メール送信 (任意、重要なら)
+        // 現状はログのみ
+        // 非常に重要でない限りログで十分
 
         this.gameLoop.uiManager.render();
     }

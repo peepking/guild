@@ -1225,6 +1225,10 @@ h2 {
     font-weight: bold;
 }
 
+.adv-header {
+    height: 45px;
+}
+
 .sub-header {
     font-size: var(--text-lg);
     border-bottom: 2px solid var(--ink-main);
@@ -1714,4 +1718,30 @@ h2 {
 .mail-detail-body {
     line-height: 1.6;
     color: #3e2723;
+}
+
+/* 
+/* バッジスタイル (修正: クリップ防止) */
+.badge-adv {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    line-height: normal;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    position: static !important;
+    /* 絶対配置を強制解除 */
+    margin-top: 0 !important;
+}
+
+.badge-warn {
+    background-color: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffe0b2;
+}
+
+.text-xs {
+    font-size: 0.75rem;
 }

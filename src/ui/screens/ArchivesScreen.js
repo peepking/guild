@@ -4,12 +4,12 @@ export class ArchivesScreen {
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
         this.container = null;
-        this.currentTab = 'FINANCE'; // FINANCE | RETIRED | MARKET | STATS
+        this.currentTab = 'FINANCE'; // 財務 | 引退 | 市場 | 統計
         this.state = {
             selectedRetiredId: null,
             sortKey: 'ID',
             sortOrder: 'DESC',
-            currentDetailTab: 'STATUS' // STATUS | HISTORY | MEIKAN
+            currentDetailTab: 'STATUS' // ステータス | 経歴 | 名鑑
         };
     }
 
@@ -40,7 +40,7 @@ export class ArchivesScreen {
 
         this._renderContent(guild);
 
-        // Bind Tabs
+        // タブ設定
         container.querySelectorAll('.tab').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.currentTab = btn.getAttribute('data-tab');
@@ -127,16 +127,16 @@ export class ArchivesScreen {
             </div>
         `;
 
-        // Render Detail
+        // 詳細描画
         this._renderFinanceDetail(container.querySelector('#finance-detail-view'), history[this.selectedDayIndex]);
 
-        // Restore scroll position
+        // スクロール位置の復元
         const newListContainer = container.querySelector('#finance-table-container');
         if (newListContainer && typeof this.financeScrollTop !== 'undefined') {
             newListContainer.scrollTop = this.financeScrollTop;
         }
 
-        // Events
+        // イベント設定
         container.querySelector('#prev-page').addEventListener('click', () => {
             if (this.financePage > 0) {
                 this.financePage--;
@@ -213,10 +213,10 @@ export class ArchivesScreen {
         detailPanel.className = 'panel detail-panel flex-col';
         container.appendChild(detailPanel);
 
-        // Render List
+        // リスト描画
         this._renderRetiredList(listContainer, list, detailPanel);
 
-        // Restore Selection
+        // 選択状態の復元
         if (this.state.selectedRetiredId) {
             const adv = list.find(a => a.id === this.state.selectedRetiredId);
             if (adv) {
@@ -235,7 +235,7 @@ export class ArchivesScreen {
             return;
         }
 
-        // Sort: Newest first (by leftDay or id)
+        // ソート: 最新順 (引退日またはID)
         const sorted = [...list].sort((a, b) => b.leftDay - a.leftDay);
 
         sorted.forEach(adv => {
@@ -257,7 +257,7 @@ export class ArchivesScreen {
         const div = document.createElement('div');
         div.className = 'list-item list-item-history';
 
-        // Reason Text
+        // 引退理由テキスト
         const reasonStr = LEAVE_TYPE_NAMES[adv.reason] || adv.reason || '不明';
 
         div.innerHTML = `
@@ -287,7 +287,7 @@ export class ArchivesScreen {
             </div>
         `;
 
-        // Tabs
+        // タブ
         const tabs = document.createElement('div');
         tabs.className = 'tabs flex-no-shrink';
         tabs.innerHTML = `
@@ -297,7 +297,7 @@ export class ArchivesScreen {
         `;
         panel.appendChild(tabs);
 
-        // Content
+        // コンテンツ
         const content = document.createElement('div');
         content.className = 'scroll-y flex-1 p-sm';
         panel.appendChild(content);
@@ -329,7 +329,7 @@ export class ArchivesScreen {
         const originName = adv.origin ? (adv.origin.name || adv.origin.id) : '不明';
         const reasonStr = LEAVE_TYPE_NAMES[adv.reason] || adv.reason || '-';
 
-        // Basic Info
+        // 基本情報
         const info = document.createElement('div');
         info.innerHTML = `
             <div class="sub-header">基本情報</div>
@@ -345,7 +345,7 @@ export class ArchivesScreen {
         `;
         container.appendChild(info);
 
-        // Stats
+        // ステータス
         if (adv.stats) {
             const statsDiv = document.createElement('div');
             statsDiv.innerHTML = `<div class="sub-header">能力値</div>`;
@@ -366,7 +366,7 @@ export class ArchivesScreen {
             container.appendChild(statsDiv);
         }
 
-        // Traits
+        // 特性
         if (adv.temperament && adv.traits) {
             const t = adv.temperament;
             const tempDiv = document.createElement('div');
@@ -385,7 +385,7 @@ export class ArchivesScreen {
             container.appendChild(tempDiv);
         }
 
-        // Arts
+        // 奥義
         if (adv.arts) {
             const artsDiv = document.createElement('div');
             artsDiv.innerHTML = `<div class="sub-header">習得奥義</div>`;
@@ -419,7 +419,7 @@ export class ArchivesScreen {
         }
         container.appendChild(list);
 
-        // Summary
+        // サマリー
         if (adv.records) {
             const statsSummary = document.createElement('div');
             statsSummary.style.marginTop = '1rem';
@@ -427,7 +427,7 @@ export class ArchivesScreen {
             statsSummary.style.background = '#fafafa';
             statsSummary.style.border = '1px dashed #ccc';
 
-            // Similar logic to AdventurerScreen for achievements/kills...
+            // 冒険者画面と同様のロジック (実績/討伐)
             let achievementHtml = "";
             if (adv.records.majorAchievements && adv.records.majorAchievements.length > 0) {
                 achievementHtml = adv.records.majorAchievements.map(a =>
@@ -446,7 +446,7 @@ export class ArchivesScreen {
     }
 
     _renderMeikanTab(container, adv) {
-        // Reuse logic from AdventurerScreen (Simplified)
+        // 冒険者画面のロジックを再利用 (簡易版)
         const bio = adv.bio || {};
         const createSection = (title, content) => {
             if (!content) return '';

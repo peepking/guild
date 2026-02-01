@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // シミュレーター用データの読み込み
     questService.initSimulator(MONSTER_DATA, ITEM_DATA);
-    // console.log("Quest Simulator Initialized with JS data.");
 
     // 2. UIマネージャーの初期化
     const uiManager = new UIManager(guild, null);
@@ -58,7 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     uiManager.registerScreen('HISTORY', new QuestHistoryScreen(gameLoop));
     uiManager.registerScreen('ADVENTURERS', new AdventurerScreen(gameLoop));
     uiManager.registerScreen('OPERATION', new OperationScreen(gameLoop));
-    uiManager.registerScreen('ARCHIVES', new ArchivesScreen(gameLoop)); // 変更あり
+    uiManager.registerScreen('OPERATION', new OperationScreen(gameLoop));
+    uiManager.registerScreen('ARCHIVES', new ArchivesScreen(gameLoop));
     // 財務画面は削除
 
     // 6. グローバルイベントのバインド

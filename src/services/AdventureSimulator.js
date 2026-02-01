@@ -548,7 +548,12 @@ export class AdventureSimulator {
         const avgCP = totalCP / party.length;
         // Bonus: +10% per additional member (3 members = 1.2x)
         const sizeBonus = 1 + 0.1 * (party.length - 1);
-        const partyPower = avgCP * sizeBonus;
+        let partyPower = avgCP * sizeBonus;
+
+        // Advisor Modifiers (Power)
+        if (modifiers.power) {
+            partyPower *= (1 + modifiers.power);
+        }
 
         // 2. Enemy Power (Flattened Curve)
         // E:90, D:110, C:130, B:150, A:170, S:190 (Defined in QUEST_RANK_BASE_POWER)

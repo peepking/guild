@@ -393,6 +393,11 @@ export class QuestService {
         });
         successChance += 0.02 * advantageCount;
 
+        // Advisor Modifiers (Success)
+        if (modifiers.success) {
+            successChance += modifiers.success;
+        }
+
         if (successChance > 0.95) successChance = 0.95;
         if (successChance < 0.05) successChance = 0.05;
 
@@ -428,6 +433,10 @@ export class QuestService {
                 }
             });
         });
+
+        if (modifiers.penalty) {
+            penaltyMod *= modifiers.penalty;
+        }
 
         party.forEach(adv => {
             let status = 'OK';
@@ -579,7 +588,7 @@ export class QuestService {
             },
             reward: {
                 money: Math.floor(money),
-                reputation: quest.rewards.reputation,
+                reputation: Math.floor(quest.rewards.reputation * (modifiers.fame || 1.0)),
                 breakdown: { base: quest.rewards.money, freeHunt: freeHuntReward, materials: materialReward }
             },
             effectiveShareMod: shareMod,
@@ -712,6 +721,7 @@ export class QuestService {
     _applyStatGrowth(adv, quest, success, modifiers = {}) {
         let base = success ? 0.60 : 0.25;
         if (modifiers.exp) base *= modifiers.exp;
+        if (modifiers.growth) base *= modifiers.growth; // Advisor growth mod
 
         // 訓練所効果: ランクC以下のステータス成長 +10% * Lv
         if (adv.rankValue < 380) {

@@ -27,7 +27,8 @@ export const ADVENTURER_TYPES = {
     HUNTER: 'HUNTER',
     NINJA: 'NINJA',
     MARTIAL_ARTIST: 'MARTIAL_ARTIST',
-    BISHOP: 'BISHOP'
+    BISHOP: 'BISHOP',
+    HEADHUNTED: 'HEADHUNTED'
 };
 
 export const ADVENTURER_JOB_NAMES = {
@@ -46,7 +47,8 @@ export const ADVENTURER_JOB_NAMES = {
     [ADVENTURER_TYPES.HUNTER]: '狩人',
     [ADVENTURER_TYPES.NINJA]: '忍者',
     [ADVENTURER_TYPES.MARTIAL_ARTIST]: '武闘家',
-    [ADVENTURER_TYPES.BISHOP]: '司祭'
+    [ADVENTURER_TYPES.BISHOP]: '司祭',
+    [ADVENTURER_TYPES.HEADHUNTED]: '招聘顧問'
 };
 
 export const ORIGINS = {
@@ -96,6 +98,34 @@ export const RETIREMENT_CONFIG = {
         HIGH_REDUCTION: 0.004,
         LOW_THRESHOLD: 10,
         LOW_INCREASE: 0.02
+    }
+};
+
+export const ADVISOR_CONFIG = {
+    MAX_ADVISORS: 20,
+    SALARY: 100, // 30日ごと
+    SALARY_INTERVAL: 30,
+    HEADHUNT_COST: 2000,
+    HEADHUNT_TERM: 90, // 外部招聘の任期 (日)
+    EFFECTS: {
+        WARRIOR: { power: 0.04, desc: '戦闘力+4%' },
+        KNIGHT: { success: 0.02, penalty: 0.95, desc: '依頼成功率+2% / 失敗ペナルティ-5%' },
+        SAMURAI: { power: 0.03, success: 0.01, desc: '戦闘力+3% / 依頼成功率+1%' },
+        DARK_KNIGHT: { power: 0.03, injury: 1.01, desc: '戦闘力+3% / 負傷率+1%' },
+        MARTIAL_ARTIST: { power: 0.02, growth: 1.05, desc: '戦闘力+2% / ステ成長率+5%' },
+        SPELLBLADE: { power: 0.02, success: 0.02, desc: '戦闘力+2% / 依頼成功率+2%' },
+        HUNTER: { power: 0.01, success: 0.03, desc: '戦闘力+1% / 依頼成功率+3%' },
+        PRIEST: { injury: 0.96, desc: '負傷率-4%' },
+        BISHOP: { injury: 0.98, growth: 1.05, desc: '負傷率-2% / ステ成長率+5%' },
+        PALADIN: { injury: 0.98, success: 0.02, desc: '負傷率-2% / 依頼成功率+2%' },
+        BARD: { fame: 1.10, desc: 'ギルド名声獲得量+10%' },
+        MAGE: { success: 0.04, desc: '依頼成功率+4%' },
+        FENG_SHUI: { growth: 1.10, desc: 'ステ成長率+10%' },
+        ROGUE: { fame: 1.05, penalty: 0.95, desc: 'ギルド名声+5% / 失敗ペナルティ-5%' },
+        NINJA: { penalty: 0.90, desc: '失敗ペナルティ-10%' },
+        MERCHANT: { reward: 1.05, desc: '依頼報酬+5%' },
+        HEADHUNTED: { success: 0.01, desc: '依頼成功率+1%' },
+        DEFAULT: { success: 0.01, desc: '依頼成功率+1%' } // Fallback
     }
 };
 

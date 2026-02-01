@@ -85,7 +85,7 @@ export class QuestScreen {
             listContainer.appendChild(h);
 
             displayPlanned.forEach(a => {
-                const el = this._createQuestItem(a.quest, a, true); // true = isPlanning
+                const el = this._createQuestItem(a.quest, a, true); // true = 計画中
                 el.onclick = () => {
                     this.state.selectedQuestId = a.quest.id;
                     this.state.selectionMode = false;
@@ -189,7 +189,7 @@ export class QuestScreen {
 
         container.appendChild(detailPanel);
 
-        // Restore Manual List Scroll
+        // 手動選択リストのスクロール位置を復元
         if (manualScrollTop > 0) {
             const newList = container.querySelector('#adv-select-list');
             if (newList) {

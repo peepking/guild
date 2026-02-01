@@ -157,31 +157,31 @@ export class MailScreen {
     }
 
     _handleAction(mailArg, action) {
-        console.log("Handle Action Start. Mail ID:", mailArg.id, "Action:", action);
+
         // サービスからの永続的な参照があることを確認
         const mail = this.gameLoop.mailService.getMails().find(m => m.id === mailArg.id) || mailArg;
 
         if (mail.acted) {
-            console.log("Mail is already acted.");
+
             return;
         }
 
         // GameLoop経由でアクションを実行
         const result = this.gameLoop.handleMailAction(action.id, action.data);
-        console.log("Action Result:", result);
+
 
         if (result.success) {
             mail.acted = true; // 正しい参照でローカルにactedとしてマーク
             this.gameLoop.uiManager.showToast(result.message || '完了しました', 'success');
 
             // 詳細ビューを即座に強制再描画
-            console.log("Forcing _renderDetail with mail.acted =", mail.acted);
+            // 詳細ビューを即座に強制再描画
             this._renderDetail(mail);
 
             // ビュー状態のリセットを避けるため、this.render()は呼び出さない
             this._updateBadge();
         } else {
-            console.error("Action Failed:", result);
+
             this.gameLoop.uiManager.showToast(result.message || '失敗しました', 'error');
         }
     }
