@@ -9,37 +9,31 @@ export class ManagementService {
     }
 
     /**
-     * Daily update for policies, events, and salaries.
      * ポリシー、イベント、給与の日次更新
      * @param {Object} guild 
      */
     dailyUpdate(guild) {
-        // 1. Pay Salaries (Monthly)
         // 1. 給与支払い (月次)
         if (guild.day > 0 && guild.day % ADVISOR_CONFIG.SALARY_INTERVAL === 0) {
             this._payAdvisorSalaries(guild);
         }
 
-        // 1.5 Contract Expiration (Headhunted Advisors)
+        // 1.5 契約満了チェック (招聘顧問)
         this._checkAdvisorContracts(guild);
 
-        // 2. Event Timers
-        // 2. イベントタイマー
+        // 2. イベントタイマー更新
         this._updateEvents(guild);
 
-        // 3. Facility Income (Shop & Tavern)
         // 3. 施設収益 (売店&酒場)
         this._processFacilityIncome(guild);
 
-        // 4. Roll for new events
         // 4. 新規イベント抽選
         if (guild.activeEvents.length === 0) {
-            if (Math.random() < 0.05) { // 5% chance
+            if (Math.random() < 0.05) { // 5%の確率
                 this._triggerRandomEvent(guild);
             }
         }
 
-        // 5. Meikan (Career) Update
         // 5. 名鑑(経歴)更新 (30日ごと)
         if (guild.day > 0 && guild.day % 30 === 0) {
             guild.adventurers.forEach(adv => {
@@ -78,8 +72,7 @@ export class ManagementService {
         const globalMods = this.getGlobalModifiers(guild);
         const marketMod = globalMods.market || 1.0;
 
-        // Shop Income: 2G * Lv * Count
-        // 売店収益: 2G * Lv * Count
+        // 売店収益: 2G * Lv * 人数
         const shopLv = (guild.facilities && guild.facilities.shop) || 0;
         if (shopLv > 0) {
             const income = Math.floor(2 * shopLv * advCount * marketMod);
@@ -87,8 +80,7 @@ export class ManagementService {
             details.push({ reason: `売店売上 (Lv.${shopLv})`, amount: income });
         }
 
-        // Tavern Income: 3G * Lv * Count
-        // 酒場収益: 3G * Lv * Count
+        // 酒場収益: 3G * Lv * 人数
         const tavernLv = (guild.facilities && guild.facilities.tavern) || 0;
         if (tavernLv > 0) {
             const income = Math.floor(3 * tavernLv * advCount * marketMod);
@@ -103,7 +95,7 @@ export class ManagementService {
                 guild.todayFinance.balance = guild.money;
                 guild.todayFinance.details.push(...details);
             }
-            // this.uiManager.log(`施設収益: +${totalIncome}G`, 'info'); // Optional to reduce spam
+            // this.uiManager.log(`施設収益: +${totalIncome}G`, 'info'); // スパム削減のため任意で無効化
         }
     }
 
@@ -120,7 +112,7 @@ export class ManagementService {
             }
             this.uiManager.log(`顧問団への給与(計${totalSalary}G)を支払いました。`, 'info');
         } else {
-            // Debt / Warning
+            // 借金 / 警告
             this.uiManager.log(`資金不足のため顧問への給与(${totalSalary}G)が未払いです。`, 'warning');
         }
     }
@@ -138,7 +130,6 @@ export class ManagementService {
 
     _triggerRandomEvent(guild) {
         const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
-        // Check if already active (though array logic handles multiple, duplicate implies stack or extend? simplify: one event max for now)
         // 既にアクティブかチェック (重複は延長かスタックか? 今は最大1つに単純化)
         if (guild.activeEvents.length > 0) return;
 
@@ -172,7 +163,6 @@ export class ManagementService {
     // --- Policy ---
     // --- 方針 ---
     canChangePolicy(guild) {
-        // Changed to allow anytime update as per user request
         // いつでも変更可能に変更 (ユーザー要望)
         return true;
     }
@@ -189,14 +179,8 @@ export class ManagementService {
         return POLICIES[guild.activePolicy] || POLICIES.BALANCED;
     }
 
-    // --- Advisors ---
     // --- 顧問 ---
-    // Called when an adventurer retires (Rank B+ only)
     // 冒険者が引退したときに呼び出し (ランクB+のみ)
-    // --- Advisors ---
-    // --- 顧問 ---
-    // Called when an adventurer retires
-    // 冒険者が引退したときに呼び出し
     sendAdvisorOfferMail(guild, adventurer, mailService) {
         if (guild.advisors.length >= ADVISOR_CONFIG.MAX_ADVISORS) return;
 
@@ -204,11 +188,11 @@ export class ManagementService {
         const title = "【顧問契約の申し出】";
         const message = `${adventurer.name}より:\n\nお世話になりました。\n冒険者としての活動は引退いたしますが、\nこれまでの経験を活かし、ギルドの顧問として貢献したいと考えております。\n\nもしよろしければ、顧問契約の締結をご検討ください。\n(賃金: ${ADVISOR_CONFIG.SALARY}G / 30日)`;
 
-        // Save candidate data in mail "payload" or globally? 
-        // For simplicity, we can just use the adventurer object ID if they are in retiredAdventurers.
-        // Or store temp object in a list? 
-        // Better: Use `advisorCandidates` strictly for this interaction state if needed, 
-        // but since we want button in Mail, we pass data via mail action.
+        // 候補者データをメールの「ペイロード」に保存するか、グローバルに保存するか？
+        // 単純化のため、すでに引退者リストにある場合は冒険者オブジェクトIDを使用できる。
+        // または一時オブジェクトをリストに保存するか？
+        // よい方法: 必要であれば `advisorCandidates` をこの対話状態のために厳密に使用するが、
+        // メール内にボタンを配置したいため、データをメールアクション経由で渡す。
 
         const candidateData = {
             id: adventurer.id,
@@ -235,12 +219,12 @@ export class ManagementService {
             return { success: false, message: '顧問枠がいっぱいです' };
         }
 
-        // Check duplicates (should rely on ID)
+        // 重複チェック (IDに依存すべき)
         if (guild.advisors.find(a => a.id === candidateData.id)) {
             return { success: false, message: '既に雇用されています' };
         }
 
-        // Determine Effect
+        // 効果の決定
         let config = ADVISOR_CONFIG.EFFECTS[candidateData.type] || ADVISOR_CONFIG.EFFECTS.DEFAULT;
         if (candidateData.isHeadhunted) {
             config = ADVISOR_CONFIG.EFFECTS.HEADHUNTED;
@@ -257,7 +241,7 @@ export class ManagementService {
         return { success: true, message: '雇用しました' };
     }
 
-    // New: Headhunt ("Generic Advisor")
+    // 新規: 外部招聘 ("汎用顧問")
     headhuntAdvisor(guild) {
         if (guild.advisors.length >= ADVISOR_CONFIG.MAX_ADVISORS) {
             this.uiManager.log('顧問枠がいっぱいです。', 'warning');
@@ -275,13 +259,13 @@ export class ManagementService {
             guild.todayFinance.details.push({ reason: '外部招聘費', amount: -ADVISOR_CONFIG.HEADHUNT_COST });
         }
 
-        // Determine Name (Random from all regions, similar to Central City logic)
+        // 地域名の決定 (中央都市のロジックと同様、全地域からランダム)
         const regionKeys = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
         const randomRegion = regionKeys[Math.floor(Math.random() * regionKeys.length)];
         const nameList = REGIONAL_NAMES[randomRegion];
         const randomName = nameList[Math.floor(Math.random() * nameList.length)];
 
-        // Fixed stats for B Rank Headhunted Advisor
+        // ランクBの招聘顧問用の固定ステータス
         const id = `headhunt_${guild.day}_${Math.floor(Math.random() * 1000)}`;
         const candidateData = {
             id: id,
@@ -291,41 +275,41 @@ export class ManagementService {
             roleName: '招聘顧問',
             salary: ADVISOR_CONFIG.SALARY,
             isHeadhunted: true,
-            remainingContract: ADVISOR_CONFIG.HEADHUNT_TERM, // 90 days
-            stats: {} // Stats aren't used for logic much, but we could add flavor stats if needed
+            remainingContract: ADVISOR_CONFIG.HEADHUNT_TERM, // 90日
+            stats: {} // ロジックではあまり使用されないが、必要に応じてフレーバーステータスを追加可能
         };
 
         this.hireAdvisor(guild, candidateData);
         return true;
     }
 
-    // New: Appoint (Promote active B+ adventurer)
+    // 新規: 任命 (現役のランクB+冒険者を昇進)
     appointAdvisor(guild, adventurerId) {
         const advIndex = guild.adventurers.findIndex(a => a.id === adventurerId);
         if (advIndex === -1) return false;
         const adv = guild.adventurers[advIndex];
 
-        // 1. Force Retire logic
-        // Remove from active list
+        // 1. 強制引退ロジック
+        // アクティブリストから削除
         guild.adventurers.splice(advIndex, 1);
 
-        // Add to retired list (set reason to 'APPOINTMENT')
+        // 引退リストに追加 (理由は 'APPOINTMENT' を設定、ここでは標準の 'RETIRE' を使用)
         const retiredData = {
             ...adv,
             leftDay: guild.day,
-            reason: 'RETIRE' // Use 'RETIRE' standard type
+            reason: 'RETIRE' // 標準タイプ 'RETIRE' を使用
         };
 
         if (!guild.retiredAdventurers) guild.retiredAdventurers = [];
         guild.retiredAdventurers.push(retiredData);
 
-        // Add history log
+        // 履歴ログを追加
         if (!retiredData.history) retiredData.history = [];
         retiredData.history.push({ day: guild.day, text: 'ギルド顧問に任命され、現役を引退。' });
 
         this.uiManager.log(`${adv.name} は現役を引退し、顧問に就任しました。`, 'success');
 
-        // 2. Hire as Advisor
+        // 2. 顧問として雇用
         const candidateData = {
             id: adv.id,
             name: adv.name,
@@ -335,70 +319,53 @@ export class ManagementService {
             roleName: '顧問',
             bio: adv.bio,
             origin: adv.origin,
-            history: adv.history // Pass reference or copy? Reference is fine as they are now same entity in lore
+            history: adv.history // 参照渡しでOK (物語上は同一人物なので)
         };
 
         return this.hireAdvisor(guild, candidateData);
     }
 
-    // No firing
-    // 解雇不可 (ユーザー要望)
+    // 解雇なし (ユーザー要望)
     fireAdvisor(guild, advisorId) {
         return false;
     }
 
-    // Helper to get total modifiers
     // 合計補正値を取得するヘルパー
     getGlobalModifiers(guild) {
-        const mods = { ...POLICIES[guild.activePolicy].mod }; // Copy policy mods
-        // 方針補正をコピー
+        const mods = { ...POLICIES[guild.activePolicy].mod }; // 方針補正をコピー
 
-        // Add Advisor mods
-        // 顧問補正を追加
-        // Add Advisor mods (Diminishing returns for duplicate jobs)
-        // 顧問補正 (同職の重複減衰)
+        // 顧問補正を追加 (同職の重複減衰あり)
         const jobCounts = {};
         guild.advisors.forEach(adv => {
             const eff = adv.effect;
             const typeKey = adv.type;
 
             jobCounts[typeKey] = (jobCounts[typeKey] || 0) + 1;
-            const count = jobCounts[typeKey]; // 1-based index (1st, 2nd...)
+            const count = jobCounts[typeKey]; // 1から始まるインデックス (1人目, 2人目...)
 
-            // Diminishing factor: 1.0, 0.5, 0.25... (1 / 2^(n-1))
+            // 減衰係数: 1.0, 0.5, 0.25... (1 / 2^(n-1))
             const factor = 1 / Math.pow(2, count - 1);
 
-            // Updated logic for new simple object format { key: val, ... }
-            // e.g. { power: 0.04 }, { injury: 0.96 }
-            // Some are additive (e.g. power, success), some are multiplicative (e.g. injury, reward)?
-            // Actually, let's treat logical flow:
-            // - Rates (success, power) are additive (+4%)
-            // - Multipliers (injury, reward, fame, growth, penalty) are multiplicative (x0.96, x1.05)?
-            //   Wait, previous Policy logic used multipliers for reward/injury.
-            //   But User request says "Success Rate +2%". This is additive to probability (0.8 + 0.02).
-            //   "Reward +5%". This is multiplier (Base * 1.05).
-            //   "Injury Rate -4%". This is reduction. If base is 1.0 multiplier, 0.96.
+            // キーに基づいて決定:
+            // 加算 (ADDITIVE): power, success
+            // 乗算 (MULTIPLICATIVE): injury, penalty, growth, fame, reward
 
-            // Let's decide based on KEY:
-            // ADDITIVE: power, success
-            // MULTIPLICATIVE: injury, penalty, growth, fame, reward
-
-            // Wait, for Multiplicative, how do we handle diminishing returns on the *factor*?
-            // e.g. Reward +5% (1.05). Second one is +2.5% (1.025).
-            // Formula: NewMult = 1 + (BaseMult - 1) * factor
-            // e.g. 1.05 -> (0.05 * 1.0) + 1 = 1.05.
-            // e.g. 1.05 second time -> (0.05 * 0.5) + 1 = 1.025.
+            // 乗算の場合の、係数による減衰の扱いについて:
+            // 例: 報酬 +5% (1.05)。2人目は +2.5% (1.025)。
+            // 式: 新規倍率 = 1 + (基本倍率 - 1) * 係数
+            // 例: 1.05 -> (0.05 * 1.0) + 1 = 1.05
+            // 例: 1.05 (2回目) -> (0.05 * 0.5) + 1 = 1.025
 
             const ADDITIVE_KEYS = ['power', 'success'];
 
-            // eff is the whole object { power: 0.04, desc: ... } or old style { type:..., val:... }
-            // With new constant update, it is { power: 0.04, desc: ... }
-            // But we need to handle potential legacy or direct access.
+            // eff は { power: 0.04, desc: ... } のようなオブジェクト、あるいは古い形式 { type:..., val:... }
+            // 新しい定数更新により { power: 0.04, desc: ... } となっているはず。
+            // しかし、レガシー対応や直接アクセスの可能性を考慮する必要がある。
 
             let effects = eff;
             if (eff.type && eff.val) {
-                // Check if legacy style (shouldn't happen with new constants but safe to keep?)
-                // Skip legacy normalization for now as we just replaced constants.
+                // レガシースタイルかチェック (新しい定数では起こらないはずだが、念のため維持)
+                // 定数を置き換えたばかりなので、今のところレガシー正規化はスキップ。
                 effects = typeof eff.val === 'object' ? eff.val : { [eff.type]: eff.val };
             }
 
@@ -406,15 +373,15 @@ export class ManagementService {
                 if (k === 'desc' || k === 'type') continue;
 
                 if (ADDITIVE_KEYS.includes(k)) {
-                    // Additive: simply add (val * factor)
+                    // 加算: 単純に加算 (値 * 係数)
                     mods[k] = (mods[k] || 0) + (v * factor);
                 } else {
-                    // Multiplicative: (val - 1) * factor + 1
-                    // e.g. 0.96 (-4%) -> -0.04 * factor -> result + 1.
-                    // If mods[k] is undefined, start at 1.0.
-                    // We need to accumulate multipliers.
-                    // Total = Base * M1 * M2...
-                    // So we multiply into the existing mod.
+                    // 乗算: (値 - 1) * 係数 + 1
+                    // 例: 0.96 (-4%) -> -0.04 * 係数 -> 結果 + 1
+                    // mods[k] が未定義の場合は 1.0 から開始
+                    // 倍率を累積する必要がある。
+                    // 合計 = Base * M1 * M2...
+                    // なので、既存の補正値に乗算する。
 
                     const baseDiff = v - 1.0;
                     const effectiveDiff = baseDiff * factor;
@@ -425,7 +392,6 @@ export class ManagementService {
             }
         });
 
-        // Add Event mods
         // イベント補正を追加
         guild.activeEvents.forEach(evt => {
             if (evt.mod) {

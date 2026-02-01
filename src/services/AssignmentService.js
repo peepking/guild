@@ -111,7 +111,7 @@ export class AssignmentService {
 
     // --- 割り当てキャンセル ---
     // 計画中のみキャンセル可能。出発後は不可。
-    cancelAssignment(questAssignment, ongoingQuests, plannedQuests) { // plannedQuests added as arg
+    cancelAssignment(questAssignment, ongoingQuests, plannedQuests) { // 引数としてplannedQuestsを追加
         // メンバーの状態を確認
         const isPlanning = questAssignment.members[0].state === 'PLANNING';
         const isQuesting = questAssignment.members[0].state === 'QUESTING';

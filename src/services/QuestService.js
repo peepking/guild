@@ -34,7 +34,7 @@ export class QuestService {
         }
 
         // フェーズ12: 特殊クエスト発生判定
-        // 図書室効果: +10% per level
+        // 図書室効果: レベルごとに+10%
         const libraryLv = facilities.library || 0;
         const specialChance = 0.15 + (libraryLv * 0.10);
 
@@ -140,12 +140,12 @@ export class QuestService {
         let bossTarget = null; // 実際のボス名を格納
         const questLogData = ADVENTURE_LOG_DATA.QUEST_LOGS[typeKey];
 
-        // 1. Determine Boss Candidate (for Combat/Boss Quests)
+        // 1. ボス候補の決定 (戦闘/ボスクエスト用)
         const combatQuestTypes = ['HUNT', 'CULLING', 'DUNGEON', 'RUINS', 'VIP_GUARD', 'REBELLION', 'ESCORT'];
-        const npcQuestTypes = ['VIP_GUARD', 'REBELLION', 'ESCORT', 'MERCHANT_DISPUTE', 'ADVENTURER_DISPUTE']; // Types needing Humanoid bosses
+        const npcQuestTypes = ['VIP_GUARD', 'REBELLION', 'ESCORT', 'MERCHANT_DISPUTE', 'ADVENTURER_DISPUTE']; // ヒューマノイドボスが必要なタイプ
         let bossMonster = null;
 
-        // NPC Boss Logic for Human-centric quests (Prioritize Humans over Monsters)
+        // 人間中心のクエストのためのNPCボスロジック (モンスターより人間を優先)
         if (npcQuestTypes.includes(typeKey)) {
             const categoryMap = {
                 'ESCORT': 'LOGISTICS',
@@ -393,7 +393,7 @@ export class QuestService {
         });
         successChance += 0.02 * advantageCount;
 
-        // Advisor Modifiers (Success)
+        // 顧問補正 (成功率)
         if (modifiers.success) {
             successChance += modifiers.success;
         }
@@ -448,12 +448,12 @@ export class QuestService {
 
             const effectiveDmg = dmgPerPerson * injuryMod;
 
-            // Death Check
+            // 死亡判定
             if (effectiveDmg > 50) {
-                let deathChance = 0.05; // 5% chance if massive damage
+                let deathChance = 0.05; // 大ダメージの場合5%の確率
 
-                // Infirmary Effect: Death Rate -5% * Lv
-                // Effectively, Lv 1 Infirmary prevents death from this basic check (0.05 - 0.05 = 0)
+                // 医務室効果: 死亡率 -5% * レベル
+                // 実質的に、レベル1の医務室でこの基本チェックによる死亡を防ぐ (0.05 - 0.05 = 0)
                 const infirmaryLv = (modifiers.facilities && modifiers.facilities.infirmary) || 0;
                 if (infirmaryLv > 0) {
                     deathChance = Math.max(0, deathChance - (0.05 * infirmaryLv));
@@ -603,7 +603,7 @@ export class QuestService {
         adv.perfEMA = (adv.perfEMA || 0) * 0.9 + surprise * 0.1;
 
         if (!success) {
-            // Failure Penalty: Moderate
+            // 失敗ペナルティ: 中程度
             adv.updateRank(-5);
             return;
         }
@@ -668,7 +668,7 @@ export class QuestService {
 
         const ranks = ['E', 'D', 'C', 'B', 'A', 'S'];
 
-        // Solo
+        // 個人戦
         if (tournamentState.solo && tournamentState.solo !== 'COMPLETED') {
             const has = existingQuests.some(q => q.type === 'TOURNAMENT_SOLO' && q.difficulty.rank === tournamentState.solo);
             if (!has) {
@@ -676,7 +676,7 @@ export class QuestService {
             }
         }
 
-        // Team
+        // 団体戦
         if (tournamentState.team && tournamentState.team !== 'COMPLETED') {
             const has = existingQuests.some(q => q.type === 'TOURNAMENT_TEAM' && q.difficulty.rank === tournamentState.team);
             if (!has) {
@@ -721,7 +721,7 @@ export class QuestService {
     _applyStatGrowth(adv, quest, success, modifiers = {}) {
         let base = success ? 0.60 : 0.25;
         if (modifiers.exp) base *= modifiers.exp;
-        if (modifiers.growth) base *= modifiers.growth; // Advisor growth mod
+        if (modifiers.growth) base *= modifiers.growth; // 顧問の成長補正
 
         // 訓練所効果: ランクC以下のステータス成長 +10% * Lv
         if (adv.rankValue < 380) {

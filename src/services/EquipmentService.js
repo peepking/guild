@@ -181,6 +181,6 @@ export class EquipmentService {
             r -= weights[key];
             if (r <= 0) return key;
         }
-        return keys[keys.length - 1]; // Fallback
+        return keys[keys.length - 1]; // フォールバック
     }
 }

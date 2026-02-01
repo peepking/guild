@@ -73,7 +73,7 @@ export class RecruitmentService {
         const origin = origins[Math.floor(Math.random() * origins.length)];
 
         // 出身地に基づく名前リストの選択
-        let regionKey = 'CENTRAL'; // Fallback
+        let regionKey = 'CENTRAL'; // フォールバック
 
         switch (origin.id) {
             case 'north': regionKey = 'NORTH'; break;
@@ -158,12 +158,12 @@ export class RecruitmentService {
     checkDailyEvents(day, mailService) {
         if (!mailService) return;
 
-        // 1. Adventurer Scout Event (3%) -> DEBUG: 100%
+        // 1. スカウトイベント (3%) -> デバッグ: 100%
         if (Math.random() < 0.03) {
             this._triggerScoutEvent(day, mailService);
         }
 
-        // 2. Apprenticeship Event (1%)
+        // 2. 弟子入りイベント (1%)
         if (Math.random() < 0.01) {
             this._triggerApprenticeEvent(day, mailService);
         }
@@ -253,11 +253,11 @@ export class RecruitmentService {
         }
 
         const newAdv = new Adventurer(candidate.id, candidate.name, candidate.type, candidate.origin, JOIN_TYPES.LOCAL, candidate.rankValue);
-        newAdv.rankValue = candidate.rankValue; // Explicitly enforce rank value from scout data
+        newAdv.rankValue = candidate.rankValue; // スカウトデータからランク値を強制適用
         // スカウトデータからランク値を強制適用
-        newAdv.lastPeriodRankValue = newAdv.rankValue; // Sync
+        newAdv.lastPeriodRankValue = newAdv.rankValue; // 同期
         // 同期
-        newAdv.updateRank(0); // Update label based on enforced rank
+        newAdv.updateRank(0); // 強制適用ランクに基づいてラベル更新
         // 強制適用ランクに基づいてラベル更新
 
         newAdv.stats = candidate.stats;
@@ -274,7 +274,7 @@ export class RecruitmentService {
 
         const newAdv = new Adventurer(apprentice.id, apprentice.name, apprentice.type, apprentice.origin, JOIN_TYPES.LOCAL, apprentice.rankValue);
         newAdv.rankValue = apprentice.rankValue;
-        newAdv.lastPeriodRankValue = newAdv.rankValue; // Sync
+        newAdv.lastPeriodRankValue = newAdv.rankValue; // 同期
         newAdv.updateRank(0);
 
         newAdv.stats = apprentice.stats;

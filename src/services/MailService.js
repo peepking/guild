@@ -33,10 +33,8 @@ export class MailService {
             date: new Date().toISOString(), // ゲーム内Dayがあればコンテキストから取得推奨
             timestamp: Date.now()
         };
-        this.mails.unshift(mail); // Newest first
-        // 最新を先頭に
+        this.mails.unshift(mail); // 最新を先頭に
 
-        // Trigger Toast logic
         // トーストロジックをトリガー
         this.toastQueue.push({
             title: title,

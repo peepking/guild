@@ -171,7 +171,7 @@ export class Adventurer {
             case 'INTRO':
                 this.bio.intro = this._generateIntro();
                 // ランクB以上ならフレーバーも更新
-                if (this.rankValue >= 380) { // B Rank Threshold
+                if (this.rankValue >= 380) {
                     this.bio.flavor = this._generateFlavor();
                 }
                 break;
@@ -242,8 +242,6 @@ export class Adventurer {
 
     _generateArtBio(artId, artName) {
         // IDに基づく検索、なければデフォルト
-        // artId might be specific like "smash"
-        // If not found in ARTS_TEMPLATES, use DEFAULT
         let list = ARTS_TEMPLATES[artId];
         if (!list) list = ARTS_TEMPLATES.DEFAULT;
 
@@ -267,22 +265,18 @@ export class Adventurer {
                 candidates.push(this._getRandomTemplate(CAREER_TEMPLATES[key]));
             }
         }
-        // Add more conditions...
 
         if (candidates.length === 0) return ["まだ特筆すべき経歴はない。"];
 
         // 1つランダムに返す、あるいはリストとして返す？
         // 仕様「経歴に関する文をランダムに表示」 -> 1文？
-        // "Updating trigger is every 30 days" -> implies it changes.
         return [candidates[Math.floor(Math.random() * candidates.length)]];
     }
 
     _generateNicknameBio(data) {
-        // data.featId should be present
         if (data.featId && NICKNAME_TEMPLATES[data.featId]) {
             return this._getRandomTemplate(NICKNAME_TEMPLATES[data.featId], data);
         }
-        // Fallback or generic
         const list = data.feat ? NICKNAME_TEMPLATES.WITH_FEAT : NICKNAME_TEMPLATES.DEFAULT;
         return this._getRandomTemplate(list, data);
     }

@@ -503,7 +503,7 @@ export class AdventureSimulator {
     }
 
     _resolveBattle(party, monster, modifiers = {}, logs = [], quest = null) {
-        // Verbose Tournament Log
+        // 詳細なトーナメントログ
         if (quest && quest.isTournament) {
             const flavor = [
                 "互いに距離を取り、隙を伺う...",
@@ -514,17 +514,17 @@ export class AdventureSimulator {
                 "目にも止まらぬ速さで技が交差する！",
                 "勝負の行方はまだ分からない..."
             ];
-            // Add 3-5 lines
+            // 3-5行追加
             const count = Math.floor(Math.random() * 3) + 3; // 3 to 5
             for (let i = 0; i < count; i++) {
                 logs.push(`[戦況] ${this._pick(flavor)}`);
             }
         }
 
-        // --- Action Logs ---
+        // --- アクションログ ---
         party.forEach(adv => {
             let template = '';
-            // 30% Art Chance
+            // アーツ発動確率 30%
             if (adv.arts && adv.arts.length > 0 && Math.random() < 0.3) {
                 const art = adv.arts[Math.floor(Math.random() * adv.arts.length)];
                 if (art.logs && art.logs.length > 0) {
@@ -532,7 +532,7 @@ export class AdventureSimulator {
                 }
             }
 
-            // Normal Action
+            // 通常アクション
             if (!template) {
                 const normalLogs = NORMAL_ACTION_LOGS[adv.type] || ['{name}は果敢に戦った！'];
                 template = normalLogs[Math.floor(Math.random() * normalLogs.length)];
@@ -541,22 +541,22 @@ export class AdventureSimulator {
             if (logs) logs.push(template.replace(/{name}/g, adv.name));
         });
 
-        // 1. Calculate Party CP
+        // 1. パーティCP計算
         let totalCP = 0;
         party.forEach(p => totalCP += this._getAdventurerPower(p));
 
         const avgCP = totalCP / party.length;
-        // Bonus: +10% per additional member (3 members = 1.2x)
+        // ボーナス: メンバー追加ごとに+10% (3人 = 1.2倍)
         const sizeBonus = 1 + 0.1 * (party.length - 1);
         let partyPower = avgCP * sizeBonus;
 
-        // Advisor Modifiers (Power)
+        // 顧問補正 (パワー)
         if (modifiers.power) {
             partyPower *= (1 + modifiers.power);
         }
 
-        // 2. Enemy Power (Flattened Curve)
-        // E:90, D:110, C:130, B:150, A:170, S:190 (Defined in QUEST_RANK_BASE_POWER)
+        // 2. 敵パワー (平準化カーブ)
+        // E:90, D:110, C:130, B:150, A:170, S:190 (QUEST_RANK_BASE_POWERで定義)
         let enemyBase = QUEST_RANK_BASE_POWER[monster.rank] || 90;
 
         let enemyPower = enemyBase;
@@ -564,13 +564,13 @@ export class AdventureSimulator {
         else if (monster.category && monster.category.includes('強敵')) enemyPower *= 1.2;
         else if (monster.category && monster.category.includes('中堅')) enemyPower *= 1.1;
 
-        // 3. Win Rate
-        // Win Rate = 0.5 + (Party - Enemy) / 50
-        // Cap at 5% - 95%
+        // 3. 勝率
+        // 勝率 = 0.5 + (パーティ - 敵) / 50
+        // 5% - 95% でキャップ
         const baseWinRate = 0.5 + (partyPower - enemyPower) / 50;
         let winRate = Math.max(0.05, Math.min(0.95, baseWinRate));
 
-        // Trait Mods
+        // 特性補正
         party.forEach(p => {
             (p.traits || []).forEach(tKey => {
                 const h = TRAITS[tKey]?.hooks;
@@ -580,18 +580,18 @@ export class AdventureSimulator {
         });
         if (modifiers.winRate) winRate *= modifiers.winRate;
 
-        // Soft Cap again after mods
+        // 補正後に再度ソフトキャップ
         winRate = Math.max(0.05, Math.min(0.95, winRate));
 
         const win = Math.random() < winRate;
 
-        // 4. Damage Calculation
-        // Base Damage = EnemyPower * (1 - WinRate) * 0.3 (Tuned Factor)
-        // Variance = 0.5 - 1.5
+        // 4. ダメージ計算
+        // 基礎ダメージ = 敵パワー * (1 - k勝率) * 0.3 (調整係数)
+        // 分散 = 0.5 - 1.5
         const variance = 0.5 + Math.random();
         let totalDamage = enemyPower * (1 - winRate) * 0.3 * variance;
 
-        // Global Danger/Injury Mods
+        // グローバル危険度/負傷補正
         if (modifiers.danger) totalDamage *= modifiers.danger;
         if (modifiers.injury) totalDamage *= modifiers.injury;
 
@@ -610,7 +610,7 @@ export class AdventureSimulator {
         const type = monster.mainType || 'unknown';
         const isBoss = monster.isBoss || false;
 
-        // Priority mapping based on Rule 8
+        // ルール8に基づく優先マッピング
         const mapping = {
             'beast': ['皮', '牙', '骨', '毛皮'],
             'humanoid': ['骨', '血液', '心臓'],
@@ -630,11 +630,11 @@ export class AdventureSimulator {
         const candidates = mapping[type] || ['謎の素材', '体液'];
         const materialName = candidates[Math.floor(Math.random() * candidates.length)];
 
-        // Value Calculation
+        // 価値計算
         // E:20 -> S:???
         const rankValues = { 'E': 20, 'D': 50, 'C': 100, 'B': 200, 'A': 300, 'S': 500 };
         let baseValue = rankValues[monster.rank] || 20;
-        if (isBoss) baseValue *= 3; // Boss materials are valuable
+        if (isBoss) baseValue *= 3; // ボス素材は高価
 
         return {
             name: `${monster.name}の${materialName}`,
