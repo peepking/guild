@@ -3,6 +3,7 @@
   "name": "guild-management-mvp",
   "version": "1.0.0",
   "description": "MVP for Guild Management Game",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
