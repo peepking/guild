@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RecruitmentService } from '../../services/RecruitmentService.js';
 import { Guild } from '../../models/Guild.js';
-import { JOIN_TYPES } from '../../data/constants.js';
+import { JOIN_TYPES, ADVENTURER_TYPES } from '../../data/constants.js';
 
 describe('RecruitmentService', () => {
     let service;
@@ -31,13 +31,6 @@ describe('RecruitmentService', () => {
 
     it('should apply rank/trust modifiers based on join type', () => {
         // Create statistical sample to verify trends (simplified for unit test)
-        // Contract: High Rank, Low Trust
-        // Local: Low Rank, High Trust
-
-        // Force random mock? Or just check ranges if logic handles it.
-        // Since we can't easily mock Math.random PER CALL in a loop cleanly without complex setup,
-        // we will check if the generated values fall within expected *potential* ranges or verify logic via multiple samples.
-
         let contractCount = 0;
         let localCount = 0;
 
@@ -48,13 +41,8 @@ describe('RecruitmentService', () => {
         for (let i = 0; i < 100; i++) {
             const adv = service.generateNewAdventurer();
             if (adv.joinType === JOIN_TYPES.CONTRACT) {
-                // Log for debugging
-                if (adv.rankValue < 350) {
-                    console.log('DEBUG: Contract Rank too low', adv.rankValue, 'GuildRep:', service.guild.reputation);
-                }
                 // Contract: Rank Range 350-900 (Potential -40 from Foreign origin)
                 expect(adv.rankValue).toBeGreaterThanOrEqual(300);
-                // Trust: Base - 15 ( Origin trust etc varies but usually low)
                 contractCount++;
             } else if (adv.joinType === JOIN_TYPES.LOCAL) {
                 // Local: Rank Range 0-160
@@ -71,10 +59,6 @@ describe('RecruitmentService', () => {
             guild.adventurers.push({ id: `filled_${i}` });
         }
 
-        // This logic is actually in GameLoop usually (checking capacity before adding).
-        // RecruitmentService.dailyRecruit just returns a candidate or null based on chance.
-        // Let's verify dailyRecruit returns candidate occasionally.
-
         // Mock Math.random to ensure recruit happens
         const originalRandom = Math.random;
         Math.random = () => 0.001; // Force hit base chance
@@ -83,5 +67,43 @@ describe('RecruitmentService', () => {
         expect(candidate).toBeDefined();
 
         Math.random = originalRandom;
+    });
+
+    // --- New Tests for Headhunted Advisor Blocking ---
+
+    describe('Headhunted Advisor Blocking', () => {
+        it('should not generate adventurers with HEADHUNTED type in generateNewAdventurer', () => {
+            // Run many times to ensure statistical coverage
+            for (let i = 0; i < 100; i++) {
+                const adv = service.generateNewAdventurer();
+                expect(adv.type).not.toBe(ADVENTURER_TYPES.HEADHUNTED);
+            }
+        });
+
+        it('should not include HEADHUNTED type in generateTemplateBatch', () => {
+            const batch = service.generateTemplateBatch(100);
+            batch.forEach(adv => {
+                expect(adv.type).not.toBe(ADVENTURER_TYPES.HEADHUNTED);
+            });
+        });
+
+        it('should not include HEADHUNTED candidates in scout event', () => {
+            const mailServiceMock = {
+                send: vi.fn()
+            };
+
+            // Accessing private method for testing purpose
+            service._triggerScoutEvent(1, mailServiceMock);
+
+            expect(mailServiceMock.send).toHaveBeenCalled();
+            const callArgs = mailServiceMock.send.mock.calls[0];
+            const data = callArgs[3]; // 4th argument is data
+
+            expect(data.actions).toBeDefined();
+            data.actions.forEach(action => {
+                const candidate = action.data.candidate;
+                expect(candidate.type).not.toBe(ADVENTURER_TYPES.HEADHUNTED);
+            });
+        });
     });
 });

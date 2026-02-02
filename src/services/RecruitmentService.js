@@ -76,8 +76,8 @@ export class RecruitmentService {
         this.counter++;
         const id = `adv_${this.counter}`;
 
-        // ランダムタイプ
-        const types = Object.values(ADVENTURER_TYPES);
+        // ランダムタイプ (招聘顧問は除外)
+        const types = Object.values(ADVENTURER_TYPES).filter(t => t !== ADVENTURER_TYPES.HEADHUNTED);
         const type = types[Math.floor(Math.random() * types.length)];
 
         // ランダムな出身地
@@ -155,7 +155,7 @@ export class RecruitmentService {
         for (let i = 0; i < count; i++) {
             this.counter++;
             const id = `test_${this.counter}`;
-            const types = Object.values(ADVENTURER_TYPES);
+            const types = Object.values(ADVENTURER_TYPES).filter(t => t !== ADVENTURER_TYPES.HEADHUNTED);
             const type = types[Math.floor(Math.random() * types.length)];
 
             let origin = ORIGINS.CENTRAL;
@@ -204,7 +204,7 @@ export class RecruitmentService {
         const ranks = ['E', 'D', 'C', 'B'];
         const targetRank = ranks[Math.floor(Math.random() * ranks.length)];
 
-        const allTypes = Object.values(ADVENTURER_TYPES);
+        const allTypes = Object.values(ADVENTURER_TYPES).filter(t => t !== ADVENTURER_TYPES.HEADHUNTED);
         const shuffledTypes = allTypes.sort(() => 0.5 - Math.random());
 
         for (let i = 0; i < 3; i++) {
