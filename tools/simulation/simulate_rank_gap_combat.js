@@ -7,12 +7,12 @@ import { fileURLToPath } from 'url';
 global.window = {};
 
 // Import necessary modules
-import { CONSTANTS, ADVENTURER_TYPES, BASE_STATS, TRAITS, QUEST_RANK_BASE_POWER } from '../src/data/constants.js';
-import { MONSTER_DATA } from '../src/data/monsterData.js';
-import { ITEM_DATA } from '../src/data/itemData.js';
-import { QUEST_SPECS, REGIONS } from '../src/data/QuestSpecs.js';
-import { AdventureSimulator } from '../src/services/AdventureSimulator.js';
-import { Adventurer } from '../src/models/Adventurer.js';
+import { CONSTANTS, ADVENTURER_TYPES, BASE_STATS, TRAITS, QUEST_RANK_BASE_POWER } from '../../src/data/constants.js';
+import { MONSTER_DATA } from '../../src/data/monsterData.js';
+import { ITEM_DATA } from '../../src/data/itemData.js';
+import { QUEST_SPECS, REGIONS } from '../../src/data/QuestSpecs.js';
+import { AdventureSimulator } from '../../src/services/AdventureSimulator.js';
+import { Adventurer } from '../../src/models/Adventurer.js';
 
 // --- 1. PATCH SIMULATOR WITH NEW LOGIC (COPIED FROM simulate_new_combat.js) ---
 
