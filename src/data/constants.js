@@ -1,5 +1,5 @@
 export const CONSTANTS = {
-    INITIAL_MONEY: 1000,
+    INITIAL_MONEY: 3000,
     INITIAL_REPUTATION: 0,
     GUILD: {
         SOFT_CAP: 10,

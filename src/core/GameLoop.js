@@ -6,6 +6,7 @@ import { StorageService } from '../services/StorageService.js';
 
 import { titleService } from '../services/TitleService.js';
 import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS, LEAVE_TYPE_NAMES, RETIREMENT_CONFIG, JOIN_TYPES } from '../data/constants.js';
+import { MESSAGES } from '../data/messages.js';
 
 /**
  * ゲームのメインループと進行を管理するコアクラス
@@ -305,6 +306,9 @@ export class GameLoop {
             }
         }
 
+        // --- チュートリアルメール送信 ---
+        this._checkTutorialMails();
+
         // --- 6. デイリーイベントチェック (スカウト/弟子) ---
         if (this.recruitmentService) {
             this.recruitmentService.checkDailyEvents(this.guild.day, this.mailService);
@@ -566,5 +570,44 @@ export class GameLoop {
             }
         }
         return { success: false, message: '不明なアクションです' };
+    }
+
+    /**
+     * チュートリアルメールの定期配信チェック
+     */
+    _checkTutorialMails() {
+        if (!this.mailService) return;
+
+        // メッセージ定義の動的インポートはできないため、
+        // 実際にはimport済みの定数を使うか、あるいはMESSAGES自体をGameLoopでimportする必要がある。
+        // GameLoop内ではまだMESSAGESをimportしていないため、追加が必要。
+        // ただし、MESSAGESはこのファイルのスコープ外。
+        // したがって、GameLoop.jsの先頭でMESSAGESをインポートする必要がある。
+        // ここでは一旦ロジックのみ記述し、別途importを追加する。
+
+        const tutorialMails = {
+            3: 'DAY_3',
+            5: 'DAY_5',
+            8: 'DAY_8',
+            10: 'DAY_10',
+            15: 'DAY_15',
+            20: 'DAY_20',
+            25: 'DAY_25',
+            35: 'DAY_35'
+        };
+
+        const key = tutorialMails[this.guild.day];
+        if (key) {
+            // import { MESSAGES } from '../data/messages.js'; が必要
+            const content = MESSAGES.MAIL.TUTORIAL[key];
+            if (content) {
+                this.mailService.send(
+                    content.TITLE,
+                    content.BODY,
+                    'SYSTEM',
+                    { day: this.guild.day }
+                );
+            }
+        }
     }
 }

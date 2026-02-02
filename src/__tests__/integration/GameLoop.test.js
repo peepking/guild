@@ -52,7 +52,7 @@ describe('GameLoop Integration', () => {
     });
 
     it('should advance day and reset finance', () => {
-        guild.money = 1000;
+        guild.money = 3000;
         const initialDay = guild.day;
 
         gameLoop.nextDay();
@@ -60,7 +60,7 @@ describe('GameLoop Integration', () => {
         expect(guild.day).toBe(initialDay + 1);
         expect(guild.todayFinance).toBeDefined();
         expect(guild.todayFinance.income).toBe(0);
-        expect(guild.todayFinance.balance).toBe(1000);
+        expect(guild.todayFinance.balance).toBe(3000);
         expect(mockUiManager.log).toHaveBeenCalledWith(expect.stringContaining('日目 開始'), 'day-start');
     });
 
