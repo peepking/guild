@@ -83,6 +83,20 @@ export const EQUIPMENT_DATA = [
     { "name": "絶対零片のブリザードボウ", "type": "BOW", "rank": "S" },
     { "name": "虚無心核のアビスボウ", "type": "BOW", "rank": "S" },
 
+    // 槍 (SPEAR)
+    { "name": "ロングスピア", "type": "SPEAR", "rank": "E" },
+    { "name": "パイク", "type": "SPEAR", "rank": "E" },
+    { "name": "霊木柄のランス", "type": "SPEAR", "rank": "D" },
+    { "name": "牙穂の突槍", "type": "SPEAR", "rank": "D" },
+    { "name": "竜骨柄の薙刀", "type": "SPEAR", "rank": "C" },
+    { "name": "十文字牙槍", "type": "SPEAR", "rank": "C" },
+    { "name": "星核穂のグレイヴ", "type": "SPEAR", "rank": "B" },
+    { "name": "氷魂角鉾", "type": "SPEAR", "rank": "B" },
+    { "name": "神骨柄の竜紋戟", "type": "SPEAR", "rank": "A" },
+    { "name": "生命核の聖槍", "type": "SPEAR", "rank": "A" },
+    { "name": "原初神骨の天槍", "type": "SPEAR", "rank": "S" },
+    { "name": "虚無核の方天画戟", "type": "SPEAR", "rank": "S" },
+
     // SPECIAL
     { "name": "護符", "type": "SPECIAL", "rank": "E" },
     { "name": "仕込み刃", "type": "SPECIAL", "rank": "E" },

@@ -1,10 +1,10 @@
 export const JOB_PREFERENCES = {
     'WARRIOR': {
-        'WEAPON': { 'LONG_SWORD': 30, 'SHORT_SWORD': 10, 'AXE': 25, 'MACE': 20, 'STAFF': 0, 'BOW': 10, 'SPECIAL': 5 },
+        'WEAPON': { 'LONG_SWORD': 25, 'SHORT_SWORD': 10, 'AXE': 20, 'MACE': 20, 'STAFF': 0, 'BOW': 10, 'SPECIAL': 5, 'SPEAR': 10 },
         'ARMOR': { 'HEAVY': 35, 'LIGHT': 45, 'CLOTHES': 15, 'ROBE': 5 }
     },
     'KNIGHT': {
-        'WEAPON': { 'LONG_SWORD': 45, 'SHORT_SWORD': 5, 'AXE': 10, 'MACE': 20, 'STAFF': 0, 'BOW': 15, 'SPECIAL': 5 },
+        'WEAPON': { 'LONG_SWORD': 35, 'SHORT_SWORD': 5, 'AXE': 5, 'MACE': 20, 'STAFF': 0, 'BOW': 10, 'SPECIAL': 5, 'SPEAR': 20 },
         'ARMOR': { 'HEAVY': 70, 'LIGHT': 25, 'CLOTHES': 5, 'ROBE': 0 }
     },
     'ROGUE': {
@@ -16,11 +16,11 @@ export const JOB_PREFERENCES = {
         'ARMOR': { 'HEAVY': 0, 'LIGHT': 10, 'CLOTHES': 10, 'ROBE': 80 }
     },
     'PRIEST': {
-        'WEAPON': { 'LONG_SWORD': 0, 'SHORT_SWORD': 10, 'AXE': 0, 'MACE': 45, 'STAFF': 40, 'BOW': 0, 'SPECIAL': 5 },
+        'WEAPON': { 'LONG_SWORD': 0, 'SHORT_SWORD': 10, 'AXE': 0, 'MACE': 40, 'STAFF': 35, 'BOW': 0, 'SPECIAL': 5, 'SPEAR': 10 },
         'ARMOR': { 'HEAVY': 0, 'LIGHT': 10, 'CLOTHES': 20, 'ROBE': 70 }
     },
     'MERCHANT': {
-        'WEAPON': { 'LONG_SWORD': 10, 'SHORT_SWORD': 35, 'AXE': 5, 'MACE': 0, 'STAFF': 0, 'BOW': 10, 'SPECIAL': 40 },
+        'WEAPON': { 'LONG_SWORD': 10, 'SHORT_SWORD': 30, 'AXE': 5, 'MACE': 0, 'STAFF': 0, 'BOW': 10, 'SPECIAL': 35, 'SPEAR': 10 },
         'ARMOR': { 'HEAVY': 0, 'LIGHT': 15, 'CLOTHES': 70, 'ROBE': 15 }
     },
     'BARD': {
@@ -32,11 +32,11 @@ export const JOB_PREFERENCES = {
         'ARMOR': { 'HEAVY': 20, 'LIGHT': 50, 'CLOTHES': 30, 'ROBE': 0 }
     },
     'SPELLBLADE': {
-        'WEAPON': { 'LONG_SWORD': 60, 'SHORT_SWORD': 20, 'AXE': 0, 'MACE': 0, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 20, 'GAUNTLET': 0 },
+        'WEAPON': { 'LONG_SWORD': 55, 'SHORT_SWORD': 20, 'AXE': 0, 'MACE': 0, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 15, 'GAUNTLET': 0, 'SPEAR': 10 },
         'ARMOR': { 'HEAVY': 40, 'LIGHT': 40, 'CLOTHES': 10, 'ROBE': 10 }
     },
     'DARK_KNIGHT': {
-        'WEAPON': { 'LONG_SWORD': 40, 'SHORT_SWORD': 0, 'AXE': 40, 'MACE': 20, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0 },
+        'WEAPON': { 'LONG_SWORD': 20, 'SHORT_SWORD': 0, 'AXE': 20, 'MACE': 20, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0, 'SPEAR': 40 },
         'ARMOR': { 'HEAVY': 80, 'LIGHT': 20, 'CLOTHES': 0, 'ROBE': 0 }
     },
     'FENG_SHUI': {
@@ -44,7 +44,7 @@ export const JOB_PREFERENCES = {
         'ARMOR': { 'HEAVY': 0, 'LIGHT': 0, 'CLOTHES': 60, 'ROBE': 40 }
     },
     'PALADIN': {
-        'WEAPON': { 'LONG_SWORD': 50, 'SHORT_SWORD': 0, 'AXE': 0, 'MACE': 50, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0 },
+        'WEAPON': { 'LONG_SWORD': 40, 'SHORT_SWORD': 0, 'AXE': 0, 'MACE': 40, 'STAFF': 0, 'BOW': 0, 'SPECIAL': 0, 'GAUNTLET': 0, 'SPEAR': 20 },
         'ARMOR': { 'HEAVY': 90, 'LIGHT': 10, 'CLOTHES': 0, 'ROBE': 0 }
     },
     'HUNTER': {

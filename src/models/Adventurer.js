@@ -82,7 +82,7 @@ export class Adventurer {
      * @param {object} equip - 装備データ
      */
     addEquipment(equip) {
-        const WEAPON_TYPES = ['LONG_SWORD', 'SHORT_SWORD', 'AXE', 'MACE', 'STAFF', 'BOW', 'SPECIAL', 'GAUNTLET'];
+        const WEAPON_TYPES = ['LONG_SWORD', 'SHORT_SWORD', 'AXE', 'MACE', 'STAFF', 'BOW', 'SPECIAL', 'GAUNTLET', 'SPEAR'];
         const ARMOR_TYPES = ['HEAVY', 'LIGHT', 'CLOTHES', 'ROBE'];
 
         let newCategory = null;
