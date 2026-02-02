@@ -2018,7 +2018,10 @@ h2 {
 }
 
 .modal-header {
-    background: var(--leather-dark);
+    /* 繊細な革の質感 */
+    background:
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0px, rgba(0, 0, 0, 0.05) 1px, transparent 1px, transparent 4px),
+        linear-gradient(to bottom, var(--leather-1), var(--leather-2));
     color: #ffd700;
     padding: 0.8rem 1rem;
     font-family: var(--font-header);
