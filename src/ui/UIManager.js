@@ -1,4 +1,5 @@
 import { UI_CONSTANTS } from '../data/ui_constants.js';
+import { Modal } from './components/Modal.js';
 
 /**
  * UI全体の状態管理と画面遷移を制御するクラス
@@ -23,6 +24,7 @@ export class UIManager {
         this.screens = {};
         this.layout = null;
         this.logs = []; // ログストア
+        this.modalComponent = new Modal();
     }
 
     /**
@@ -74,6 +76,26 @@ export class UIManager {
         if (this.layout) {
             this.layout.showToast(message, type);
         }
+    }
+
+    /**
+     * アラートを表示します。
+     * @param {string} message 
+     * @param {string} title 
+     * @returns {Promise<void>}
+     */
+    async alert(message, title = '通知') {
+        return this.modalComponent.alert(message, title);
+    }
+
+    /**
+     * 確認ダイアログを表示します。
+     * @param {string} message 
+     * @param {string} title 
+     * @returns {Promise<boolean>}
+     */
+    async confirm(message, title = '確認') {
+        return this.modalComponent.confirm(message, title);
     }
 
     /**

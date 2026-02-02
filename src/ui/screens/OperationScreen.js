@@ -333,8 +333,8 @@ export class OperationScreen {
             <div class="text-xs mt-xs ${UI_CONSTANTS.CLASSES.SUB_TEXT}">即戦力の専門家を90日契約で雇用します</div>
         `;
 
-        footer.querySelector('#btn-headhunt').addEventListener('click', () => {
-            if (confirm(`外部から顧問を招聘しますか？ (費用: ${headhuntCost}G)`)) {
+        footer.querySelector('#btn-headhunt').addEventListener('click', async () => {
+            if (await this.gameLoop.uiManager.confirm(`外部から顧問を招聘しますか？ (費用: ${headhuntCost}G)`)) {
                 if (this.gameLoop.managementService && this.gameLoop.managementService.headhuntAdvisor(guild)) {
                     this.gameLoop.uiManager.render();
                 }
@@ -1082,10 +1082,10 @@ export class OperationScreen {
             </div>
         `;
 
-        // Export Logic
+        // データエクスポート
         const exportArea = container.querySelector('#export-area');
         if (this.gameLoop.storageService) {
-            // Generate Code
+            // コード生成
             const code = this.gameLoop.storageService.exportData(this.gameLoop);
             if (code) {
                 exportArea.value = code;
@@ -1100,13 +1100,13 @@ export class OperationScreen {
             this.gameLoop.uiManager.log("セーブコードをクリップボードにコピーしました。", "success");
         });
 
-        // Import Logic
+        // データインポート
         const importArea = container.querySelector('#import-area');
-        container.querySelector('#btn-import').addEventListener('click', () => {
+        container.querySelector('#btn-import').addEventListener('click', async () => {
             const code = importArea.value.trim();
             if (!code) return;
 
-            if (confirm("現在のデータを上書きしてロードしますか？\\n（未保存の進行状況は失われます）")) {
+            if (await this.gameLoop.uiManager.confirm("現在のデータを上書きしてロードしますか？\n（未保存の進行状況は失われます）")) {
                 if (this.gameLoop.storageService && this.gameLoop.storageService.importData(code, this.gameLoop)) {
                     this.gameLoop.uiManager.log("データの読み込みに成功しました。ページをリロードします...", "success");
                     setTimeout(() => {
@@ -1118,9 +1118,9 @@ export class OperationScreen {
             }
         });
 
-        // Reset Logic
-        container.querySelector('#btn-reset').addEventListener('click', () => {
-            if (confirm("本当にデータを削除してリセットしますか？\\nこの操作は元に戻せません。")) {
+        // データリセット
+        container.querySelector('#btn-reset').addEventListener('click', async () => {
+            if (await this.gameLoop.uiManager.confirm("本当にデータを削除してリセットしますか？\nこの操作は元に戻せません。")) {
                 if (this.gameLoop.storageService) {
                     this.gameLoop.storageService.reset();
                     this.gameLoop.uiManager.log("データを削除しました。初期状態に戻ります...", "warning");

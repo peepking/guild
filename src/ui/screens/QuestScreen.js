@@ -141,7 +141,7 @@ export class QuestScreen {
         if (displayActive.length === 0) {
             const empty = document.createElement('div');
             empty.textContent = UI_CONSTANTS.MESSAGES.NO_QUESTS;
-            empty.className = 'empty-state-text';
+            empty.className = 'empty-state';
             listContainer.appendChild(empty);
         } else {
             displayActive.forEach(q => {
@@ -332,7 +332,7 @@ export class QuestScreen {
 
                         document.dispatchEvent(new Event('plan-update'));
                     } else {
-                        alert(res.message);
+                        this.gameLoop.uiManager.alert(res.message);
                     }
                 };
             }
@@ -426,7 +426,7 @@ export class QuestScreen {
                     // メイン画面のボタン状態などを更新するためにイベント発火
                     document.dispatchEvent(new Event('plan-update'));
                 } else {
-                    alert(result.message);
+                    this.gameLoop.uiManager.alert(result.message);
                 }
             };
         }

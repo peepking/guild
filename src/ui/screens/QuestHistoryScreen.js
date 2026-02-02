@@ -57,7 +57,7 @@ export class QuestHistoryScreen {
         if (displayItems.length === 0) {
             const empty = document.createElement('div');
             empty.textContent = '履歴はありません';
-            empty.className = 'empty-state-text';
+            empty.className = 'empty-state';
             listContainer.appendChild(empty);
         } else {
             displayItems.forEach(item => {
