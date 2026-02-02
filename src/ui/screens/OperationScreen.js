@@ -491,9 +491,9 @@ export class OperationScreen {
                 </div>
                 <div class="info-row">
                     <span class="label">現在の効果率:</span>
-                    <span class="value ${factor < 1 ? UI_CONSTANTS.CLASSES.WARN : UI_CONSTANTS.CLASSES.SAFE}">${efficiency}%</span>
+                    <span class="value ${factor < 1 ? UI_CONSTANTS.CLASSES.WARNING : UI_CONSTANTS.CLASSES.SAFE}">${efficiency}%</span>
                 </div>
-                ${factor < 1 ? `<div class="text-sm ${UI_CONSTANTS.CLASSES.WARN} mt-sm">※ 同職の顧問が複数いるため効果が減衰しています (${index + 1}人目)</div>` : ''}
+                ${factor < 1 ? `<div class="text-sm ${UI_CONSTANTS.CLASSES.WARNING} mt-sm">※ 同職の顧問が複数いるため効果が減衰しています (${index + 1}人目)</div>` : ''}
                 
                 <hr class="separator">
                 
@@ -976,7 +976,6 @@ export class OperationScreen {
                         ${isOtherActive || isActive || guild.money < cmp.cost ? 'disabled' : ''}>
                         ${isActive ? '実施中' : '実施'}
                     </button>
-                    ${guild.money < cmp.cost ? `<div class="text-xs ${UI_CONSTANTS.CLASSES.WARN} text-center mt-xs">資金不足</div>` : ''}
                 </div>
              `;
 
