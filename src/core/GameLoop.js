@@ -2,6 +2,7 @@ import { QuestService } from '../services/QuestService.js';
 import { RecruitmentService } from '../services/RecruitmentService.js';
 import { AssignmentService } from '../services/AssignmentService.js';
 import { LifeEventService } from '../services/LifeEventService.js';
+import { StorageService } from '../services/StorageService.js';
 
 import { titleService } from '../services/TitleService.js';
 import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS, LEAVE_TYPE_NAMES, RETIREMENT_CONFIG, JOIN_TYPES } from '../data/constants.js';
@@ -13,6 +14,7 @@ export class GameLoop {
         this.questService = questService || new QuestService();
         this.mailService = mailService;
         this.managementService = managementService;
+        this.storageService = new StorageService();
 
         // タイトルサービスの初期化
         if (this.mailService) {
@@ -293,6 +295,15 @@ export class GameLoop {
 
         // --- 8. UI更新 ---
         this.uiManager.render();
+
+        // --- 9. オートセーブ ---
+        this.save();
+    }
+
+    save() {
+        if (this.storageService) {
+            this.storageService.save(this);
+        }
     }
 
 

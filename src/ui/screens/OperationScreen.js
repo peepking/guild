@@ -26,6 +26,7 @@ export class OperationScreen {
                     <button class="tab ${this.currentTab === 'POLICY' ? 'active' : ''}" data-tab="POLICY">運営方針</button>
                     <button class="tab ${this.currentTab === 'PERSONNEL' ? 'active' : ''}" data-tab="PERSONNEL">顧問人事</button>
                     <button class="tab ${this.currentTab === 'PR' ? 'active' : ''}" data-tab="PR">広報活動</button>
+                    <button class="tab ${this.currentTab === 'SYSTEM' ? 'active' : ''}" data-tab="SYSTEM">システム</button>
                 </div>
                 
                 <div id="operation-content" class="operation-layout flex-1 scroll-y p-md">
@@ -73,6 +74,8 @@ export class OperationScreen {
             this._renderPolicy(content, guild);
         } else if (this.currentTab === 'PERSONNEL') {
             this._renderPersonnel(content, guild);
+        } else if (this.currentTab === 'SYSTEM') {
+            this._renderSystem(content, guild);
         } else {
             this._renderPR(content, guild);
         }
@@ -768,5 +771,102 @@ export class OperationScreen {
         // 非常に重要でない限りログで十分
 
         this.gameLoop.uiManager.render();
+    }
+
+    _renderSystem(container, guild) {
+        container.innerHTML = `
+            <div class="panel p-md">
+                <h3 class="section-header">データ管理</h3>
+                <div class="mb-lg">
+                    <div class="text-sm mb-sm">
+                        ゲームデータは毎日自動的にブラウザに保存されますが、<br>
+                        以下の機能を使って手動でバックアップ（文字列での書き出し・読み込み）が可能です。
+                    </div>
+                </div>
+
+                <div class="operation-grid">
+                    <!-- Export Card -->
+                    <div class="operation-card">
+                        <h4 class="font-bold mb-sm">セーブデータの書き出し (Export)</h4>
+                        <p class="text-xs text-muted mb-sm">このコードをコピーして、テキストファイル等に保存してください。</p>
+                        <textarea id="export-area" readonly class="textarea-code"></textarea>
+                        <div class="text-right mt-auto">
+                            <button id="btn-copy" class="btn btn-primary">クリップボードにコピー</button>
+                        </div>
+                    </div>
+
+                    <!-- Import Card -->
+                    <div class="operation-card">
+                        <h4 class="font-bold mb-sm">セーブデータの読み込み (Import)</h4>
+                        <p class="text-xs text-muted mb-sm">保存したセーブコードを貼り付けてください。現在のデータは上書きされます。</p>
+                        <textarea id="import-area" class="textarea-code"></textarea>
+                        <div class="text-right mt-auto">
+                            <button id="btn-import" class="btn btn-primary">データを読み込む</button>
+                        </div>
+                    </div>
+
+                    <!-- Reset Card -->
+                    <div class="operation-card border-danger">
+                        <h4 class="font-bold text-danger mb-sm">データリセット</h4>
+                        <p class="text-xs text-muted mb-sm">
+                            ブラウザに保存されている自動セーブデータを完全に削除し、ゲームを初期状態に戻します。<br>
+                            <span class="text-danger font-bold">この操作は取り消せません。</span>
+                        </p>
+                        <div class="text-right mt-auto">
+                            <button id="btn-reset" class="btn btn-danger">全データを削除してリセット</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Export Logic
+        const exportArea = container.querySelector('#export-area');
+        if (this.gameLoop.storageService) {
+            // Generate Code
+            const code = this.gameLoop.storageService.exportData(this.gameLoop);
+            if (code) {
+                exportArea.value = code;
+            } else {
+                exportArea.value = "エラー: データの生成に失敗しました。";
+            }
+        }
+
+        container.querySelector('#btn-copy').addEventListener('click', () => {
+            exportArea.select();
+            document.execCommand('copy');
+            this.gameLoop.uiManager.log("セーブコードをクリップボードにコピーしました。", "success");
+        });
+
+        // Import Logic
+        const importArea = container.querySelector('#import-area');
+        container.querySelector('#btn-import').addEventListener('click', () => {
+            const code = importArea.value.trim();
+            if (!code) return;
+
+            if (confirm("現在のデータを上書きしてロードしますか？\\n（未保存の進行状況は失われます）")) {
+                if (this.gameLoop.storageService && this.gameLoop.storageService.importData(code, this.gameLoop)) {
+                    this.gameLoop.uiManager.log("データの読み込みに成功しました。ページをリロードします...", "success");
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    this.gameLoop.uiManager.log("データの読み込みに失敗しました。コードが正しいか確認してください。", "error");
+                }
+            }
+        });
+
+        // Reset Logic
+        container.querySelector('#btn-reset').addEventListener('click', () => {
+            if (confirm("本当にデータを削除してリセットしますか？\\nこの操作は元に戻せません。")) {
+                if (this.gameLoop.storageService) {
+                    this.gameLoop.storageService.reset();
+                    this.gameLoop.uiManager.log("データを削除しました。初期状態に戻ります...", "warning");
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }
+        });
     }
 }

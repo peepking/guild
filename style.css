@@ -851,10 +851,16 @@ h2 {
     border-bottom: 2px solid var(--wood-light);
 }
 
-.operation-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+.textarea-code {
+    width: 100%;
+    height: 8rem;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    font-family: monospace;
+    border: 1px solid var(--iron);
+    border-radius: 4px;
+    resize: vertical;
+    margin-bottom: 0.5rem;
 }
 
 .operation-card {

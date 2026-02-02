@@ -69,6 +69,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         layout.updateMailBadge(unread);
     });
 
+    // オートロード
+    if (gameLoop.storageService && gameLoop.storageService.hasSaveData()) {
+        if (gameLoop.storageService.load(gameLoop)) {
+            uiManager.log("セーブデータを読み込みました。", "system");
+        }
+    }
+
     // メールシステムイベント
     document.addEventListener('mail-updated', () => {
         const unread = mailService.getUnreadCount();
