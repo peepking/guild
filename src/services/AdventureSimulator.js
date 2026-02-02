@@ -1,7 +1,7 @@
 import { MonsterDataLoader } from '../data/MonsterDataLoader.js';
 import { ItemDataLoader } from '../data/ItemDataLoader.js';
 import { QUEST_SPECS } from '../data/QuestSpecs.js';
-import { TRAITS, ADVENTURER_TYPES, QUEST_RANK_BASE_POWER } from '../data/constants.js';
+import { TRAITS, ADVENTURER_TYPES, QUEST_RANK_BASE_POWER, BATTLE_CONFIG, EVENT_CONFIG } from '../data/constants.js';
 import { ADVENTURE_LOG_DATA } from '../data/AdventureLogData.js';
 import { NORMAL_ACTION_LOGS } from '../data/ArtsData.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
@@ -100,7 +100,7 @@ export class AdventureSimulator {
         });
 
         // 2. 特性フレーバーログ (日次ランダム確率)
-        if (!quest.isTournament && Math.random() < 0.4) {
+        if (!quest.isTournament && Math.random() < EVENT_CONFIG.FLAVOR_LOG_CHANCE) {
             const randomTrait = this._pick(partyTraits);
             if (randomTrait && ADVENTURE_LOG_DATA.TRAITS[randomTrait]) {
                 const owner = party.find(p => p.traits.includes(randomTrait));
@@ -112,7 +112,7 @@ export class AdventureSimulator {
         }
 
         // 3. ランダムイベント (基本15%)
-        if (!quest.isTournament && Math.random() < 0.15) {
+        if (!quest.isTournament && Math.random() < EVENT_CONFIG.RANDOM_EVENT_CHANCE) {
             this._processRandomEvent(logs, results, party);
         }
 
@@ -515,7 +515,7 @@ export class AdventureSimulator {
                 "勝負の行方はまだ分からない..."
             ];
             // 3-5行追加
-            const count = Math.floor(Math.random() * 3) + 3; // 3 to 5
+            const count = Math.floor(Math.random() * BATTLE_CONFIG.TOURNAMENT.FLAVOR_LOG_RANGE) + BATTLE_CONFIG.TOURNAMENT.FLAVOR_LOG_MIN; // 3 to 5
             for (let i = 0; i < count; i++) {
                 logs.push(`[戦況] ${this._pick(flavor)}`);
             }
@@ -525,7 +525,7 @@ export class AdventureSimulator {
         party.forEach(adv => {
             let template = '';
             // アーツ発動確率 30%
-            if (adv.arts && adv.arts.length > 0 && Math.random() < 0.3) {
+            if (adv.arts && adv.arts.length > 0 && Math.random() < BATTLE_CONFIG.ARTS_ACTIVATION_CHANCE) {
                 const art = adv.arts[Math.floor(Math.random() * adv.arts.length)];
                 if (art.logs && art.logs.length > 0) {
                     template = art.logs[Math.floor(Math.random() * art.logs.length)];
@@ -547,7 +547,7 @@ export class AdventureSimulator {
 
         const avgCP = totalCP / party.length;
         // ボーナス: メンバー追加ごとに+10% (3人 = 1.2倍)
-        const sizeBonus = 1 + 0.1 * (party.length - 1);
+        const sizeBonus = 1 + BATTLE_CONFIG.PARTY_SIZE_BONUS_PER_MEMBER * (party.length - 1);
         let partyPower = avgCP * sizeBonus;
 
         // 顧問補正 (パワー)
@@ -567,8 +567,8 @@ export class AdventureSimulator {
         // 3. 勝率
         // 勝率 = 0.5 + (パーティ - 敵) / 50
         // 5% - 95% でキャップ
-        const baseWinRate = 0.5 + (partyPower - enemyPower) / 50;
-        let winRate = Math.max(0.05, Math.min(0.95, baseWinRate));
+        const baseWinRate = BATTLE_CONFIG.WIN_RATE_BASE + (partyPower - enemyPower) / BATTLE_CONFIG.WIN_RATE_DIVISOR;
+        let winRate = Math.max(BATTLE_CONFIG.WIN_RATE_MIN, Math.min(BATTLE_CONFIG.WIN_RATE_MAX, baseWinRate));
 
         // 特性補正
         party.forEach(p => {
@@ -581,7 +581,7 @@ export class AdventureSimulator {
         if (modifiers.winRate) winRate *= modifiers.winRate;
 
         // 補正後に再度ソフトキャップ
-        winRate = Math.max(0.05, Math.min(0.95, winRate));
+        winRate = Math.max(BATTLE_CONFIG.WIN_RATE_MIN, Math.min(BATTLE_CONFIG.WIN_RATE_MAX, winRate));
 
         const win = Math.random() < winRate;
 
@@ -589,7 +589,7 @@ export class AdventureSimulator {
         // 基礎ダメージ = 敵パワー * (1 - k勝率) * 0.3 (調整係数)
         // 分散 = 0.5 - 1.5
         const variance = 0.5 + Math.random();
-        let totalDamage = enemyPower * (1 - winRate) * 0.3 * variance;
+        let totalDamage = enemyPower * (1 - winRate) * BATTLE_CONFIG.DAMAGE_COEFFICIENT * variance;
 
         // グローバル危険度/負傷補正
         if (modifiers.danger) totalDamage *= modifiers.danger;

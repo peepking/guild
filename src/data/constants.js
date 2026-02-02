@@ -154,7 +154,8 @@ export const TYPE_ADVANTAGES = {
     [ADVENTURER_TYPES.HUNTER]: [QUEST_TYPES.EXPLORE, QUEST_TYPES.HUNT],
     [ADVENTURER_TYPES.NINJA]: [QUEST_TYPES.EXPLORE],
     [ADVENTURER_TYPES.MARTIAL_ARTIST]: [QUEST_TYPES.HUNT, QUEST_TYPES.TOURNAMENT_SOLO],
-    [ADVENTURER_TYPES.BISHOP]: [QUEST_TYPES.MAGIC, QUEST_TYPES.GUARD]
+    [ADVENTURER_TYPES.BISHOP]: [QUEST_TYPES.MAGIC, QUEST_TYPES.GUARD],
+    [ADVENTURER_TYPES.HEADHUNTED]: []
 };
 
 export const STATUS_NAMES = {
@@ -193,7 +194,8 @@ export const BASE_STATS = {
     [ADVENTURER_TYPES.HUNTER]: { STR: 40, VIT: 30, MAG: 15, DEX: 60, INT: 40, CHA: 20 },
     [ADVENTURER_TYPES.NINJA]: { STR: 30, VIT: 25, MAG: 20, DEX: 55, INT: 45, CHA: 40 },
     [ADVENTURER_TYPES.MARTIAL_ARTIST]: { STR: 65, VIT: 50, MAG: 10, DEX: 50, INT: 20, CHA: 20 },
-    [ADVENTURER_TYPES.BISHOP]: { STR: 15, VIT: 30, MAG: 50, DEX: 20, INT: 50, CHA: 50 }
+    [ADVENTURER_TYPES.BISHOP]: { STR: 15, VIT: 30, MAG: 50, DEX: 20, INT: 50, CHA: 50 },
+    [ADVENTURER_TYPES.HEADHUNTED]: { STR: 35, VIT: 35, MAG: 35, DEX: 35, INT: 35, CHA: 35 }
 };
 
 export const TRAITS = {
@@ -269,3 +271,61 @@ export const QUEST_DIFFICULTY = {
     A: { rank: 'A', powerReq: 70, baseReward: 80, baseRep: 4.0 },
     S: { rank: 'S', powerReq: 100, baseReward: 100, baseRep: 5.0 }
 };
+
+export const BATTLE_CONFIG = {
+    ARTS_ACTIVATION_CHANCE: 0.3,
+    PARTY_SIZE_BONUS_PER_MEMBER: 0.1, // +10% per extra member
+    WIN_RATE_BASE: 0.5,
+    WIN_RATE_DIVISOR: 50,
+    WIN_RATE_MIN: 0.05,
+    WIN_RATE_MAX: 0.95,
+    DAMAGE_COEFFICIENT: 0.3, // 基礎ダメージ係数
+    TOURNAMENT: {
+        FLAVOR_LOG_MIN: 3,
+        FLAVOR_LOG_RANGE: 3 // min + random(range)
+    }
+};
+
+export const EVENT_CONFIG = {
+    FLAVOR_LOG_CHANCE: 0.4,
+    RANDOM_EVENT_CHANCE: 0.15,
+    SCOUT_EVENT_CHANCE: 0.03,
+    APPRENTICE_EVENT_CHANCE: 0.01,
+    FOREIGN_DEBUFF_CHANCE: 0.2, // 遠方出身者の弱体化確率
+    FOREIGN_DEBUFF_VAL: 3,      // 弱体化時の加算値
+    FOREIGN_BONUS_VAL: 3
+};
+
+export const RECRUIT_CONFIG = {
+    BASE_CHANCE: 0.01,
+    PR_BONUS_PER_LV: 0.03,
+    REP_BONUS_FACTOR: 0.00005, // per reputation point
+    EXTENDED_CAP_MULTIPLIER: 1.5,
+    SOFT_CAP_PENALTY: 0.5,
+    HARD_CAP_PENALTY: 0.2
+};
+
+export const GENERATION_CONFIG = {
+    RANK_RANGES: {
+        LOCAL: { MIN: 0, MAX: 160 },
+        WANDERER: { MIN: 0, MAX: 650 },
+        CONTRACT: { MIN: 350, MAX: 900 }
+    },
+    TRUST_BONUS: {
+        LOCAL: 15,
+        CONTRACT: -15,
+        WANDERER: 0
+    },
+    ORIGIN_BONUS: {
+        CENTRAL: 30,
+        FOREIGN: -40,
+        OTHER: 10
+    },
+    STAT_CURVE: {
+        BASE_FACTOR: 0.88,
+        GROWTH_FACTOR: 0.70,
+        POWER: 1.6
+    },
+    MIN_STAT_GUARD: 0.92 // 92% of expected average
+};
+

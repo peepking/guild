@@ -1,4 +1,4 @@
-import { BASE_STATS, TRAITS, ORIGINS, JOIN_TYPES, ADVENTURER_RANKS } from '../data/constants.js';
+import { BASE_STATS, TRAITS, ORIGINS, JOIN_TYPES, ADVENTURER_RANKS, GENERATION_CONFIG, EVENT_CONFIG } from '../data/constants.js';
 import { ARTS_DATA } from '../data/ArtsData.js';
 import { INTRO_TEMPLATES, ARTS_TEMPLATES, TRAIT_TEMPLATES, CAREER_TEMPLATES, NICKNAME_TEMPLATES, FLAVOR_TEMPLATES } from '../data/BioData.js';
 import { ADVENTURER_TYPES } from '../data/constants.js';
@@ -285,16 +285,16 @@ export class Adventurer {
     _initRank(origin, joinType, maxRankValue) {
         // 4.1 加入タイプベース
         let min = 0, max = 100;
-        if (joinType === JOIN_TYPES.LOCAL) { min = 0; max = 160; }
-        else if (joinType === JOIN_TYPES.WANDERER) { min = 0; max = 650; }
-        else if (joinType === JOIN_TYPES.CONTRACT) { min = 350; max = 900; }
+        if (joinType === JOIN_TYPES.LOCAL) { min = GENERATION_CONFIG.RANK_RANGES.LOCAL.MIN; max = GENERATION_CONFIG.RANK_RANGES.LOCAL.MAX; }
+        else if (joinType === JOIN_TYPES.WANDERER) { min = GENERATION_CONFIG.RANK_RANGES.WANDERER.MIN; max = GENERATION_CONFIG.RANK_RANGES.WANDERER.MAX; }
+        else if (joinType === JOIN_TYPES.CONTRACT) { min = GENERATION_CONFIG.RANK_RANGES.CONTRACT.MIN; max = GENERATION_CONFIG.RANK_RANGES.CONTRACT.MAX; }
 
         let val = Math.floor(Math.random() * (max - min)) + min;
 
         // 4.2 出身地ボーナス
-        if (origin.id === 'central') val += 30;
-        else if (origin.id === 'foreign') val -= 40;
-        else val += 10;
+        if (origin.id === 'central') val += GENERATION_CONFIG.ORIGIN_BONUS.CENTRAL;
+        else if (origin.id === 'foreign') val += GENERATION_CONFIG.ORIGIN_BONUS.FOREIGN; // Note: defined as -40
+        else val += GENERATION_CONFIG.ORIGIN_BONUS.OTHER;
 
         // 4.3 クランプ（範囲制限）
         if (val < 0) val = 0;
@@ -310,9 +310,9 @@ export class Adventurer {
         let base = origin.trust || 0;
 
         let bonus = 0;
-        if (joinType === JOIN_TYPES.LOCAL) bonus = 15;
-        else if (joinType === JOIN_TYPES.WANDERER) bonus = 0;
-        else if (joinType === JOIN_TYPES.CONTRACT) bonus = -15;
+        if (joinType === JOIN_TYPES.LOCAL) bonus = GENERATION_CONFIG.TRUST_BONUS.LOCAL;
+        else if (joinType === JOIN_TYPES.WANDERER) bonus = GENERATION_CONFIG.TRUST_BONUS.WANDERER;
+        else if (joinType === JOIN_TYPES.CONTRACT) bonus = GENERATION_CONFIG.TRUST_BONUS.CONTRACT;
 
         return Math.max(0, base + bonus);
     }
@@ -368,7 +368,7 @@ export class Adventurer {
         // 3.1 & 3.2 ランク係数
         const t = rankValue / 1000; // 0..1
         // factor = 0.88 + 0.70 * (t^1.6)
-        const rankFactor = 0.88 + 0.70 * Math.pow(t, 1.6);
+        const rankFactor = GENERATION_CONFIG.STAT_CURVE.BASE_FACTOR + GENERATION_CONFIG.STAT_CURVE.GROWTH_FACTOR * Math.pow(t, GENERATION_CONFIG.STAT_CURVE.POWER);
 
         // 4.2 ばらつき率 (高ランクほど安定)
         // 0.10 - 0.04 * t -> E: 10%, S: 6%
@@ -387,8 +387,8 @@ export class Adventurer {
             if (mod[key]) val += mod[key];
 
             // 4.4 遠方出身者の弱体化 (仕様に基づく確率ブースト)
-            if (origin.id === 'foreign' && Math.random() < 0.2) {
-                val += 3;
+            if (origin.id === 'foreign' && Math.random() < EVENT_CONFIG.FOREIGN_DEBUFF_CHANCE) {
+                val += EVENT_CONFIG.FOREIGN_BONUS_VAL;
             }
 
             // 4.5 丸め処理
@@ -410,7 +410,7 @@ export class Adventurer {
 
         // 5.2 最低閾値
         // 期待されるランク平均の92%
-        const minSum = baseSum * rankFactor * 0.92;
+        const minSum = baseSum * rankFactor * GENERATION_CONFIG.MIN_STAT_GUARD;
 
         // 5.3 再分配
         let need = minSum - sum;

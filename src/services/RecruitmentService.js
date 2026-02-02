@@ -1,5 +1,5 @@
 import { Adventurer } from '../models/Adventurer.js';
-import { ADVENTURER_TYPES, ORIGINS, JOIN_TYPES, GUILD_RANK_THRESHOLDS, ADVENTURER_RANKS, ADVENTURER_JOB_NAMES } from '../data/constants.js';
+import { ADVENTURER_TYPES, ORIGINS, JOIN_TYPES, GUILD_RANK_THRESHOLDS, ADVENTURER_RANKS, ADVENTURER_JOB_NAMES, RECRUIT_CONFIG, EVENT_CONFIG } from '../data/constants.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
 
 export class RecruitmentService {
@@ -29,13 +29,13 @@ export class RecruitmentService {
 
         // 基礎: 1% + Lv毎に3%。最大Lv5で16% + 評判ボーナス
         // 旧計算式: 約15-20%
-        let chance = 0.01 + (prLv * 0.03);
+        let chance = RECRUIT_CONFIG.BASE_CHANCE + (prLv * RECRUIT_CONFIG.PR_BONUS_PER_LV);
 
         // 微量の評判ボーナス (200 Reputation毎に0.01%)
-        chance += this.guild.reputation * 0.00005;
+        chance += this.guild.reputation * RECRUIT_CONFIG.REP_BONUS_FACTOR;
 
         // 微量の評判ボーナス (200 Reputation毎に0.01%)
-        chance += this.guild.reputation * 0.00005;
+        chance += this.guild.reputation * RECRUIT_CONFIG.REP_BONUS_FACTOR;
 
         // バフ適用
         chance *= buffMod;
@@ -46,11 +46,11 @@ export class RecruitmentService {
 
         if (count >= cap) {
             // ソフトリミット: 確率50%
-            chance *= 0.5;
+            chance *= RECRUIT_CONFIG.SOFT_CAP_PENALTY;
 
             // 飽和状態: 1.5倍以上 -> 確率10%
-            if (count >= Math.floor(cap * 1.5)) {
-                chance *= 0.2; // 大幅減衰
+            if (count >= Math.floor(cap * RECRUIT_CONFIG.EXTENDED_CAP_MULTIPLIER)) {
+                chance *= RECRUIT_CONFIG.HARD_CAP_PENALTY; // 大幅減衰
             }
         }
 
@@ -159,12 +159,12 @@ export class RecruitmentService {
         if (!mailService) return;
 
         // 1. スカウトイベント (3%) -> デバッグ: 100%
-        if (Math.random() < 0.03) {
+        if (Math.random() < EVENT_CONFIG.SCOUT_EVENT_CHANCE) {
             this._triggerScoutEvent(day, mailService);
         }
 
         // 2. 弟子入りイベント (1%)
-        if (Math.random() < 0.01) {
+        if (Math.random() < EVENT_CONFIG.APPRENTICE_EVENT_CHANCE) {
             this._triggerApprenticeEvent(day, mailService);
         }
     }
