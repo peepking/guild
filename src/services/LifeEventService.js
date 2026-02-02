@@ -2,9 +2,9 @@ import { TRAITS } from '../data/constants.js';
 import { EquipmentService } from '../services/EquipmentService.js';
 
 export class LifeEventService {
-    constructor(uiManager) {
+    constructor(uiManager, equipmentService) {
         this.uiManager = uiManager;
-        this.equipmentService = new EquipmentService();
+        this.equipmentService = equipmentService || new EquipmentService();
     }
 
     processLifeEvents(guild) {
