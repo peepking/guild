@@ -685,6 +685,7 @@ export class OperationScreen {
     }
 
     _renderAdvisorTabContent(container, adv) {
+        container.innerHTML = '';
         switch (this.advisorState.detailTab) {
             case 'EFFECT':
                 this._renderAdvisorEffectTab(container, adv);
