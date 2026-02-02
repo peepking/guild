@@ -2,12 +2,23 @@ import { Adventurer } from '../models/Adventurer.js';
 import { ADVENTURER_TYPES, ORIGINS, JOIN_TYPES, GUILD_RANK_THRESHOLDS, ADVENTURER_RANKS, ADVENTURER_JOB_NAMES, RECRUIT_CONFIG, EVENT_CONFIG } from '../data/constants.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
 
+/**
+ * 冒険者の募集、スカウト、イベント生成を行うサービス
+ */
 export class RecruitmentService {
+    /**
+     * コンストラクタ
+     * @param {object} guild - ギルドモデルへの参照
+     */
     constructor(guild) {
         this.guild = guild;
         this.counter = 1000;
     }
 
+    /**
+     * 日次の冒険者募集処理を行います。
+     * @returns {Adventurer|null} 新規採用された冒険者、またはnull
+     */
     dailyRecruit() {
         // 1. アクティブなバフの処理（期限切れ削除） -> GameLoop/ManagementServiceで一元管理されるためここでは参照のみ
 
@@ -30,9 +41,6 @@ export class RecruitmentService {
         // 基礎: 1% + Lv毎に3%。最大Lv5で16% + 評判ボーナス
         // 旧計算式: 約15-20%
         let chance = RECRUIT_CONFIG.BASE_CHANCE + (prLv * RECRUIT_CONFIG.PR_BONUS_PER_LV);
-
-        // 微量の評判ボーナス (200 Reputation毎に0.01%)
-        chance += this.guild.reputation * RECRUIT_CONFIG.REP_BONUS_FACTOR;
 
         // 微量の評判ボーナス (200 Reputation毎に0.01%)
         chance += this.guild.reputation * RECRUIT_CONFIG.REP_BONUS_FACTOR;
@@ -60,6 +68,10 @@ export class RecruitmentService {
         return null;
     }
 
+    /**
+     * 新規冒険者を生成します。
+     * @returns {Adventurer} 生成された冒険者
+     */
     generateNewAdventurer() {
         this.counter++;
         const id = `adv_${this.counter}`;
@@ -93,19 +105,20 @@ export class RecruitmentService {
         // フェーズ10: 加入タイプのロジック (出身地依存)
         let joinType = JOIN_TYPES.WANDERER;
         const roll = Math.random();
+        const probs = RECRUIT_CONFIG.PROBABILITIES;
 
         if (origin.id === ORIGINS.CENTRAL.id) {
             // 中央: 地元80%, 流浪10%, 契約10%
-            if (roll < 0.8) joinType = JOIN_TYPES.LOCAL;
-            else if (roll < 0.9) joinType = JOIN_TYPES.WANDERER;
+            if (roll < probs.CENTRAL.LOCAL) joinType = JOIN_TYPES.LOCAL;
+            else if (roll < probs.CENTRAL.LOCAL + probs.CENTRAL.WANDERER) joinType = JOIN_TYPES.WANDERER;
             else joinType = JOIN_TYPES.CONTRACT;
         } else if ([ORIGINS.NORTH.id, ORIGINS.SOUTH.id, ORIGINS.EAST.id, ORIGINS.WEST.id].includes(origin.id)) {
             // 東西南北: 流浪80%, 契約20%
-            if (roll < 0.8) joinType = JOIN_TYPES.WANDERER;
+            if (roll < probs.REGIONAL.WANDERER) joinType = JOIN_TYPES.WANDERER;
             else joinType = JOIN_TYPES.CONTRACT;
         } else {
             // 遠方(Foreign): 流浪50%, 契約50%
-            if (roll < 0.5) joinType = JOIN_TYPES.WANDERER;
+            if (roll < probs.FOREIGN.WANDERER) joinType = JOIN_TYPES.WANDERER;
             else joinType = JOIN_TYPES.CONTRACT;
         }
 
@@ -131,7 +144,12 @@ export class RecruitmentService {
         return adv;
     }
 
-    // "100 templates" 検証用メソッド
+    /**
+     * テスト用の冒険者バッチ生成を行います。
+     * @param {number} [count=100] - 生成数
+     * @param {string} [originId=null] - 指定出身地ID
+     * @returns {Array<Adventurer>} 生成された冒険者リスト
+     */
     generateTemplateBatch(count = 100, originId = null) {
         const results = [];
         for (let i = 0; i < count; i++) {
@@ -155,6 +173,12 @@ export class RecruitmentService {
         return results;
     }
 
+    /**
+     * 日次のイベント（スカウト、弟子入り等）発生チェックを行います。
+     * @param {number} day - 現在の日数
+     * @param {object} mailService - メールサービス
+     * @returns {void}
+     */
     checkDailyEvents(day, mailService) {
         if (!mailService) return;
 
@@ -169,6 +193,12 @@ export class RecruitmentService {
         }
     }
 
+    /**
+     * スカウトイベントを発生させます。
+     * @param {number} day - 現在の日数
+     * @param {object} mailService - メールサービス
+     * @private
+     */
     _triggerScoutEvent(day, mailService) {
         const candidates = [];
         const ranks = ['E', 'D', 'C', 'B'];
@@ -214,6 +244,12 @@ export class RecruitmentService {
         );
     }
 
+    /**
+     * 弟子入りイベントを発生させます。
+     * @param {number} day - 現在の日数
+     * @param {object} mailService - メールサービス
+     * @private
+     */
     _triggerApprenticeEvent(day, mailService) {
         const mentors = this.guild.adventurers.filter(a => a.rankValue >= 380);
         if (mentors.length === 0) return;
@@ -246,6 +282,11 @@ export class RecruitmentService {
         );
     }
 
+    /**
+     * スカウト処理を実行します。
+     * @param {object} data - スカウトデータ
+     * @returns {object} 結果メッセージ
+     */
     executeScout(data) {
         const candidate = data.candidate;
         if (this.guild.adventurers.length >= (this.guild.softCap || 10) + 5) {
@@ -254,11 +295,8 @@ export class RecruitmentService {
 
         const newAdv = new Adventurer(candidate.id, candidate.name, candidate.type, candidate.origin, JOIN_TYPES.LOCAL, candidate.rankValue);
         newAdv.rankValue = candidate.rankValue; // スカウトデータからランク値を強制適用
-        // スカウトデータからランク値を強制適用
         newAdv.lastPeriodRankValue = newAdv.rankValue; // 同期
-        // 同期
         newAdv.updateRank(0); // 強制適用ランクに基づいてラベル更新
-        // 強制適用ランクに基づいてラベル更新
 
         newAdv.stats = candidate.stats;
         newAdv.arts = candidate.arts || [];
@@ -268,6 +306,11 @@ export class RecruitmentService {
         return { success: true, message: `${newAdv.name}をスカウトしました！` };
     }
 
+    /**
+     * 弟子入り処理を実行します。
+     * @param {object} data - 弟子入りデータ
+     * @returns {object} 結果メッセージ
+     */
     executeApprentice(data) {
         const { apprentice, mentorId } = data;
         const mentor = this.guild.adventurers.find(a => a.id === mentorId);

@@ -1,28 +1,46 @@
 import { Quest } from '../models/Quest.js';
-import { CONSTANTS, QUEST_DIFFICULTY, QUEST_TYPES, TYPE_ADVANTAGES, TRAITS, QUEST_RANK_VALUE, GUILD_RANK_THRESHOLDS } from '../data/constants.js';
+import { CONSTANTS, QUEST_DIFFICULTY, QUEST_TYPES, TYPE_ADVANTAGES, TRAITS, QUEST_RANK_VALUE, GUILD_RANK_THRESHOLDS, QUEST_CONFIG } from '../data/constants.js';
 import { AdventureSimulator } from './AdventureSimulator.js';
 import { REGIONS, QUEST_SPECS } from '../data/QuestSpecs.js';
 import { ADVENTURE_LOG_DATA } from '../data/AdventureLogData.js';
 import { titleService } from './TitleService.js';
 
+/**
+ * クエスト（依頼）の生成、判定、結果計算を行うサービス
+ */
 export class QuestService {
+    /**
+     * コンストラクタ
+     */
     constructor() {
         this.questCounter = 100;
         this.simulator = new AdventureSimulator();
     }
 
-    // シミュレーターのデータ初期化
+    /**
+     * シミュレーターの初期化を行います。
+     * @param {object} monsterMd - モンスターデータ
+     * @param {object} itemMd - アイテムデータ
+     * @returns {void}
+     */
     initSimulator(monsterMd, itemMd) {
         this.simulator.init(monsterMd, itemMd);
     }
 
+    /**
+     * 日次のクエスト生成を行います。
+     * @param {number} day - 現在の日数
+     * @param {number} [reputation=0] - ギルド評判
+     * @param {object} [facilities={}] - 施設レベル情報
+     * @returns {Array<Quest>} 生成されたクエストのリスト
+     */
     generateDailyQuests(day, reputation = 0, facilities = {}) {
         // 管理部はクエスト数を制御
         const admLv = facilities.administration || 0;
-        let count = 2 + admLv;
+        let count = QUEST_CONFIG.BASE_COUNT + admLv;
 
         // 上限10件
-        if (count > 10) count = 10;
+        if (count > QUEST_CONFIG.MAX_DAILY) count = QUEST_CONFIG.MAX_DAILY;
 
         // ギルドランク判定
         const guildRankObj = GUILD_RANK_THRESHOLDS.find(r => reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
@@ -36,7 +54,7 @@ export class QuestService {
         // フェーズ12: 特殊クエスト発生判定
         // 図書室効果: レベルごとに+10%
         const libraryLv = facilities.library || 0;
-        const specialChance = 0.15 + (libraryLv * 0.10);
+        const specialChance = QUEST_CONFIG.SPECIAL_CHANCE_BASE + (libraryLv * QUEST_CONFIG.SPECIAL_CHANCE_PER_LIBRARY);
 
         if (Math.random() < specialChance) {
             // 特殊クエストは通常クエストの制限に関わらず追加
@@ -46,7 +64,12 @@ export class QuestService {
         return quests;
     }
 
-    // 内部ロジック用カテゴリーマッピング
+    /**
+     * タイプキーからログ用カテゴリーへのマッピングを行います。
+     * @param {string} typeKey - クエストタイプキー
+     * @returns {string} カテゴリー文字列
+     * @private
+     */
     _mapTypeToCategory(typeKey) {
         // QUEST_SPECSキーに基づくマッピング
         const MAP = {
@@ -59,6 +82,13 @@ export class QuestService {
         return MAP[typeKey] || 'DEFAULT';
     }
 
+    /**
+     * ランダムなクエストを作成します。
+     * @param {number} day - 現在の日数
+     * @param {string} [maxRankLabel='S'] - 最大ランク制限
+     * @returns {Quest} 生成されたクエスト
+     * @private
+     */
     _createRandomQuest(day, maxRankLabel = 'S') {
         this.questCounter++;
         const region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
@@ -124,7 +154,7 @@ export class QuestService {
         }
 
         const penalty = {
-            money: Math.floor(difficulty.baseReward * 0.2),
+            money: Math.floor(difficulty.baseReward * QUEST_CONFIG.PENALTY_RATE),
             reputation: rank === 'S' ? 50 : (rank === 'A' ? 20 : 5)
         };
 
@@ -237,6 +267,12 @@ export class QuestService {
         return q;
     }
 
+    /**
+     * 特殊クエストを生成します。
+     * @param {number} day - 現在の日数
+     * @returns {Quest} 生成された特殊クエスト
+     * @private
+     */
     _createSpecialQuest(day) {
         const specialKeys = ['OTHERWORLD', 'ANCIENT_BEAST', 'MISSING_ROYAL', 'ORACLE'];
         const typeKey = specialKeys[Math.floor(Math.random() * specialKeys.length)];
@@ -327,6 +363,12 @@ export class QuestService {
         return q;
     }
 
+    /**
+     * クエストに対する冒険者の適合スコアを計算します。
+     * @param {Quest} quest - 対象クエスト
+     * @param {Adventurer} adventurer - 対象冒険者
+     * @returns {number} スコア
+     */
     calculateScore(quest, adventurer) {
         // ... (unchanged)
         let baseScore = 0;
@@ -358,6 +400,13 @@ export class QuestService {
         return baseScore * multiplier;
     }
 
+    /**
+     * クエストの実行シミュレーション（全体）を行います。
+     * @param {Quest} quest - クエスト
+     * @param {Array<Adventurer>} party - パーティメンバー
+     * @param {object} [modifiers={}] - 補正情報
+     * @returns {object} 結果オブジェクト
+     */
     attemptQuest(quest, party, modifiers = {}) {
         const totalDays = quest.days || 1;
         const dailyLogs = [];
@@ -384,7 +433,7 @@ export class QuestService {
         });
         const target = quest.difficulty.powerReq * party.length;
         const delta = partyRawScore - target;
-        let successChance = 0.5 + (delta / 200);
+        let successChance = QUEST_CONFIG.SUCCESS_BASE + (delta / QUEST_CONFIG.SUCCESS_DIVISOR);
 
         let advantageCount = 0;
         party.forEach(adv => {
@@ -398,8 +447,8 @@ export class QuestService {
             successChance += modifiers.success;
         }
 
-        if (successChance > 0.95) successChance = 0.95;
-        if (successChance < 0.05) successChance = 0.05;
+        if (successChance > QUEST_CONFIG.SUCCESS_CAP_MAX) successChance = QUEST_CONFIG.SUCCESS_CAP_MAX;
+        if (successChance < QUEST_CONFIG.SUCCESS_CAP_MIN) successChance = QUEST_CONFIG.SUCCESS_CAP_MIN;
 
         const roll = Math.random();
         let mainObjectiveSuccess = roll < successChance;
@@ -597,6 +646,15 @@ export class QuestService {
         };
     }
 
+    /**
+     * 冒険者のランク評価を更新します。
+     * @param {Adventurer} adv - 更新対象の冒険者
+     * @param {Quest} quest - 実行したクエスト
+     * @param {number} chance - 推定成功率
+     * @param {boolean} success - 実際の成否
+     * @param {object} [modifiers={}] - 補正
+     * @private
+     */
     _applyRankUpdate(adv, quest, chance, success, modifiers = {}) {
         const r = success ? 1 : 0;
         const surprise = r - chance;
@@ -612,7 +670,7 @@ export class QuestService {
 
         // 1. 基本完了報酬 (緩やかなカーブ)
         // E:6, D:7, C:9, B:12, A:14, S:20
-        const baseRewardTable = [0, 6, 7, 9, 12, 14, 20];
+        const baseRewardTable = QUEST_CONFIG.RANK_REWARD_TABLE;
         const baseReward = baseRewardTable[qRankVal] || 6;
 
         // 2. 下克上ボーナス & ギャップペナルティ
@@ -663,6 +721,12 @@ export class QuestService {
         adv.updateRank(delta);
     }
 
+    /**
+     * トーナメントクエストを生成します。
+     * @param {object} tournamentState - トーナメント状態
+     * @param {Array<Quest>} existingQuests - 既存のクエストリスト
+     * @returns {Array<Quest>} 新規トーナメントクエスト
+     */
     generateTournamentQuests(tournamentState, existingQuests) {
         const newQuests = [];
 
@@ -686,6 +750,15 @@ export class QuestService {
         return newQuests;
     }
 
+    /**
+     * 個別のトーナメントクエストインスタンスを生成します。
+     * @param {string} type - タイプ
+     * @param {string} rank - ランク
+     * @param {number} partySize - パーティサイズ
+     * @param {number} rankIdx - ランクインデックス
+     * @returns {Quest} トーナメントクエスト
+     * @private
+     */
     _createTournamentQuest(type, rank, partySize, rankIdx) {
         this.questCounter++;
         const difficulty = QUEST_DIFFICULTY[rank];
@@ -718,8 +791,16 @@ export class QuestService {
         return q;
     }
 
+    /**
+     * ステータス成長を適用します。
+     * @param {Adventurer} adv - 対象冒険者
+     * @param {Quest} quest - 実行クエスト
+     * @param {boolean} success - 成功可否
+     * @param {object} modifiers - 補正
+     * @private
+     */
     _applyStatGrowth(adv, quest, success, modifiers = {}) {
-        let base = success ? 0.60 : 0.25;
+        let base = success ? QUEST_CONFIG.GROWTH_BASE_SUCCESS : QUEST_CONFIG.GROWTH_BASE_FAILURE;
         if (modifiers.exp) base *= modifiers.exp;
         if (modifiers.growth) base *= modifiers.growth; // 顧問の成長補正
 

@@ -3,14 +3,16 @@ import { Adventurer } from '../models/Adventurer.js';
 import { Quest } from '../models/Quest.js';
 import { QuestAssignment } from '../models/QuestAssignment.js';
 import { Guild } from '../models/Guild.js';
+import { STORAGE_CONFIG } from '../data/constants.js';
 
-const STORAGE_KEY = 'guild_master_save_v1';
-
+/**
+ * ゲームデータの保存と読み込みを行うサービス
+ */
 export class StorageService {
     /**
-     * @param {string} key 
+     * @param {string} key - 保存キー
      */
-    constructor(key = STORAGE_KEY) {
+    constructor(key = STORAGE_CONFIG.KEY) {
         this.key = key;
     }
 
@@ -84,16 +86,29 @@ export class StorageService {
         }
     }
 
+    /**
+     * 保存データを削除
+     */
     reset() {
         localStorage.removeItem(this.key);
     }
 
+    /**
+     * 保存データが存在するか確認
+     * @returns {boolean}
+     */
     hasSaveData() {
         return !!localStorage.getItem(this.key);
     }
 
     // --- Private Serialization Logic ---
 
+    /**
+     * ゲームデータをシリアライズします。
+     * @param {GameLoop} gameLoop 
+     * @returns {object} シリアライズされたオブジェクト
+     * @private
+     */
     _serialize(gameLoop) {
         return {
             version: 1,
@@ -116,6 +131,12 @@ export class StorageService {
         };
     }
 
+    /**
+     * データをデシリアライズしてゲーム状態を復元します。
+     * @param {object} data 
+     * @param {GameLoop} gameLoop 
+     * @private
+     */
     _deserialize(data, gameLoop) {
         // 1. Guild Restoration
         const savedGuild = data.guild;
@@ -162,7 +183,7 @@ export class StorageService {
 
         // 3. Quest Service Restoration
         if (data.quest) {
-            gameLoop.questService.questCounter = data.quest.counter || 100;
+            gameLoop.questService.questCounter = data.quest.counter || STORAGE_CONFIG.DEFAULT_QUEST_COUNTER;
         }
 
         // 4. GameLoop Lists Restoration

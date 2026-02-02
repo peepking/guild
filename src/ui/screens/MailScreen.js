@@ -1,20 +1,40 @@
+import { UI_CONSTANTS } from '../../data/ui_constants.js';
 
+/**
+ * 郵便受け画面クラス
+ * 未読メッセージやイベント通知などを管理・表示します。
+ */
 export class MailScreen {
+    /**
+     * コンストラクタ
+     * @param {object} gameLoop 
+     */
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
         this.container = null;
         this.selectedMailId = null;
     }
 
+    /**
+     * DOM要素にマウントします
+     * @param {HTMLElement} container 
+     */
     mount(container) {
         this.container = container;
         this.render();
     }
 
+    /**
+     * アンマウント処理
+     */
     unmount() {
         this.container = null;
     }
 
+    /**
+     * 画面を描画します
+     * @param {HTMLElement} container 
+     */
     render(container) {
         if (container) this.container = container;
         if (!this.container) return;
@@ -27,24 +47,24 @@ export class MailScreen {
         const unreadCount = this.gameLoop.mailService.getUnreadCount();
 
         this.container.innerHTML = `
-            <div class="mail-screen">
-                <div class="mail-header">
+            <div class="mail-screen h-full flex-col">
+                <div class="mail-header panel-header flex-between flex-center">
                     <h2>郵便受け</h2>
                     <div class="mail-actions">
                         <button id="mark-all-read-btn" class="btn btn-secondary btn-sm">全て既読にする</button>
                     </div>
                 </div>
 
-                <div class="mail-layout">
+                <div class="mail-layout grid-2-col-fixed-left flex-1 h-0">
                     <!-- メールリスト -->
-                    <div class="mail-list" id="mail-list">
-                        ${mails.length === 0 ? '<div class="empty-state">メッセージはありません</div>' : ''}
+                    <div class="mail-list scroll-list flex-1 scroll-y" id="mail-list">
+                        ${mails.length === 0 ? `<div class="empty-state ${UI_CONSTANTS.CLASSES.SUB_TEXT}">メッセージはありません</div>` : ''}
                         <!-- 項目はここに挿入されます -->
                     </div>
 
                     <!-- メール詳細 -->
-                    <div class="mail-detail" id="mail-detail">
-                        <div class="empty-detail">メールを選択してください</div>
+                    <div class="mail-detail panel detail-panel flex-col flex-1 scroll-y" id="mail-detail">
+                        <div class="empty-state-centered ${UI_CONSTANTS.CLASSES.SUB_TEXT} h-full flex-center justify-center">メールを選択してください</div>
                     </div>
                 </div>
             </div>
@@ -62,6 +82,8 @@ export class MailScreen {
             const selectedMail = mails.find(m => m.id === this.selectedMailId);
             if (selectedMail) {
                 this._renderDetail(selectedMail);
+            } else {
+                this.selectedMailId = null;
             }
         }
 
@@ -81,17 +103,19 @@ export class MailScreen {
         mails.forEach(mail => {
             const isSelected = mail.id === this.selectedMailId;
             const item = document.createElement('div');
-            item.className = `mail-item ${mail.isRead ? 'read' : 'unread'} ${mail.type.toLowerCase()} ${isSelected ? 'selected' : ''}`;
+            item.className = `mail-item list-item ${mail.isRead ? 'read' : 'unread'} ${mail.type.toLowerCase()} ${isSelected ? 'selected' : ''}`;
+
+            // JSDoc: mail structure expected { id, title, body, type, isRead, date }
             item.innerHTML = `
-                <div class="mail-icon">✉</div>
-                <div class="mail-info">
-                    <div class="mail-title-row">
-                        <span class="mail-type-badge">${this._getTypeLabel(mail.type)}</span>
-                        <span class="mail-title">${mail.title}</span>
+                <div class="mail-icon mr-sm">✉</div>
+                <div class="mail-info flex-1 min-w-0">
+                    <div class="mail-title-row flex-between">
+                        <span class="font-bold truncate">${mail.title}</span>
+                        <span class="mail-type-badge badge-sm">${this._getTypeLabel(mail.type)}</span>
                     </div>
-                    <div class="mail-preview">${mail.body.substring(0, 20)}...</div>
+                    <div class="mail-preview text-sm ${UI_CONSTANTS.CLASSES.SUB_TEXT} truncate">${mail.body.substring(0, 20)}...</div>
                 </div>
-                ${!mail.isRead ? '<div class="unread-dot">●</div>' : ''}
+                ${!mail.isRead ? '<div class="unread-dot ml-xs">●</div>' : ''}
             `;
 
             item.addEventListener('click', () => {
@@ -111,29 +135,31 @@ export class MailScreen {
         const actions = (mail.meta && mail.meta.actions) || mail.actions;
         let actionsHtml = '';
         if (actions && actions.length > 0 && !mail.acted) {
-            actionsHtml = `<div class="mail-actions-body">`;
+            actionsHtml = `<div class="mail-actions-body mt-lg p-md border-t-soft flex-row-end gap-sm">`;
             actions.forEach((action, index) => {
                 actionsHtml += `<button class="btn btn-primary action-btn" data-index="${index}">${action.label}</button>`;
             });
             actionsHtml += `</div>`;
         } else if (mail.acted) {
-            actionsHtml = `<div class="mail-actions-body"><div class="action-completed">対応済み</div></div>`;
+            actionsHtml = `<div class="mail-actions-body mt-lg p-md border-t-soft text-right"><div class="action-completed ${UI_CONSTANTS.CLASSES.SAFE} font-bold">対応済み</div></div>`;
         }
 
         detailContainer.innerHTML = `
-            <div class="mail-detail-header">
-                <div class="mail-header-top flex-between flex-center">
+            <div class="mail-detail-header pb-md border-b-soft mb-md flex-no-shrink">
+                <div class="mail-header-top flex-between flex-center mb-sm">
                     <h3 class="mail-detail-title m-0">${mail.title}</h3>
                     <button id="delete-mail-btn" class="btn btn-danger btn-sm">削除</button>
                 </div>
-                <div class="mail-detail-meta mt-sm flex-row gap-sm">
+                <div class="mail-detail-meta flex-row gap-md text-sm">
                     <span class="mail-type-badge ${mail.type.toLowerCase()}">${this._getTypeLabel(mail.type)}</span>
-                    <span class="mail-date">Day ${mail.meta && mail.meta.day ? mail.meta.day : ''}</span>
+                    <span class="mail-date ${UI_CONSTANTS.CLASSES.SUB_TEXT}">Day ${mail.meta && mail.meta.day ? mail.meta.day : '?'}</span>
                 </div>
             </div>
-            <div class="mail-detail-body">
+            
+            <div class="mail-detail-body flex-1 overflow-y-auto font-serif-padded">
                 ${mail.body.replace(/\n/g, '<br>')}
             </div>
+            
             ${actionsHtml}
         `;
 
@@ -157,31 +183,26 @@ export class MailScreen {
     }
 
     _handleAction(mailArg, action) {
-
         // サービスからの永続的な参照があることを確認
         const mail = this.gameLoop.mailService.getMails().find(m => m.id === mailArg.id) || mailArg;
 
         if (mail.acted) {
-
             return;
         }
 
         // GameLoop経由でアクションを実行
         const result = this.gameLoop.handleMailAction(action.id, action.data);
 
-
         if (result.success) {
             mail.acted = true; // 正しい参照でローカルにactedとしてマーク
             this.gameLoop.uiManager.showToast(result.message || '完了しました', 'success');
 
-            // 詳細ビューを即座に強制再描画
             // 詳細ビューを即座に強制再描画
             this._renderDetail(mail);
 
             // ビュー状態のリセットを避けるため、this.render()は呼び出さない
             this._updateBadge();
         } else {
-
             this.gameLoop.uiManager.showToast(result.message || '失敗しました', 'error');
         }
     }
@@ -198,7 +219,6 @@ export class MailScreen {
 
     _updateBadge() {
         // グローバル更新をトリガー
-        // 安全であればDOM経由でレイアウトを直接更新
         document.dispatchEvent(new CustomEvent('mail-updated'));
     }
 }

@@ -1,12 +1,24 @@
-import { TRAITS } from '../data/constants.js';
+import { TRAITS, LIFE_EVENT_CONFIG } from '../data/constants.js';
 import { EquipmentService } from '../services/EquipmentService.js';
 
+/**
+ * 冒険者の生活イベント（買い物、トラブル、交流）を管理するサービス
+ */
 export class LifeEventService {
+    /**
+     * コンストラクタ
+     * @param {object} uiManager - UIマネージャー
+     * @param {EquipmentService} equipmentService - 装備サービス
+     */
     constructor(uiManager, equipmentService) {
         this.uiManager = uiManager;
         this.equipmentService = equipmentService || new EquipmentService();
     }
 
+    /**
+     * 日次の生活イベントを処理します。
+     * @param {object} guild - ギルドモデル
+     */
     processLifeEvents(guild) {
         // 回復中でないIDLE状態の冒険者をフィルタ
         const candidates = guild.adventurers.filter(a => a.state === 'IDLE' && a.recoveryDays <= 0);
@@ -16,23 +28,29 @@ export class LifeEventService {
             this._processShopping(adv);
 
             // 2. イベント発生確率: 標準で日次10%
-            if (Math.random() < 0.1) {
+            if (Math.random() < LIFE_EVENT_CONFIG.EVENT_CHANCE) {
                 this._rollEvent(adv, guild);
             }
         });
     }
 
+    /**
+     * 装備購入処理（買い物）を行います。
+     * @param {Adventurer} adv - 対象冒険者
+     * @private
+     */
     _processShopping(adv) {
         // 資金がある場合の基本購入確率: 30% (20%から増加)
-        let shopChance = 0.3;
+        let shopChance = LIFE_EVENT_CONFIG.SHOPPING_CHANCE.BASE;
 
         const traits = adv.traits || [];
         // 特性による補正
-        if (traits.includes('spender')) shopChance += 0.4; // 高確率
-        if (traits.includes('frugal')) shopChance -= 0.15; // 低確率
-        if (traits.includes('greedy')) shopChance -= 0.1;  // 貯金優先
-        if (traits.includes('gourmet')) shopChance += 0.1; // 浪費家
-        if (traits.includes('noble')) shopChance += 0.1;   // 品質重視
+        const mods = LIFE_EVENT_CONFIG.SHOPPING_CHANCE.MODIFIERS;
+        if (traits.includes('spender')) shopChance += mods.SPENDER; // 高確率
+        if (traits.includes('frugal')) shopChance += mods.FRUGAL; // 低確率
+        if (traits.includes('greedy')) shopChance += mods.GREEDY;  // 貯金優先
+        if (traits.includes('gourmet')) shopChance += mods.GOURMET; // 浪費家
+        if (traits.includes('noble')) shopChance += mods.NOBLE;   // 品質重視
 
         if (Math.random() < shopChance) {
             const result = this.equipmentService.upgradeEquipment(adv);
@@ -42,29 +60,36 @@ export class LifeEventService {
         }
     }
 
+    /**
+     * ランダムな生活イベントを発生させます。
+     * @param {Adventurer} adv - 対象冒険者
+     * @param {object} guild - ギルドモデル
+     * @private
+     */
     _rollEvent(adv, guild) {
         // 特性チェック
         const traits = adv.traits || [];
+        const probs = LIFE_EVENT_CONFIG.EVENT_PROBS;
 
         // 特性ベースのイベントを優先
-        if (traits.includes('drunkard') && Math.random() < 0.3) {
+        if (traits.includes('drunkard') && Math.random() < probs.DRUNKARD) {
             this._eventDrunkard(adv);
             return;
         }
-        if (traits.includes('spender') && Math.random() < 0.3) {
+        if (traits.includes('spender') && Math.random() < probs.SPENDER) {
             this._eventSpender(adv);
             return;
         }
-        if (traits.includes('troublemaker') && Math.random() < 0.2) {
+        if (traits.includes('troublemaker') && Math.random() < probs.TROUBLE) {
             this._eventTrouble(adv, guild);
             return;
         }
 
-        if (traits.includes('mediator') && Math.random() < 0.2) {
+        if (traits.includes('mediator') && Math.random() < probs.MEDIATOR) {
             this._eventMediator(adv, guild);
             return;
         }
-        if (traits.includes('glutton') && Math.random() < 0.2) {
+        if (traits.includes('glutton') && Math.random() < probs.GLUTTON) {
             this._eventGlutton(adv);
             return;
         }
@@ -75,15 +100,23 @@ export class LifeEventService {
 
     // --- Specific Events ---
 
+    /**
+     * イベント: 酔っ払い
+     * @param {Adventurer} adv 
+     * @private
+     */
     _eventDrunkard(adv) {
         adv.trust = Math.max(0, adv.trust - 2);
         adv.recoveryDays = 1; // 軽傷 (二日酔い/喧嘩)
-        // 軽傷 (二日酔い/喧嘩)
         adv.state = "IDLE"; // IDLEままだが回復中
-        // IDLEままだが回復中
         this.uiManager.log(`${adv.name} は酒場で大暴れし、二日酔いで動けません。(信頼度低下)`, 'warning');
     }
 
+    /**
+     * イベント: 浪費家
+     * @param {Adventurer} adv 
+     * @private
+     */
     _eventSpender(adv) {
         // EquipmentServiceを使用してアップグレードを試行
         const result = this.equipmentService.upgradeEquipment(adv);
@@ -95,8 +128,14 @@ export class LifeEventService {
         }
     }
 
+    /**
+     * イベント: トラブルメーカー
+     * @param {Adventurer} adv 
+     * @param {object} guild 
+     * @private
+     */
     _eventTrouble(adv, guild) {
-        const fine = 100;
+        const fine = LIFE_EVENT_CONFIG.FINES.TROUBLE;
         if (guild.money >= fine) {
             guild.money -= fine;
             adv.trust -= 5;
@@ -107,6 +146,12 @@ export class LifeEventService {
         }
     }
 
+    /**
+     * イベント: 仲裁者
+     * @param {Adventurer} adv 
+     * @param {object} guild 
+     * @private
+     */
     _eventMediator(adv, guild) {
         if (Math.random() < 0.5) {
             adv.trust += 1;
@@ -117,9 +162,15 @@ export class LifeEventService {
         }
     }
 
+    /**
+     * イベント: 大食漢
+     * @param {Adventurer} adv 
+     * @private
+     */
     _eventGlutton(adv) {
-        if (adv.personalMoney > 100) {
-            adv.personalMoney -= 100;
+        const cost = LIFE_EVENT_CONFIG.COSTS.GLUTTON;
+        if (adv.personalMoney > cost) {
+            adv.personalMoney -= cost;
             // 一時的なバフロジックの可能性 (現在は省略)
             this.uiManager.log(`${adv.name} は美食にお金を使っています。`, 'info');
         } else {

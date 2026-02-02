@@ -1,11 +1,25 @@
 import { GUILD_RANK_THRESHOLDS } from '../../data/constants.js';
 import { EFFECT_LABELS } from '../../data/ManagementData.js';
+import { UI_CONSTANTS } from '../../data/ui_constants.js';
 
+/**
+ * メイン画面（ダッシュボード）クラス
+ */
 export class MainScreen {
+    /**
+     * コンストラクタ
+     */
     constructor() {
         // ログが渡される場合、Rendererへの依存は不要
     }
 
+    /**
+     * 画面を描画します。
+     * @param {HTMLElement} container - 描画対象コンテナ
+     * @param {object} guild - ギルドデータ
+     * @param {object} state - UI状態
+     * @param {Array} logs - ログ配列
+     */
     render(container, guild, state, logs = []) {
         // レイアウト: 2カラム (サマリー / 通知)
         container.classList.add('grid-2-col-even');
@@ -19,11 +33,10 @@ export class MainScreen {
         mgmtContent.className = 'text-sm';
 
         // 現在の方針
-        const pName = { BALANCED: '標準', AGGRESSIVE: '利益追求', SAFE: '安全第一', TRAINING: '新人育成', COMMERCIAL: '商業振興' };
-        const policyName = pName[guild.activePolicy] || guild.activePolicy;
+        const policyName = UI_CONSTANTS.POLICY_LABELS[guild.activePolicy] || guild.activePolicy;
 
         // 発生中のイベント
-        let eventHtml = '<span class="text-grey">特になし</span>';
+        let eventHtml = `<span class="${UI_CONSTANTS.CLASSES.SUB_TEXT}">${UI_CONSTANTS.MESSAGES.EMPTY_STATE}</span>`;
         if (guild.activeEvents && guild.activeEvents.length > 0) {
             eventHtml = guild.activeEvents.map(evt => {
                 let modStr = [];
@@ -46,7 +59,7 @@ export class MainScreen {
             <div class="mb-sm">
                 <strong>ギルドランク:</strong> ${(() => {
                 const r = GUILD_RANK_THRESHOLDS.find(r => guild.reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
-                return `<span class="text-status-safe">${r.name}</span> (Rank ${r.label})`;
+                return `<span class="${UI_CONSTANTS.CLASSES.SAFE}">${r.name}</span> (Rank ${r.label})`;
             })()}
             </div>
             <div class="mb-sm">
@@ -87,9 +100,9 @@ export class MainScreen {
         stats.innerHTML = `
             <div class="summary-item"><span>所属冒険者</span><span>${guild.adventurers.length}名</span></div>
             <div class="summary-item"><span>待機中</span><span>${idle}名</span></div>
-            <div class="summary-item"><span>準備中</span><span class="${planning > 0 ? 'text-status-safe' : ''}">${planning}名</span></div>
+            <div class="summary-item"><span>準備中</span><span class="${planning > 0 ? UI_CONSTANTS.CLASSES.SAFE : ''}">${planning}名</span></div>
             <div class="summary-item"><span>遠征中</span><span>${questing}名</span></div>
-            <div class="summary-item"><span>療養中</span><span class="${injured > 0 ? 'text-status-danger' : ''}">${injured}名</span></div>
+            <div class="summary-item"><span>療養中</span><span class="${injured > 0 ? UI_CONSTANTS.CLASSES.DANGER : ''}">${injured}名</span></div>
         `;
         summaryPanel.appendChild(stats);
         leftCol.appendChild(summaryPanel);

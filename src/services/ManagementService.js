@@ -1,16 +1,23 @@
 
 import { POLICIES, ADVISOR_ROLES, RANDOM_EVENTS, FACILITIES } from '../data/ManagementData.js';
-import { CONSTANTS, ADVISOR_CONFIG, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, ADVENTURER_RANKS } from '../data/constants.js';
+import { CONSTANTS, ADVISOR_CONFIG, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, ADVENTURER_RANKS, MANAGEMENT_CONFIG } from '../data/constants.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
 
+/**
+ * ギルドの管理（財政、アクティビティ、顧問）を行うサービス
+ */
 export class ManagementService {
+    /**
+     * コンストラクタ
+     * @param {object} uiManager - UIマネージャー
+     */
     constructor(uiManager) {
         this.uiManager = uiManager;
     }
 
     /**
      * ポリシー、イベント、給与の日次更新
-     * @param {Object} guild 
+     * @param {object} guild 
      */
     dailyUpdate(guild) {
         // 1. 給与支払い (月次)
@@ -29,7 +36,7 @@ export class ManagementService {
 
         // 4. 新規イベント抽選
         if (guild.activeEvents.length === 0) {
-            if (Math.random() < 0.05) { // 5%の確率
+            if (Math.random() < MANAGEMENT_CONFIG.RANDOM_EVENT_CHANCE) {
                 this._triggerRandomEvent(guild);
             }
         }
@@ -49,6 +56,12 @@ export class ManagementService {
         }
     }
 
+    /**
+     * 最も多いクエストタイプを取得します。
+     * @param {object} quests 
+     * @returns {string|null}
+     * @private
+     */
     _getTopQuestType(quests) {
         let max = 0;
         let type = null;
@@ -61,6 +74,11 @@ export class ManagementService {
         return type;
     }
 
+    /**
+     * 施設からの収益を計算し、適用します。
+     * @param {object} guild 
+     * @private
+     */
     _processFacilityIncome(guild) {
         const advCount = guild.adventurers.length;
         if (advCount === 0) return;
@@ -75,7 +93,7 @@ export class ManagementService {
         // 売店収益: 2G * Lv * 人数
         const shopLv = (guild.facilities && guild.facilities.shop) || 0;
         if (shopLv > 0) {
-            const income = Math.floor(2 * shopLv * advCount * marketMod);
+            const income = Math.floor(MANAGEMENT_CONFIG.FACILITY_INCOME.SHOP_MULTIPLIER * shopLv * advCount * marketMod);
             totalIncome += income;
             details.push({ reason: `売店売上 (Lv.${shopLv})`, amount: income });
         }
@@ -83,7 +101,7 @@ export class ManagementService {
         // 酒場収益: 3G * Lv * 人数
         const tavernLv = (guild.facilities && guild.facilities.tavern) || 0;
         if (tavernLv > 0) {
-            const income = Math.floor(3 * tavernLv * advCount * marketMod);
+            const income = Math.floor(MANAGEMENT_CONFIG.FACILITY_INCOME.TAVERN_MULTIPLIER * tavernLv * advCount * marketMod);
             totalIncome += income;
             details.push({ reason: `酒場売上 (Lv.${tavernLv})`, amount: income });
         }
@@ -99,6 +117,11 @@ export class ManagementService {
         }
     }
 
+    /**
+     * 顧問の給与を支払います。
+     * @param {object} guild 
+     * @private
+     */
     _payAdvisorSalaries(guild) {
         if (guild.advisors.length === 0) return;
 
@@ -117,6 +140,11 @@ export class ManagementService {
         }
     }
 
+    /**
+     * イベントの残り日数を更新します。
+     * @param {object} guild 
+     * @private
+     */
     _updateEvents(guild) {
         for (let i = guild.activeEvents.length - 1; i >= 0; i--) {
             const evt = guild.activeEvents[i];
@@ -128,6 +156,11 @@ export class ManagementService {
         }
     }
 
+    /**
+     * ランダムイベントを発生させます。
+     * @param {object} guild 
+     * @private
+     */
     _triggerRandomEvent(guild) {
         const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
         // 既にアクティブかチェック (重複は延長かスタックか? 今は最大1つに単純化)
@@ -143,6 +176,11 @@ export class ManagementService {
         this.uiManager.log(`【イベント発生】${event.name}: ${event.description}`, 'event');
     }
 
+    /**
+     * 顧問契約の有効期限をチェックします。
+     * @param {object} guild 
+     * @private
+     */
     _checkAdvisorContracts(guild) {
         if (!guild.advisors) return;
 
@@ -162,11 +200,22 @@ export class ManagementService {
 
     // --- Policy ---
     // --- 方針 ---
+    /**
+     * 方針変更可能か判定します。
+     * @param {object} guild 
+     * @returns {boolean}
+     */
     canChangePolicy(guild) {
         // いつでも変更可能に変更 (ユーザー要望)
         return true;
     }
 
+    /**
+     * 方針を設定します。
+     * @param {object} guild 
+     * @param {string} policyId 
+     * @returns {boolean}
+     */
     setPolicy(guild, policyId) {
         if (!POLICIES[policyId]) return false;
         guild.activePolicy = policyId;
@@ -175,12 +224,24 @@ export class ManagementService {
         return true;
     }
 
+    /**
+     * 現在の方針を取得します。
+     * @param {object} guild 
+     * @returns {object}
+     */
     getPolicy(guild) {
         return POLICIES[guild.activePolicy] || POLICIES.BALANCED;
     }
 
     // --- 顧問 ---
     // 冒険者が引退したときに呼び出し (ランクB+のみ)
+    /**
+     * 顧問契約のオファーメールを送信します。
+     * @param {object} guild 
+     * @param {Adventurer} adventurer 
+     * @param {object} mailService 
+     * @returns {void}
+     */
     sendAdvisorOfferMail(guild, adventurer, mailService) {
         if (guild.advisors.length >= ADVISOR_CONFIG.MAX_ADVISORS) return;
 
@@ -213,6 +274,12 @@ export class ManagementService {
         }
     }
 
+    /**
+     * 顧問を雇用します。
+     * @param {object} guild 
+     * @param {object} candidateData 
+     * @returns {object} 結果メッセージ
+     */
     hireAdvisor(guild, candidateData) {
         if (guild.advisors.length >= ADVISOR_CONFIG.MAX_ADVISORS) {
             this.uiManager.log(`顧問枠がいっぱいです。(最大${ADVISOR_CONFIG.MAX_ADVISORS}名)`, 'warning');
@@ -242,6 +309,11 @@ export class ManagementService {
     }
 
     // 新規: 外部招聘 ("汎用顧問")
+    /**
+     * 外部から顧問を招聘します。
+     * @param {object} guild 
+     * @returns {boolean}
+     */
     headhuntAdvisor(guild) {
         if (guild.advisors.length >= ADVISOR_CONFIG.MAX_ADVISORS) {
             this.uiManager.log('顧問枠がいっぱいです。', 'warning');
@@ -284,6 +356,12 @@ export class ManagementService {
     }
 
     // 新規: 任命 (現役のランクB+冒険者を昇進)
+    /**
+     * 現役冒険者を顧問に任命します。
+     * @param {object} guild 
+     * @param {string} adventurerId 
+     * @returns {object} 結果
+     */
     appointAdvisor(guild, adventurerId) {
         const advIndex = guild.adventurers.findIndex(a => a.id === adventurerId);
         if (advIndex === -1) return false;
@@ -326,11 +404,22 @@ export class ManagementService {
     }
 
     // 解雇なし (ユーザー要望)
+    /**
+     * 顧問を解雇します（未実装）。
+     * @param {object} guild 
+     * @param {string} advisorId 
+     * @returns {boolean}
+     */
     fireAdvisor(guild, advisorId) {
         return false;
     }
 
     // 合計補正値を取得するヘルパー
+    /**
+     * 現在のギルドに対する全補正値（ポリシー、顧問、イベント）を計算して返します。
+     * @param {object} guild 
+     * @returns {object} 補正値オブジェクト
+     */
     getGlobalModifiers(guild) {
         const mods = { ...POLICIES[guild.activePolicy].mod }; // 方針補正をコピー
 

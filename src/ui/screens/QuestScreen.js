@@ -1,16 +1,30 @@
 import { TRAITS, ADVENTURER_JOB_NAMES } from '../../data/constants.js';
+import { UI_CONSTANTS } from '../../data/ui_constants.js';
 
+/**
+ * クエスト画面クラス
+ */
 export class QuestScreen {
+    /**
+     * コンストラクタ
+     * @param {GameLoop} gameLoop - ゲームループインスタンス
+     */
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
         this.state = {
             selectedQuestId: null,
             selectionMode: false,
             selectedAdventurerIds: [],
-            currentTab: 'NORMAL' // 'NORMAL' | 'SPECIAL'
+            currentTab: UI_CONSTANTS.QUEST_TABS.NORMAL // 'NORMAL' | 'SPECIAL'
         };
     }
 
+    /**
+     * 画面を描画します。
+     * @param {HTMLElement} container - 描画対象コンテナ
+     * @param {object} guild - ギルドデータ
+     * @param {object} globalState - グローバルUI状態
+     */
     render(container, guild, globalState) {
         // 描画前のスクロール位置を保持
         let lastScrollTop = 0;
@@ -39,7 +53,7 @@ export class QuestScreen {
 
         const createTab = (id, label) => {
             const btn = document.createElement('button');
-            btn.className = `tab ${this.state.currentTab === id ? 'active' : ''}`;
+            btn.className = `tab ${this.state.currentTab === id ? UI_CONSTANTS.CLASSES.ACTIVE : ''}`;
             btn.textContent = label;
             btn.onclick = () => {
                 this.state.currentTab = id;
@@ -50,8 +64,8 @@ export class QuestScreen {
             return btn;
         };
 
-        tabsContainer.appendChild(createTab('NORMAL', '通常依頼'));
-        tabsContainer.appendChild(createTab('SPECIAL', '特殊依頼'));
+        tabsContainer.appendChild(createTab(UI_CONSTANTS.QUEST_TABS.NORMAL, '通常依頼'));
+        tabsContainer.appendChild(createTab(UI_CONSTANTS.QUEST_TABS.SPECIAL, '特殊依頼'));
         listPanel.appendChild(tabsContainer);
 
         // リストエリア
@@ -66,7 +80,7 @@ export class QuestScreen {
         let displayPlanned = [];
         let displayActive = [];
 
-        if (this.state.currentTab === 'SPECIAL') {
+        if (this.state.currentTab === UI_CONSTANTS.QUEST_TABS.SPECIAL) {
             displayAssigns = allAssignments.filter(a => a.quest.isSpecial);
             displayPlanned = allPlanned.filter(a => a.quest.isSpecial);
             displayActive = allActive.filter(q => q.isSpecial);
@@ -126,7 +140,7 @@ export class QuestScreen {
 
         if (displayActive.length === 0) {
             const empty = document.createElement('div');
-            empty.textContent = '依頼はありません';
+            empty.textContent = UI_CONSTANTS.MESSAGES.NO_QUESTS;
             empty.className = 'empty-state-text';
             listContainer.appendChild(empty);
         } else {
@@ -179,7 +193,7 @@ export class QuestScreen {
             detailPanel.innerHTML = `
                 <div class="empty-state-centered">
                     <div class="empty-state-icon">📜</div>
-                    <p>依頼を選択してください</p>
+                    <p>${UI_CONSTANTS.MESSAGES.SELECT_QUEST}</p>
                 </div>
             `;
         }
@@ -362,7 +376,7 @@ export class QuestScreen {
         });
 
         if (avail.length === 0) {
-            listDiv.innerHTML = '<div class="p-md text-sub">派遣可能な冒険者がいません</div>';
+            listDiv.innerHTML = `<div class="p-md text-sub">${UI_CONSTANTS.MESSAGES.NO_ADVENTURERS}</div>`;
         }
 
         avail.forEach(adv => {

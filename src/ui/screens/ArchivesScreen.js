@@ -1,18 +1,34 @@
-import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, JOIN_TYPE_NAMES, LEAVE_TYPE_NAMES } from '../../data/constants.js';
+import { TRAITS, ADVENTURER_JOB_NAMES, JOIN_TYPE_NAMES, LEAVE_TYPE_NAMES } from '../../data/constants.js';
+import { UI_CONSTANTS } from '../../data/ui_constants.js';
 
+/**
+ * ギルド資料室画面クラス
+ * 財務記録、引退者リスト、市場情報などを表示します。
+ */
 export class ArchivesScreen {
+    /**
+     * コンストラクタ
+     * @param {object} gameLoop 
+     */
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
         this.container = null;
-        this.currentTab = 'FINANCE'; // 財務 | 引退 | 市場 | 統計
+        this.currentTab = 'FINANCE'; // 財務 | 引退 | 市場
         this.state = {
             selectedRetiredId: null,
             sortKey: 'ID',
             sortOrder: 'DESC',
-            currentDetailTab: 'STATUS' // ステータス | 経歴 | 名鑑
+            currentDetailTab: UI_CONSTANTS.ADVISOR_TABS.STATUS // ステータス | 経歴 | 名鑑 (Advisorと同じ定数を再利用)
         };
     }
 
+    /**
+     * 画面を描画します。
+     * @param {HTMLElement} container 
+     * @param {object} guild 
+     * @param {object} state 
+     * @param {object} logs 
+     */
     render(container, guild, state, logs) {
         this.container = container;
 
@@ -27,9 +43,9 @@ export class ArchivesScreen {
                 <div class="panel-header">ギルド資料室</div>
                 
                 <div class="tabs">
-                    <button class="tab ${this.currentTab === 'FINANCE' ? 'active' : ''}" data-tab="FINANCE">収支記録</button>
-                    <button class="tab ${this.currentTab === 'RETIRED' ? 'active' : ''}" data-tab="RETIRED">過去帳</button>
-                    <button class="tab ${this.currentTab === 'MARKET' ? 'active' : ''}" data-tab="MARKET">市場相場</button>
+                    <button class="tab ${this.currentTab === 'FINANCE' ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="FINANCE">収支記録</button>
+                    <button class="tab ${this.currentTab === 'RETIRED' ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="RETIRED">過去帳</button>
+                    <button class="tab ${this.currentTab === 'MARKET' ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="MARKET">市場相場</button>
                 </div>
                 
                 <div id="archives-content" class="flex-1 scroll-y p-sm">
@@ -44,6 +60,7 @@ export class ArchivesScreen {
         container.querySelectorAll('.tab').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.currentTab = btn.getAttribute('data-tab');
+                // クラス更新のみでなく全体再描画する(初期化処理等のため)
                 this.render(container, guild, state, logs);
             });
         });
@@ -61,10 +78,15 @@ export class ArchivesScreen {
         }
     }
 
+    /**
+     * 財務タブを描画します。
+     * @param {HTMLElement} container 
+     * @param {object} guild 
+     */
     _renderFinance(container, guild) {
         const history = guild.financeHistory || [];
         if (history.length === 0) {
-            container.innerHTML = '<div class="empty-state">記録はありません</div>';
+            container.innerHTML = `<div class="empty-state ${UI_CONSTANTS.CLASSES.SUB_TEXT}">記録はありません</div>`;
             return;
         }
 
@@ -83,7 +105,7 @@ export class ArchivesScreen {
                 
                 <!-- 左: 詳細 -->
                 <div id="finance-detail-view" class="finance-detail">
-                    <div class="text-center text-sub mt-lg">右側のリストから日付を選択してください</div>
+                    <div class="text-center text-sub-color mt-lg">右側のリストから日付を選択してください</div>
                 </div>
 
                 <!-- 右: リスト -->
@@ -167,10 +189,8 @@ export class ArchivesScreen {
                     <div class="text-meta">収入</div>
                     <div class="text-success font-bold">+${dayData.income}</div>
                 </div>
-                <div class="finance-summary-item">
-                    <div class="text-meta">収入</div>
-                    <div class="text-success font-bold">+${dayData.income}</div>
-                </div>
+                <!-- 収入重複していたため削除し、支出を表示 -->
+                
                 <div class="finance-summary-item">
                     <div class="text-meta">支出</div>
                     <div class="text-reckless font-bold">${dayData.expense}</div>
@@ -186,21 +206,26 @@ export class ArchivesScreen {
                 dayData.details.map(d => `
                         <div class="finance-detail-row">
                             <span>${d.reason}</span>
-                            <span class="font-bold ${d.amount >= 0 ? 'text-success' : 'text-reckless'}">
+                            <span class="font-bold ${d.amount >= 0 ? UI_CONSTANTS.CLASSES.SAFE : UI_CONSTANTS.CLASSES.DANGER}">
                                 ${d.amount >= 0 ? '+' : ''}${d.amount}
                             </span>
                         </div>
                     `).join('')
-                : '<div class="text-sub text-center">詳細なし</div>'}
+                : `<div class="${UI_CONSTANTS.CLASSES.SUB_TEXT} text-center">詳細なし</div>`}
             </div>
         `;
     }
 
+    /**
+     * 過去帳タブを描画します。
+     * @param {HTMLElement} container 
+     * @param {object} guild 
+     */
     _renderRetired(container, guild) {
         const list = guild.retiredAdventurers || [];
 
         container.innerHTML = '';
-        container.classList.add('grid-2-col-fixed-right');
+        container.className = 'grid-2-col-fixed-right p-md panel-reset';
 
         // --- 左: リスト ---
         const listPanel = document.createElement('section');
@@ -227,7 +252,10 @@ export class ArchivesScreen {
                 this._renderRetiredDetail(detailPanel, adv);
             } else {
                 this.state.selectedRetiredId = null;
+                detailPanel.innerHTML = `<div class="p-lg text-center ${UI_CONSTANTS.CLASSES.SUB_TEXT}">リストから選択してください</div>`;
             }
+        } else {
+            detailPanel.innerHTML = `<div class="p-lg text-center ${UI_CONSTANTS.CLASSES.SUB_TEXT}">リストから選択してください</div>`;
         }
     }
 
@@ -235,7 +263,7 @@ export class ArchivesScreen {
         container.innerHTML = '';
 
         if (list.length === 0) {
-            container.innerHTML = '<div class="empty-state">引退者はまだいません</div>';
+            container.innerHTML = `<div class="empty-state ${UI_CONSTANTS.CLASSES.SUB_TEXT}">引退者はまだいません</div>`;
             return;
         }
 
@@ -250,7 +278,7 @@ export class ArchivesScreen {
                 el.classList.add('selected');
                 this._renderRetiredDetail(detailPanel, adv);
             });
-            if (this.state.selectedRetiredId === adv.id) {
+            if (this.state.selectedRetiredId && this.state.selectedRetiredId === adv.id) {
                 el.classList.add('selected');
             }
             container.appendChild(el);
@@ -295,9 +323,9 @@ export class ArchivesScreen {
         const tabs = document.createElement('div');
         tabs.className = 'tabs flex-no-shrink';
         tabs.innerHTML = `
-            <button class="tab ${this.state.currentDetailTab === 'STATUS' ? 'active' : ''}" data-tab="STATUS">ステータス</button>
-            <button class="tab ${this.state.currentDetailTab === 'HISTORY' ? 'active' : ''}" data-tab="HISTORY">経歴</button>
-            <button class="tab ${this.state.currentDetailTab === 'MEIKAN' ? 'active' : ''}" data-tab="MEIKAN">名鑑</button>
+            <button class="tab ${this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.STATUS ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVISOR_TABS.STATUS}">ステータス</button>
+            <button class="tab ${this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.HISTORY ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVISOR_TABS.HISTORY}">経歴</button>
+            <button class="tab ${this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.MEIKAN ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVISOR_TABS.MEIKAN}">名鑑</button>
         `;
         panel.appendChild(tabs);
 
@@ -311,8 +339,11 @@ export class ArchivesScreen {
         tabs.querySelectorAll('.tab').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.state.currentDetailTab = btn.dataset.tab;
-                tabs.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+
+                // Active class toggle
+                tabs.querySelectorAll('.tab').forEach(b => b.classList.remove(UI_CONSTANTS.CLASSES.ACTIVE));
+                btn.classList.add(UI_CONSTANTS.CLASSES.ACTIVE);
+
                 this._renderRetiredTabContent(content, adv);
             });
         });
@@ -320,11 +351,11 @@ export class ArchivesScreen {
 
     _renderRetiredTabContent(container, adv) {
         container.innerHTML = '';
-        if (this.state.currentDetailTab === 'STATUS') {
+        if (this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.STATUS) {
             this._renderStatusTab(container, adv);
-        } else if (this.state.currentDetailTab === 'HISTORY') {
+        } else if (this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.HISTORY) {
             this._renderHistoryTab(container, adv);
-        } else if (this.state.currentDetailTab === 'MEIKAN') {
+        } else if (this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.MEIKAN) {
             this._renderMeikanTab(container, adv);
         }
     }
@@ -402,7 +433,7 @@ export class ArchivesScreen {
                     `).join('')}
                 </div>`;
             } else {
-                artsDiv.innerHTML += `<div class="text-sm text-muted">なし</div>`;
+                artsDiv.innerHTML += `<div class="text-sm ${UI_CONSTANTS.CLASSES.SUB_TEXT}">なし</div>`;
             }
             container.appendChild(artsDiv);
         }
@@ -411,13 +442,13 @@ export class ArchivesScreen {
     _renderHistoryTab(container, adv) {
         const list = document.createElement('div');
         if (!adv.history || adv.history.length === 0) {
-            list.innerHTML = '<div class="empty-state">記録なし</div>';
+            list.innerHTML = `<div class="empty-state ${UI_CONSTANTS.CLASSES.SUB_TEXT}">記録なし</div>`;
         } else {
             list.innerHTML = adv.history.map(h => `
                 <div class="history-item">
                     <div class="history-dot"></div>
                     <div class="text-meta">Day ${h.day}</div>
-                    <div class="text-grey-dark">${h.text}</div>
+                    <div class="text-wood">${h.text}</div>
                 </div>
             `).join('');
         }
@@ -452,7 +483,7 @@ export class ArchivesScreen {
         const createSection = (title, content) => {
             if (!content) return '';
             let htmlContent = Array.isArray(content) ? content.map(l => `<p>${l}</p>`).join('') : `<p>${content}</p>`;
-            return `<div class="mb-md"><div class="sub-header">${title}</div><div class="serif">${htmlContent}</div></div>`;
+            return `<div class="mb-md"><div class="sub-header">${title}</div><div class="font-serif-padded">${htmlContent}</div></div>`;
         };
 
         let html = '<div class="p-sm">';
@@ -462,16 +493,21 @@ export class ArchivesScreen {
         html += '</div>';
 
         if (html === '<div class="p-sm"></div>') {
-            container.innerHTML = '<div class="empty-state">名鑑データなし</div>';
+            container.innerHTML = `<div class="empty-state ${UI_CONSTANTS.CLASSES.SUB_TEXT}">名鑑データなし</div>`;
         } else {
             container.innerHTML = html;
         }
     }
 
+    /**
+     * 市場タブを描画します。
+     * @param {HTMLElement} container 
+     * @param {object} guild 
+     */
     _renderMarket(container, guild) {
         const qs = this.gameLoop.questService;
         if (!qs || !qs.simulator || !qs.simulator.items) {
-            container.innerHTML = '<div class="empty-state">市場データ取得不可</div>';
+            container.innerHTML = `<div class="empty-state ${UI_CONSTANTS.CLASSES.SUB_TEXT}">市場データ取得不可</div>`;
             return;
         }
 
@@ -493,7 +529,7 @@ export class ArchivesScreen {
         uniqueItems.sort((a, b) => a.price - b.price);
 
         let html = `
-            <div class="mb-sm text-sm text-sub">※ ギルド標準買取価格表</div>
+            <div class="mb-sm text-sm ${UI_CONSTANTS.CLASSES.SUB_TEXT}">※ ギルド標準買取価格表</div>
             <div class="market-grid">
         `;
 

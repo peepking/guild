@@ -1,13 +1,27 @@
 import { QuestAssignment } from '../models/QuestAssignment.js';
+import { ASSIGNMENT_CONFIG } from '../data/constants.js';
 
+/**
+ * クエストへの冒険者割り当て（自動・手動）を管理するサービス
+ */
 export class AssignmentService {
+    /**
+     * コンストラクタ
+     * @param {object} guild - ギルドモデル
+     * @param {object} questService - クエストサービス
+     * @param {object} uiManager - UIマネージャー
+     */
     constructor(guild, questService, uiManager) {
         this.guild = guild;
         this.questService = questService;
         this.uiManager = uiManager;
     }
 
-    // --- 自動割り当て (Daily) ---
+    /**
+     * 自動割り当てを実行し、計画リストを作成します。
+     * @param {Array<object>} activeQuests - 募集中のクエストリスト
+     * @returns {Array<QuestAssignment>} 作成された割り当て計画リスト
+     */
     // 計画リスト (QuestAssignment) を返すが、ongoingQuests には追加しない
     autoAssign(activeQuests) {
         const availableAdventurers = this.guild.adventurers.filter(a => a.isAvailable());
@@ -41,7 +55,7 @@ export class AssignmentService {
             const targetScore = quest.difficulty.powerReq * size * 1.0;
 
             // 自動採用閾値: 要求の90%
-            if (totalScore >= targetScore * 0.9) {
+            if (totalScore >= targetScore * ASSIGNMENT_CONFIG.AUTO_ASSIGN_THRESHOLD) {
                 const members = party.map(c => c.adv);
 
                 // 計画作成
@@ -56,7 +70,12 @@ export class AssignmentService {
         return plannedAssignments;
     }
 
-    // --- 手動割り当て ---
+    /**
+     * 手動割り当てを実行し、計画を作成します。
+     * @param {object} quest - 対象クエスト
+     * @param {Array<string>} adventurerIds - 冒険者IDリスト
+     * @returns {object} 結果オブジェクト { success, message, assignment }
+     */
     // 即時出発ではなく、計画 (Planning) を作成する
     manualAssign(quest, adventurerIds) {
         // バリデーション
@@ -77,6 +96,14 @@ export class AssignmentService {
         return { success: true, assignment };
     }
 
+    /**
+     * 割り当て情報を作成します。
+     * @param {object} quest - クエスト
+     * @param {Array<object>} members - メンバー
+     * @param {boolean} [isManual=false] - 手動フラグ
+     * @returns {QuestAssignment} 割り当てオブジェクト
+     * @private
+     */
     _createAssignment(quest, members, isManual = false) {
         // ステータスを PLANNING に設定
         members.forEach(m => m.state = "PLANNING");
@@ -93,7 +120,12 @@ export class AssignmentService {
         return assignment;
     }
 
-    // --- 割り当て確定 (出発) ---
+    /**
+     * 割り当て計画を確定し、出発させます。
+     * @param {Array<QuestAssignment>} plannedAssignments - 計画リスト
+     * @param {Array<QuestAssignment>} ongoingQuests - 進行中リスト
+     * @returns {number} 出発したチーム数
+     */
     confirmAssignments(plannedAssignments, ongoingQuests) {
         let count = 0;
         plannedAssignments.forEach(assignment => {
@@ -109,7 +141,13 @@ export class AssignmentService {
         return count;
     }
 
-    // --- 割り当てキャンセル ---
+    /**
+     * 割り当て計画をキャンセルします。
+     * @param {QuestAssignment} questAssignment - キャンセル対象
+     * @param {Array<QuestAssignment>} ongoingQuests - 進行中リスト
+     * @param {Array<QuestAssignment>} plannedQuests - 計画リスト
+     * @returns {object} 結果
+     */
     // 計画中のみキャンセル可能。出発後は不可。
     cancelAssignment(questAssignment, ongoingQuests, plannedQuests) { // 引数としてplannedQuestsを追加
         // メンバーの状態を確認

@@ -1,10 +1,22 @@
-import { BASE_STATS, TRAITS, ORIGINS, JOIN_TYPES, ADVENTURER_RANKS, GENERATION_CONFIG, EVENT_CONFIG } from '../data/constants.js';
+import { BASE_STATS, TRAITS, ORIGINS, JOIN_TYPES, ADVENTURER_RANKS, GENERATION_CONFIG, EVENT_CONFIG, ADVENTURER_MODEL_CONFIG } from '../data/constants.js';
 import { ARTS_DATA } from '../data/ArtsData.js';
 import { INTRO_TEMPLATES, ARTS_TEMPLATES, TRAIT_TEMPLATES, CAREER_TEMPLATES, NICKNAME_TEMPLATES, FLAVOR_TEMPLATES } from '../data/BioData.js';
 import { ADVENTURER_TYPES } from '../data/constants.js';
 
+/**
+ * 冒険者モデルクラス
+ */
 export class Adventurer {
-    constructor(id, name, type, origin = ORIGINS.CENTRAL, joinType = JOIN_TYPES.LOCAL, maxRankValue = 9999) {
+    /**
+     * コンストラクタ
+     * @param {string} id - 冒険者ID
+     * @param {string} name - 名前
+     * @param {string} type - 職業タイプ
+     * @param {object} origin - 出身地データ
+     * @param {string} joinType - 加入タイプ
+     * @param {number} maxRankValue - 生成時の最大ランク値
+     */
+    constructor(id, name, type, origin = ORIGINS.CENTRAL, joinType = JOIN_TYPES.LOCAL, maxRankValue = ADVENTURER_MODEL_CONFIG.MAX_RANK_VALUE) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -61,10 +73,14 @@ export class Adventurer {
         };
 
         // 初回アーツ習得チェック
-        if (this.rankValue >= 380) this.learnRandomArt();
-        if (this.rankValue >= 1000) this.learnRandomArt();
+        if (this.rankValue >= ADVENTURER_MODEL_CONFIG.MIN_TITLE_RANK) this.learnRandomArt();
+        if (this.rankValue >= ADVENTURER_MODEL_CONFIG.SECOND_TITLE_RANK) this.learnRandomArt();
     }
 
+    /**
+     * 装備を追加・更新します。
+     * @param {object} equip - 装備データ
+     */
     addEquipment(equip) {
         const WEAPON_TYPES = ['LONG_SWORD', 'SHORT_SWORD', 'AXE', 'MACE', 'STAFF', 'BOW', 'SPECIAL', 'GAUNTLET'];
         const ARMOR_TYPES = ['HEAVY', 'LIGHT', 'CLOTHES', 'ROBE'];
@@ -85,6 +101,11 @@ export class Adventurer {
         this.equipment.push(equip);
     }
 
+    /**
+     * 主要討伐記録を追加します。
+     * @param {object} monster - モンスターデータ
+     * @param {number} day - 日付
+     */
     addMajorKill(monster, day) {
         // ボス補正を適用 (+1 ランク相当)
         const isBoss = monster.category && (monster.category.includes('ボス') || monster.isBoss);
@@ -94,11 +115,11 @@ export class Adventurer {
             return;
         }
 
-        const RANK_VAL = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
+        const RANK_VAL = ADVENTURER_MODEL_CONFIG.RANK_POINTS;
         const rank = monster.rank || 'E';
         let val = RANK_VAL[rank] || 1;
 
-        if (isBoss) val += 1;
+        if (isBoss) val += ADVENTURER_MODEL_CONFIG.BOSS_KILL_BONUS;
 
         const record = {
             day: day,
@@ -117,15 +138,18 @@ export class Adventurer {
         });
 
         // トップ10を保持
-        if (this.records.majorKills.length > 10) {
-            this.records.majorKills = this.records.majorKills.slice(0, 10);
+        if (this.records.majorKills.length > ADVENTURER_MODEL_CONFIG.HISTORY_LIMIT) {
+            this.records.majorKills = this.records.majorKills.slice(0, ADVENTURER_MODEL_CONFIG.HISTORY_LIMIT);
         }
     }
 
-    // 主要功績の更新 (Top 10)
+    /**
+     * 主要功績（クエストクリア）を追加します。
+     * @param {Quest} quest - クエストデータ
+     * @param {number} day - 日付
+     */
     addMajorAchievement(quest, day) {
-        // 簡易版: S=6, A=5, B=4, C=3, D=2, E=1.
-        const RANK_VAL = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 };
+        const RANK_VAL = ADVENTURER_MODEL_CONFIG.RANK_POINTS;
         const rank = quest.difficulty.rank;
         const val = RANK_VAL[rank] || 0;
 
@@ -145,12 +169,16 @@ export class Adventurer {
         });
 
         // トップ10を保持
-        if (this.records.majorAchievements.length > 10) {
-            this.records.majorAchievements = this.records.majorAchievements.slice(0, 10);
+        if (this.records.majorAchievements.length > ADVENTURER_MODEL_CONFIG.HISTORY_LIMIT) {
+            this.records.majorAchievements = this.records.majorAchievements.slice(0, ADVENTURER_MODEL_CONFIG.HISTORY_LIMIT);
         }
     }
 
-    // 装備レベルアップ（所持金消費）
+    /**
+     * 装備レベルをアップグレードします（所持金消費）。
+     * @param {number} cost - 費用
+     * @returns {boolean} 成功した場合true
+     */
     upgradeEquipment(cost) {
         if (this.personalMoney >= cost) {
             this.personalMoney -= cost;
@@ -160,18 +188,26 @@ export class Adventurer {
         return false;
     }
 
-    // 履歴追加メソッド
+    /**
+     * 履歴を追加します。
+     * @param {number} day - 日付
+     * @param {string} text - 内容
+     */
     addHistory(day, text) {
         this.history.push({ day, text });
     }
 
-    // 名鑑更新
+    /**
+     * 名鑑（バイオグラフィー）情報を更新します。
+     * @param {string} category - 更新カテゴリ (INTRO, TRAITS, ARTS, CAREER, NICKNAME)
+     * @param {object} context - コンテキストデータ
+     */
     updateBio(category, context = {}) {
         switch (category) {
             case 'INTRO':
                 this.bio.intro = this._generateIntro();
                 // ランクB以上ならフレーバーも更新
-                if (this.rankValue >= 380) {
+                if (this.rankValue >= ADVENTURER_MODEL_CONFIG.MIN_TITLE_RANK) {
                     this.bio.flavor = this._generateFlavor();
                 }
                 break;
@@ -301,7 +337,7 @@ export class Adventurer {
         // 上限適用
         val = Math.min(val, maxRankValue);
         // 生成時の絶対上限 (オプション)
-        if (val > 9999) val = 9999;
+        if (val > ADVENTURER_MODEL_CONFIG.MAX_RANK_VALUE) val = ADVENTURER_MODEL_CONFIG.MAX_RANK_VALUE;
         return val;
     }
 
@@ -328,12 +364,12 @@ export class Adventurer {
         const oldVal = this.rankValue;
         this.rankValue += delta;
         if (this.rankValue < 0) this.rankValue = 0;
-        if (this.rankValue > 9999) this.rankValue = 9999;
+        if (this.rankValue > ADVENTURER_MODEL_CONFIG.MAX_RANK_VALUE) this.rankValue = ADVENTURER_MODEL_CONFIG.MAX_RANK_VALUE;
 
         // アーツ習得チェック
         // アーツ習得チェック (ランク変動による重複習得を防止)
-        if (oldVal < 380 && this.rankValue >= 380 && this.arts.length < 1) this.learnRandomArt();
-        if (oldVal < 1000 && this.rankValue >= 1000 && this.arts.length < 2) this.learnRandomArt();
+        if (oldVal < ADVENTURER_MODEL_CONFIG.MIN_TITLE_RANK && this.rankValue >= ADVENTURER_MODEL_CONFIG.MIN_TITLE_RANK && this.arts.length < 1) this.learnRandomArt();
+        if (oldVal < ADVENTURER_MODEL_CONFIG.SECOND_TITLE_RANK && this.rankValue >= ADVENTURER_MODEL_CONFIG.SECOND_TITLE_RANK && this.arts.length < 2) this.learnRandomArt();
 
         const oldLabel = this.rankLabel;
         this.rankLabel = this._getRankLabel();
@@ -372,7 +408,7 @@ export class Adventurer {
 
         // 4.2 ばらつき率 (高ランクほど安定)
         // 0.10 - 0.04 * t -> E: 10%, S: 6%
-        const varianceRate = 0.10 - 0.04 * t;
+        const varianceRate = ADVENTURER_MODEL_CONFIG.VARIANCE.BASE - ADVENTURER_MODEL_CONFIG.VARIANCE.DECAY * t;
 
         for (const [key, val0] of Object.entries(base)) {
             // 4.1 ベーススケーリング
@@ -454,6 +490,10 @@ export class Adventurer {
         return traits;
     }
 
+    /**
+     * 冒険者が利用可能か（IDLEかつ回復中ではない）を判定します。
+     * @returns {boolean}
+     */
     isAvailable() {
         return this.state === "IDLE" && this.recoveryDays <= 0;
     }

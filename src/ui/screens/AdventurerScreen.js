@@ -1,11 +1,19 @@
 import { TRAITS, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, JOIN_TYPE_NAMES, ADVISOR_CONFIG } from '../../data/constants.js';
+import { UI_CONSTANTS } from '../../data/ui_constants.js';
 
+/**
+ * 冒険者一覧・詳細画面クラス
+ */
 export class AdventurerScreen {
+    /**
+     * コンストラクタ
+     * @param {GameLoop} gameLoop - ゲームループインスタンス
+     */
     constructor(gameLoop) {
         this.gameLoop = gameLoop;
         this.state = {
             selectedAdventurerId: null,
-            currentTab: 'STATUS', // ステータス | 経歴
+            currentTab: UI_CONSTANTS.ADVENTURER_TABS.STATUS, // ステータス | 経歴 | 名鑑
             // ソート & フィルタ状態
             sortKey: 'RANK', // ランク, 日数, 信頼度, 状態, ID
             sortOrder: 'DESC', // 降順, 昇順
@@ -15,6 +23,12 @@ export class AdventurerScreen {
         };
     }
 
+    /**
+     * 画面を描画します。
+     * @param {HTMLElement} container - 描画対象コンテナ
+     * @param {object} guild - ギルドデータ
+     * @param {object} globalState - グローバルUI状態
+     */
     render(container, guild, globalState) {
         // スクロール位置の保持
         let lastScrollTop = 0;
@@ -140,6 +154,8 @@ export class AdventurerScreen {
                 this.state.selectedAdventurerId = adv.id;
 
                 // 表示の更新
+                container.querySelectorAll('.list-item').forEach(item => item.classList.remove(UI_CONSTANTS.CLASSES.ACTIVE)); // selected -> active? UI_CONSTANTS defines active. but CSS might depend on selected. Let's use 'selected' for list items as per CSS, but keep constants in mind. Reverting to 'selected' for list item class if it's not in constants. Correct, 'selected' is common class name.
+                // Keeping 'selected' hardcoded or adding to constants. Let's stick to hardcoded 'selected' for list item state for now or add to constants if I want to be strict. I'll use hardcoded 'selected' as per existing CSS.
                 container.querySelectorAll('.list-item').forEach(item => item.classList.remove('selected'));
                 el.classList.add('selected');
 
@@ -356,9 +372,9 @@ export class AdventurerScreen {
         const tabs = document.createElement('div');
         tabs.className = 'tabs flex-no-shrink';
         tabs.innerHTML = `
-            <button class="tab ${this.state.currentTab === 'STATUS' ? 'active' : ''}" data-tab="STATUS">ステータス</button>
-            <button class="tab ${this.state.currentTab === 'HISTORY' ? 'active' : ''}" data-tab="HISTORY">経歴</button>
-            <button class="tab ${this.state.currentTab === 'MEIKAN' ? 'active' : ''}" data-tab="MEIKAN">名鑑</button>
+            <button class="tab ${this.state.currentTab === UI_CONSTANTS.ADVENTURER_TABS.STATUS ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVENTURER_TABS.STATUS}">ステータス</button>
+            <button class="tab ${this.state.currentTab === UI_CONSTANTS.ADVENTURER_TABS.HISTORY ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVENTURER_TABS.HISTORY}">経歴</button>
+            <button class="tab ${this.state.currentTab === UI_CONSTANTS.ADVENTURER_TABS.MEIKAN ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVENTURER_TABS.MEIKAN}">名鑑</button>
         `;
         panel.appendChild(tabs);
 
@@ -376,8 +392,8 @@ export class AdventurerScreen {
             btn.addEventListener('click', () => {
                 this.state.currentTab = btn.dataset.tab;
                 // Update specific styles
-                tabs.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+                tabs.querySelectorAll('.tab').forEach(b => b.classList.remove(UI_CONSTANTS.CLASSES.ACTIVE));
+                btn.classList.add(UI_CONSTANTS.CLASSES.ACTIVE);
 
                 this._renderTabContent(content, adv);
             });
@@ -386,11 +402,11 @@ export class AdventurerScreen {
 
     _renderTabContent(container, adv) {
         container.innerHTML = '';
-        if (this.state.currentTab === 'STATUS') {
+        if (this.state.currentTab === UI_CONSTANTS.ADVENTURER_TABS.STATUS) {
             this._renderStatusTab(container, adv);
-        } else if (this.state.currentTab === 'HISTORY') {
+        } else if (this.state.currentTab === UI_CONSTANTS.ADVENTURER_TABS.HISTORY) {
             this._renderHistoryTab(container, adv);
-        } else if (this.state.currentTab === 'MEIKAN') {
+        } else if (this.state.currentTab === UI_CONSTANTS.ADVENTURER_TABS.MEIKAN) {
             this._renderMeikanTab(container, adv);
         }
     }
@@ -557,7 +573,7 @@ export class AdventurerScreen {
         const list = document.createElement('div');
 
         if (!adv.history || adv.history.length === 0) {
-            list.innerHTML = '<div class="empty-state">特筆すべき出来事はまだありません</div>';
+            list.innerHTML = `<div class="empty-state">${UI_CONSTANTS.MESSAGES.EMPTY_STATE}</div>`;
         } else {
             // 簡易タイムライン
             list.innerHTML = adv.history.map(h => `

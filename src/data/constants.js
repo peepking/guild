@@ -274,6 +274,27 @@ export const QUEST_DIFFICULTY = {
     S: { rank: 'S', powerReq: 100, baseReward: 100, baseRep: 5.0 }
 };
 
+export const QUEST_CONFIG = {
+    BASE_COUNT: 2,
+    MAX_DAILY: 10,
+    SPECIAL_CHANCE_BASE: 0.15,
+    SPECIAL_CHANCE_PER_LIBRARY: 0.10,
+    PENALTY_RATE: 0.2, // Base reward * 0.2
+
+    // ランク更新報酬テーブル (E, D, C, B, A, S)
+    RANK_REWARD_TABLE: [0, 6, 7, 9, 12, 14, 20],
+
+    // 成長
+    GROWTH_BASE_SUCCESS: 0.60,
+    GROWTH_BASE_FAILURE: 0.25,
+
+    // 成功率計算
+    SUCCESS_BASE: 0.5,
+    SUCCESS_DIVISOR: 200,
+    SUCCESS_CAP_MIN: 0.05,
+    SUCCESS_CAP_MAX: 0.95
+};
+
 export const BATTLE_CONFIG = {
     ARTS_ACTIVATION_CHANCE: 0.3,
     PARTY_SIZE_BONUS_PER_MEMBER: 0.1, // +10% per extra member
@@ -304,9 +325,17 @@ export const RECRUIT_CONFIG = {
     REP_BONUS_FACTOR: 0.00005, // per reputation point
     EXTENDED_CAP_MULTIPLIER: 1.5,
     SOFT_CAP_PENALTY: 0.5,
-    HARD_CAP_PENALTY: 0.2
+    HARD_CAP_PENALTY: 0.2,
+
+    // 出身地・雇用形態の確率設定
+    PROBABILITIES: {
+        CENTRAL: { LOCAL: 0.8, WANDERER: 0.1, CONTRACT: 0.1 },
+        REGIONAL: { WANDERER: 0.8, CONTRACT: 0.2 },
+        FOREIGN: { WANDERER: 0.5, CONTRACT: 0.5 }
+    }
 };
 
+// ... (existing content)
 export const GENERATION_CONFIG = {
     RANK_RANGES: {
         LOCAL: { MIN: 0, MAX: 160 },
@@ -329,5 +358,111 @@ export const GENERATION_CONFIG = {
         POWER: 1.6
     },
     MIN_STAT_GUARD: 0.92 // 92% of expected average
+};
+
+export const ASSIGNMENT_CONFIG = {
+    AUTO_ASSIGN_THRESHOLD: 0.9
+};
+
+// ... (existing content)
+export const MANAGEMENT_CONFIG = {
+    FACILITY_INCOME: {
+        SHOP_MULTIPLIER: 2,
+        TAVERN_MULTIPLIER: 3
+    },
+    RANDOM_EVENT_CHANCE: 0.05
+};
+
+export const EQUIPMENT_CONFIG = {
+    RANK_PRICES: {
+        'E': 50,
+        'D': 150,
+        'C': 400,
+        'B': 900,
+        'A': 1800,
+        'S': 3500
+    },
+    // Default preferences if job not found
+    DEFAULT_PREF: {
+        'WEAPON': { 'LONG_SWORD': 20, 'SHORT_SWORD': 20, 'AXE': 10, 'MACE': 10, 'STAFF': 10, 'BOW': 10, 'SPECIAL': 20 },
+        'ARMOR': { 'LIGHT': 40, 'CLOTHES': 40, 'HEAVY': 10, 'ROBE': 10 }
+    }
+};
+
+export const LIFE_EVENT_CONFIG = {
+    EVENT_CHANCE: 0.1,
+    SHOPPING_CHANCE: {
+        BASE: 0.3,
+        MODIFIERS: {
+            SPENDER: 0.4,
+            FRUGAL: -0.15,
+            GREEDY: -0.1,
+            GOURMET: 0.1,
+            NOBLE: 0.1
+        }
+    },
+    EVENT_PROBS: {
+        DRUNKARD: 0.3,
+        SPENDER: 0.3,
+        TROUBLE: 0.2,
+        MEDIATOR: 0.2,
+        GLUTTON: 0.2
+    },
+    FINES: {
+        TROUBLE: 100
+    },
+    // ... (existing content)
+    COSTS: {
+        GLUTTON: 100
+    }
+};
+
+export const TITLE_CONFIG = {
+    GRANT_RATE: 1.0,
+    ELIGIBILITY: {
+        MIN_DAYS: 30,
+        MIN_S_RANK_SUCCESS: 3,
+        RANKS: ['S', 'A', 'B']
+    },
+    ACHIEVEMENT_MAPPING: {
+        'HUNT': 'QUEST_S_HUNT_CLEARED',
+        'DUNGEON': 'QUEST_S_DUNGEON_CLEARED',
+        'EXPLORE': 'QUEST_S_RUINS_CLEARED',
+        'GUARD': 'QUEST_S_VIP_GUARD_CLEARED',
+        'PATROL': 'QUEST_S_BORDER_RECON_CLEARED',
+        'DISASTER': 'QUEST_S_BARRIER_CLEARED',
+        'REBELLION': 'QUEST_S_REBELLION_CLEARED',
+        'OTHERWORLD': 'QUEST_S_OTHERWORLD_CLEARED',
+        'ORACLE': 'QUEST_S_ORACLE_CLEARED',
+        'ANCIENT': 'QUEST_S_ANCIENT_BEAST_CLEARED',
+        'ROYAL': 'QUEST_S_MISSING_ROYAL_CLEARED'
+    }
+};
+
+export const STORAGE_CONFIG = {
+    // ... (existing content)
+    KEY: 'guild_master_save_v1',
+    DEFAULT_QUEST_COUNTER: 100
+};
+
+export const ADVENTURER_MODEL_CONFIG = {
+    MAX_RANK_VALUE: 9999,
+    HISTORY_LIMIT: 10,
+    RANK_POINTS: { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1 },
+    BOSS_KILL_BONUS: 1,
+    VARIANCE: {
+        BASE: 0.10,
+        DECAY: 0.04
+    },
+    MIN_TITLE_RANK: 380, // B rank threshold
+    SECOND_TITLE_RANK: 1000 // S rank threshold
+};
+
+export const QUEST_MODEL_CONFIG = {
+    DEFAULT_EXPIRE_DAYS: 30,
+    GUILD_SHARE: {
+        BASE: 0.30,
+        MANUAL_PENALTY_SHIFT: 0.10
+    }
 };
 

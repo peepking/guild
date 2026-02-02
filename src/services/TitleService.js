@@ -1,28 +1,39 @@
 import { TRAIT_TITLE_DEFS, ACHIEVEMENT_TITLE_DEFS } from '../data/TitleDefinitions.js';
+import { TITLE_CONFIG } from '../data/constants.js';
 
+/**
+ * 二つ名（Title）の生成と管理を行うサービス
+ */
 export class TitleService {
+    /**
+     * コンストラクタ
+     */
     constructor() {
-        this.pTitleGrant = 1.0;
+        this.pTitleGrant = TITLE_CONFIG.GRANT_RATE;
         this.mailService = null;
     }
 
+    /**
+     * メールサービスをセットします。
+     * @param {object} service - MailServiceインスタンス
+     */
     setMailService(service) {
         this.mailService = service;
     }
 
     /**
      * 二つ名の生成と付与を試みる
-     * @param {Object} adventurer
+     * @param {Adventurer} adventurer
      * @param {Object} context { questType, isBoss, bossId, rank, result, questId, region, day }
      * @returns {string|null} 付与された二つ名 (または null)
      */
     tryGenerateTitle(adventurer, context) {
         // 資格チェック
         if (adventurer.title) return null;
-        const eligibleRanks = ['S', 'A', 'B'];
+        const eligibleRanks = TITLE_CONFIG.ELIGIBILITY.RANKS;
         if (!eligibleRanks.includes(adventurer.rankLabel)) return null;
-        if (adventurer.daysInGuild < 30) return null;
-        if ((adventurer.sRankSuccessCount || 0) < 3) return null;
+        if (adventurer.daysInGuild < TITLE_CONFIG.ELIGIBILITY.MIN_DAYS) return null;
+        if ((adventurer.sRankSuccessCount || 0) < TITLE_CONFIG.ELIGIBILITY.MIN_S_RANK_SUCCESS) return null;
 
         // トリガーチェック
         const isSRank = context.rank === 'S' && context.result === 'SUCCESS';
@@ -55,20 +66,7 @@ export class TitleService {
         if (!achievement && isSRank) {
             // クエストタイプマッピング
             const typeUpper = context.questType.toUpperCase();
-            const map = {
-                'HUNT': 'QUEST_S_HUNT_CLEARED',
-                'DUNGEON': 'QUEST_S_DUNGEON_CLEARED',
-                'EXPLORE': 'QUEST_S_RUINS_CLEARED',
-                'GUARD': 'QUEST_S_VIP_GUARD_CLEARED',
-                'PATROL': 'QUEST_S_BORDER_RECON_CLEARED',
-                'DISASTER': 'QUEST_S_BARRIER_CLEARED',
-                'REBELLION': 'QUEST_S_REBELLION_CLEARED',
-                'OTHERWORLD': 'QUEST_S_OTHERWORLD_CLEARED',
-                'ORACLE': 'QUEST_S_ORACLE_CLEARED',
-                'ANCIENT': 'QUEST_S_ANCIENT_BEAST_CLEARED',
-                'ROYAL': 'QUEST_S_MISSING_ROYAL_CLEARED'
-            };
-            const targetId = map[typeUpper];
+            const targetId = TITLE_CONFIG.ACHIEVEMENT_MAPPING[typeUpper];
             if (targetId) {
                 achievement = ACHIEVEMENT_TITLE_DEFS.find(a => a.id === targetId);
             }
@@ -143,6 +141,13 @@ export class TitleService {
         return title;
     }
 
+    /**
+     * 通知を送信します。
+     * @param {Adventurer} adventurer 
+     * @param {string} title 
+     * @param {object} achievement 
+     * @private
+     */
     _sendNotifications(adventurer, title, achievement) {
         if (!this.mailService) return;
 

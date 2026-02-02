@@ -1,15 +1,26 @@
+import { ADVISOR_CONFIG, ADVENTURER_JOB_NAMES, TRAITS, JOIN_TYPE_NAMES } from '../../data/constants.js';
+import { UI_CONSTANTS } from '../../data/ui_constants.js';
 
-import { ADVISOR_CONFIG, ADVENTURER_JOB_NAMES } from '../../data/constants.js';
-
+/**
+ * 顧問一覧・詳細画面クラス
+ */
 export class AdvisorScreen {
+    /**
+     * コンストラクタ
+     * @param {UIManager} uiManager 
+     */
     constructor(uiManager) {
         this.uiManager = uiManager;
         this.state = {
             selectedAdvisorId: null,
-            currentDetailTab: 'EFFECT' // 効果, ステータス, 経歴, 名鑑
+            currentDetailTab: UI_CONSTANTS.ADVISOR_TABS.EFFECT // 効果, ステータス, 経歴, 名鑑
         };
     }
 
+    /**
+     * 画面を描画します。
+     * @param {HTMLElement} container 
+     */
     render(container) {
         const guild = this.uiManager.gameLoop.guild;
         const advisors = guild.advisors || [];
@@ -126,10 +137,10 @@ export class AdvisorScreen {
         const tabs = document.createElement('div');
         tabs.className = 'tabs flex-no-shrink';
         tabs.innerHTML = `
-            <button class="tab ${this.state.currentDetailTab === 'EFFECT' ? 'active' : ''}" data-tab="EFFECT">顧問効果</button>
-            <button class="tab ${this.state.currentDetailTab === 'STATUS' ? 'active' : ''}" data-tab="STATUS">ステータス</button>
-            <button class="tab ${this.state.currentDetailTab === 'HISTORY' ? 'active' : ''}" data-tab="HISTORY">経歴</button>
-            <button class="tab ${this.state.currentDetailTab === 'MEIKAN' ? 'active' : ''}" data-tab="MEIKAN">名鑑</button>
+            <button class="tab ${this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.EFFECT ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVISOR_TABS.EFFECT}">顧問効果</button>
+            <button class="tab ${this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.STATUS ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVISOR_TABS.STATUS}">ステータス</button>
+            <button class="tab ${this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.HISTORY ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVISOR_TABS.HISTORY}">経歴</button>
+            <button class="tab ${this.state.currentDetailTab === UI_CONSTANTS.ADVISOR_TABS.MEIKAN ? UI_CONSTANTS.CLASSES.ACTIVE : ''}" data-tab="${UI_CONSTANTS.ADVISOR_TABS.MEIKAN}">名鑑</button>
         `;
         panel.appendChild(tabs);
 
@@ -150,16 +161,16 @@ export class AdvisorScreen {
 
     _renderTabContent(container, adv) {
         switch (this.state.currentDetailTab) {
-            case 'EFFECT':
+            case UI_CONSTANTS.ADVISOR_TABS.EFFECT:
                 this._renderEffectTab(container, adv);
                 break;
-            case 'STATUS':
+            case UI_CONSTANTS.ADVISOR_TABS.STATUS:
                 this._renderStatusTab(container, adv);
                 break;
-            case 'HISTORY':
+            case UI_CONSTANTS.ADVISOR_TABS.HISTORY:
                 this._renderHistoryTab(container, adv);
                 break;
-            case 'MEIKAN':
+            case UI_CONSTANTS.ADVISOR_TABS.MEIKAN:
                 this._renderMeikanTab(container, adv);
                 break;
         }
@@ -183,9 +194,9 @@ export class AdvisorScreen {
                 </div>
                 <div class="info-row">
                     <span class="label">現在の効果率:</span>
-                    <span class="value ${factor < 1 ? 'text-warning' : 'text-success'}">${efficiency}%</span>
+                    <span class="value ${factor < 1 ? UI_CONSTANTS.CLASSES.WARN : UI_CONSTANTS.CLASSES.SAFE}">${efficiency}%</span>
                 </div>
-                ${factor < 1 ? `<div class="text-sm text-warning mt-sm">※ 同職の顧問が複数いるため効果が減衰しています (${index + 1}人目)</div>` : ''}
+                ${factor < 1 ? `<div class="text-sm ${UI_CONSTANTS.CLASSES.WARN} mt-sm">※ 同職の顧問が複数いるため効果が減衰しています (${index + 1}人目)</div>` : ''}
                 
                 <hr class="separator">
                 
@@ -193,7 +204,7 @@ export class AdvisorScreen {
                     <span class="label">契約賃金:</span>
                     <span class="value">${ADVISOR_CONFIG.SALARY} G / 30日</span>
                 </div>
-                 <div class="text-xs text-muted mt-sm">
+                 <div class="text-xs ${UI_CONSTANTS.CLASSES.SUB_TEXT} mt-sm">
                     顧問契約は終身雇用です。解雇はできません。
                 </div>
             </div>
@@ -219,25 +230,13 @@ export class AdvisorScreen {
                 <div class="stats-grid grid-2-col">
                     <div class="stat-item"><span class="label">STR:</span> ${stats.STR || 0}</div>
                     <div class="stat-item"><span class="label">VIT:</span> ${stats.VIT || 0}</div>
+                    <div class="stat-item"><span class="label">MAG:</span> ${stats.MAG || 0}</div>
                     <div class="stat-item"><span class="label">DEX:</span> ${stats.DEX || 0}</div>
-                    <div class="stat-item"><span class="label">AGI:</span> ${stats.AGI || 0}</div>
                     <div class="stat-item"><span class="label">INT:</span> ${stats.INT || 0}</div>
-                    <div class="stat-item"><span class="label">MND:</span> ${stats.MND || 0}</div>
+                    <div class="stat-item"><span class="label">CHA:</span> ${stats.CHA || 0}</div>
                 </div>
             </div>
         `;
-
-        // ロジックからの実際のステータスキーに対応: STR, VIT, MAG, DEX, INT, CHA
-        if (stats.MAG !== undefined) {
-            container.querySelector('.stats-grid').innerHTML = `
-                <div class="stat-item"><span class="label">STR:</span> ${stats.STR}</div>
-                <div class="stat-item"><span class="label">VIT:</span> ${stats.VIT}</div>
-                <div class="stat-item"><span class="label">MAG:</span> ${stats.MAG}</div>
-                <div class="stat-item"><span class="label">DEX:</span> ${stats.DEX}</div>
-                <div class="stat-item"><span class="label">INT:</span> ${stats.INT}</div>
-                <div class="stat-item"><span class="label">CHA:</span> ${stats.CHA}</div>
-            `;
-        }
     }
 
     _renderHistoryTab(container, adv) {
