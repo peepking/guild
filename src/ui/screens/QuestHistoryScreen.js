@@ -199,14 +199,15 @@ export class QuestHistoryScreen {
         else resultLabel = '<span class="text-warning font-bold">期限切れ</span>';
 
         panel.innerHTML += `
-            <div class="mb-md">
+            <div class="flex-between">
                 ${resultLabel}
-                <span class="ml-sm">完了日: Day ${item.date}</span>
+                <span class="text-sub">完了日: Day ${item.date}</span>
             </div>
-            <div class="text-base text-sub mb-sm italic">
+            <hr class="separator">
+            <div class="text-desc">
                 ${item.description || "詳細不明"}
             </div>
-            <div class="grid-2-col gap-sm text-base text-sub">
+            <div class="quest-detail-grid">
                 <div>ランク: <b>${item.rank}</b></div>
                 <div>参加: ${item.members.length > 0 ? item.members.length + '人' : 'なし'}</div>
             </div>
@@ -215,7 +216,7 @@ export class QuestHistoryScreen {
 
         if (item.result !== 'EXPIRED') {
             panel.innerHTML += `
-                <div class="reward-box text-base">
+                <div class="quest-reward-box">
                     <b>報酬:</b> ${item.reward.money}G / 評判 ${item.reward.reputation > 0 ? '+' : ''}${item.reward.reputation}
                 </div>
                 <div class="mt-sm">
