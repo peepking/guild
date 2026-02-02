@@ -7,7 +7,20 @@ import { StorageService } from '../services/StorageService.js';
 import { titleService } from '../services/TitleService.js';
 import { TYPE_ADVANTAGES, LEAVE_TYPES, GUILD_RANK_THRESHOLDS, LEAVE_TYPE_NAMES, RETIREMENT_CONFIG, JOIN_TYPES } from '../data/constants.js';
 
+/**
+ * ゲームのメインループと進行を管理するコアクラス
+ */
 export class GameLoop {
+    /**
+     * コンストラクタ
+     * @param {Guild} guild - ギルドモデル
+     * @param {UIManager} uiManager - UIマネージャー
+     * @param {QuestService} questService - クエスト管理サービス
+     * @param {MailService} mailService - メールサービス
+     * @param {ManagementService} managementService - 運営管理サービス
+     * @param {EquipmentService} equipmentService - 装備サービス
+     * @param {RecruitmentService} recruitmentService - スカウトサービス
+     */
     constructor(guild, uiManager, questService, mailService, managementService, equipmentService, recruitmentService) {
         this.guild = guild;
         this.uiManager = uiManager;
@@ -36,6 +49,11 @@ export class GameLoop {
         }
     }
 
+    /**
+     * クエスト履歴をアーカイブします。
+     * @param {object} snapshot - クエスト結果のスナップショット
+     * @returns {void}
+     */
     archiveQuest(snapshot) {
         this.questHistory.unshift(snapshot);
         if (this.questHistory.length > 1000) {
@@ -43,6 +61,10 @@ export class GameLoop {
         }
     }
 
+    /**
+     * 日付を変更し、1日のシミュレーションを実行します。
+     * @returns {void}
+     */
     nextDay() {
         // ランク昇格通知用に前回のランクを保持 (現在はギルドステート内で利用可能)
 

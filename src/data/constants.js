@@ -1,8 +1,10 @@
 export const CONSTANTS = {
     INITIAL_MONEY: 1000,
     INITIAL_REPUTATION: 0,
-    INITIAL_MONEY: 1000,
-    INITIAL_REPUTATION: 0,
+    GUILD: {
+        SOFT_CAP: 10,
+        MAX_QUESTS: 20
+    },
     QUEST_COUNT_RANGE: [2, 5], // 1日のクエスト数 (最小, 最大)
     REWARD_VARIANCE: 0.2, // +/- 20%
     BASE_QUEST_REWARD: 100,

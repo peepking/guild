@@ -1,5 +1,12 @@
+import { MESSAGES } from '../data/messages.js';
 
+/**
+ * メール（通知）機能を管理するサービス
+ */
 export class MailService {
+    /**
+     * コンストラクタ
+     */
     constructor() {
         this.mails = [];
         this.toastQueue = [];
@@ -7,8 +14,8 @@ export class MailService {
 
         // 初回チュートリアルメール
         this.send(
-            "ギルドへようこそ",
-            "ギルド運営へようこそ！\nまずは「依頼」メニューからクエストを発注し、冒険者を派遣してみましょう。\n日数が経過すると結果が届きます。",
+            MESSAGES.MAIL.WELCOME.TITLE,
+            MESSAGES.MAIL.WELCOME.BODY,
             "SYSTEM",
             { day: 1 }
         );
@@ -16,10 +23,11 @@ export class MailService {
 
     /**
      * 新しいメールを送信（トースト通知もトリガー）
-     * @param {string} title 
-     * @param {string} body 
-     * @param {string} type - 'SYSTEM', 'EVENT', 'IMPORTANT', 'NORMAL'
-     * @param {object} meta - イベント用オプションデータ
+     * @param {string} title - メールのタイトル
+     * @param {string} body - メールの本文
+     * @param {string} [type='NORMAL'] - メールの種類 ('SYSTEM', 'EVENT', 'IMPORTANT', 'NORMAL')
+     * @param {object} [meta={}] - イベント用オプションデータ
+     * @returns {void}
      */
     send(title, body, type = 'NORMAL', meta = {}) {
         this.mailCounter++;
@@ -46,6 +54,11 @@ export class MailService {
         document.dispatchEvent(new CustomEvent('mail-received', { detail: { mail } }));
     }
 
+    /**
+     * メールを既読にします。
+     * @param {string} id - メールのID
+     * @returns {void}
+     */
     markAsRead(id) {
         const mail = this.mails.find(m => m.id === id);
         if (mail) {
@@ -53,27 +66,51 @@ export class MailService {
         }
     }
 
+    /**
+     * すべてのメールを既読にします。
+     * @returns {void}
+     */
     markAllAsRead() {
         this.mails.forEach(m => m.isRead = true);
     }
 
+    /**
+     * メールを削除します。
+     * @param {string} id - メールのID
+     * @returns {void}
+     */
     delete(id) {
         this.mails = this.mails.filter(m => m.id !== id);
     }
 
+    /**
+     * 全メールを取得します。
+     * @returns {Array<object>} メールリスト
+     */
     getMails() {
         return this.mails;
     }
 
+    /**
+     * 未読件数を取得します。
+     * @returns {number} 未読メール数
+     */
     getUnreadCount() {
         return this.mails.filter(m => !m.isRead).length;
     }
 
+    /**
+     * トースト通知キューから最新を取得します。
+     * @returns {object|undefined} トーストオブジェクト
+     */
     getToast() {
         return this.toastQueue.shift();
     }
 
-    // デバッグ用
+    /**
+     * データをクリアします（デバッグ用）。
+     * @returns {void}
+     */
     clear() {
         this.mails = [];
         this.toastQueue = [];
