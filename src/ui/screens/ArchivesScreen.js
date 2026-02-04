@@ -229,7 +229,7 @@ export class ArchivesScreen {
 
         // --- 左: リスト ---
         const listPanel = document.createElement('section');
-        listPanel.className = 'panel flex-col';
+        listPanel.className = 'panel flex-col h-full';
         listPanel.innerHTML = `<div class="panel-header">過去帳 (${list.length}名)</div>`;
 
         const listContainer = document.createElement('div');
