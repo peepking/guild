@@ -61,8 +61,12 @@ export class StorageService {
         try {
             const data = this._serialize(gameLoop);
             const json = JSON.stringify(data);
-            // 簡易的な難読化 (Base64)
-            return btoa(unescape(encodeURIComponent(json)));
+
+            // UTF-8対応のエンコード (TextEncoder -> Uint8Array -> BinaryString -> Base64)
+            const encoder = new TextEncoder();
+            const uint8Array = encoder.encode(json);
+            const binaryString = String.fromCharCode.apply(null, uint8Array);
+            return btoa(binaryString);
         } catch (e) {
             console.error('[Storage] Export failed', e);
             return null;
@@ -76,7 +80,22 @@ export class StorageService {
      */
     importData(encodedString, gameLoop) {
         try {
-            const json = decodeURIComponent(escape(atob(encodedString)));
+            let json;
+            try {
+                // 1. 新しい方式でのデコード試行 (Base64 -> BinaryString -> Uint8Array -> TextDecoder)
+                const binaryString = atob(encodedString);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const decoder = new TextDecoder();
+                json = decoder.decode(bytes);
+            } catch (newMethodError) {
+                console.warn('[Storage] New import method failed, trying fallback...', newMethodError);
+                // 2. フォールバック: 旧方式でのデコード試行 (Backward Compatibility)
+                json = decodeURIComponent(escape(atob(encodedString)));
+            }
+
             const data = JSON.parse(json);
             this._deserialize(data, gameLoop);
             return true;

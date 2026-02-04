@@ -225,7 +225,9 @@ export class ArchivesScreen {
         const list = guild.retiredAdventurers || [];
 
         container.innerHTML = '';
-        container.className = 'grid-2-col-fixed-right p-md panel-reset';
+        container.className = 'grid-2-col-fixed-right p-md panel-reset flex-1 overflow-hidden';
+        container.style.height = 'auto'; // Flexbox内で親要素の高さを超えないようにheight:100%を打ち消す
+        container.style.minHeight = '0'; // Gridアイテムが親を超えて拡張しないように制約
 
         // --- 左: リスト ---
         const listPanel = document.createElement('section');

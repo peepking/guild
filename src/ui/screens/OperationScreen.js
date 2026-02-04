@@ -1108,6 +1108,9 @@ export class OperationScreen {
 
             if (await this.gameLoop.uiManager.confirm("現在のデータを上書きしてロードしますか？\n（未保存の進行状況は失われます）")) {
                 if (this.gameLoop.storageService && this.gameLoop.storageService.importData(code, this.gameLoop)) {
+                    // インポートされた状態を即座に永続化する
+                    this.gameLoop.storageService.save(this.gameLoop);
+
                     this.gameLoop.uiManager.log("データの読み込みに成功しました。ページをリロードします...", "success");
                     setTimeout(() => {
                         window.location.reload();

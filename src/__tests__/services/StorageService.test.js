@@ -145,6 +145,28 @@ describe('StorageService', () => {
         expect(mockGameLoop.guild.money).toBe(1000); // Restored
     });
 
+    it('should handle Japanese characters in export/import', () => {
+        // Setup state with Japanese text
+        mockGameLoop.guild.adventurers[0].name = '勇者タナカ';
+        mockGameLoop.guild.adventurers[0].bio = { intro: '彼は伝説の戦士です。' };
+
+        // Export
+        const exportString = storageService.exportData(mockGameLoop);
+        expect(exportString).toEqual(expect.any(String));
+
+        // Clear state
+        mockGameLoop.guild.adventurers = [];
+
+        // Import
+        const result = storageService.importData(exportString, mockGameLoop);
+
+        expect(result).toBe(true);
+        expect(mockGameLoop.guild.adventurers.length).toBe(2);
+        expect(mockGameLoop.guild.adventurers[0].name).toBe('勇者タナカ');
+        // If bio was part of serialized data (checking _serialize implementation logic may be needed, assuming it includes full object state by default via Object.assign behavior in load)
+        // In _serialize, it saves `guild` which includes adventurers. Adventurers are serialized by JSON.stringify.
+    });
+
     it('should handle missing data gracefully', () => {
         const result = storageService.load(mockGameLoop);
         expect(result).toBe(false); // No data saved yet
