@@ -103,6 +103,7 @@ export class QuestScreen {
                 el.onclick = () => {
                     this.state.selectedQuestId = a.quest.id;
                     this.state.selectionMode = false;
+                    this.state.selectedAdventurerIds = []; // 選択状態をリセット
                     this.render(container, guild, globalState);
                 };
                 listContainer.appendChild(el);
@@ -121,6 +122,7 @@ export class QuestScreen {
                 el.onclick = () => {
                     this.state.selectedQuestId = a.quest.id;
                     this.state.selectionMode = false;
+                    this.state.selectedAdventurerIds = []; // 選択状態をリセット
                     this.render(container, guild, globalState);
                 };
                 listContainer.appendChild(el);
@@ -149,6 +151,7 @@ export class QuestScreen {
                 el.onclick = () => {
                     this.state.selectedQuestId = q.id;
                     this.state.selectionMode = false;
+                    this.state.selectedAdventurerIds = []; // 選択状態をリセット
                     this.render(container, guild, globalState);
                 };
                 listContainer.appendChild(el);
@@ -444,6 +447,7 @@ export class QuestScreen {
 
         panel.querySelector('#btn-back').onclick = () => {
             this.state.selectionMode = false;
+            this.state.selectedAdventurerIds = []; // 選択状態をリセット
             this.render(panel.parentElement, guild, {});
         };
     }
