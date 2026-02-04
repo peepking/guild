@@ -364,6 +364,43 @@ export class QuestService {
     }
 
     /**
+     * クエストの成功率を計算します。
+     * @param {Quest} quest 
+     * @param {Array<Adventurer>} party 
+     * @param {object} [modifiers={}] 
+     * @returns {number} 0.0 - 1.0
+     */
+    calculateSuccessChance(quest, party, modifiers = {}) {
+        let partyRawScore = 0;
+        const weights = quest.weights || {};
+        party.forEach(adv => {
+            for (const [stat, weight] of Object.entries(weights)) {
+                partyRawScore += (adv.stats[stat] || 0) * weight;
+            }
+        });
+        const target = quest.difficulty.powerReq * party.length;
+        const delta = partyRawScore - target;
+        let successChance = QUEST_CONFIG.SUCCESS_BASE + (delta / QUEST_CONFIG.SUCCESS_DIVISOR);
+
+        let advantageCount = 0;
+        party.forEach(adv => {
+            const advantages = TYPE_ADVANTAGES[adv.type] || [];
+            if (advantages.includes(quest.type)) advantageCount++;
+        });
+        successChance += 0.02 * advantageCount;
+
+        // 顧問補正 (成功率)
+        if (modifiers.success) {
+            successChance += modifiers.success;
+        }
+
+        if (successChance > QUEST_CONFIG.SUCCESS_CAP_MAX) successChance = QUEST_CONFIG.SUCCESS_CAP_MAX;
+        if (successChance < QUEST_CONFIG.SUCCESS_CAP_MIN) successChance = QUEST_CONFIG.SUCCESS_CAP_MIN;
+
+        return successChance;
+    }
+
+    /**
      * クエストに対する冒険者の適合スコアを計算します。
      * @param {Quest} quest - 対象クエスト
      * @param {Adventurer} adventurer - 対象冒険者
@@ -424,31 +461,7 @@ export class QuestService {
             combinedResults.monstersKilled.push(...SimResult.results.monstersKilled);
         }
 
-        let partyRawScore = 0;
-        const weights = quest.weights || {};
-        party.forEach(adv => {
-            for (const [stat, weight] of Object.entries(weights)) {
-                partyRawScore += (adv.stats[stat] || 0) * weight;
-            }
-        });
-        const target = quest.difficulty.powerReq * party.length;
-        const delta = partyRawScore - target;
-        let successChance = QUEST_CONFIG.SUCCESS_BASE + (delta / QUEST_CONFIG.SUCCESS_DIVISOR);
-
-        let advantageCount = 0;
-        party.forEach(adv => {
-            const advantages = TYPE_ADVANTAGES[adv.type] || [];
-            if (advantages.includes(quest.type)) advantageCount++;
-        });
-        successChance += 0.02 * advantageCount;
-
-        // 顧問補正 (成功率)
-        if (modifiers.success) {
-            successChance += modifiers.success;
-        }
-
-        if (successChance > QUEST_CONFIG.SUCCESS_CAP_MAX) successChance = QUEST_CONFIG.SUCCESS_CAP_MAX;
-        if (successChance < QUEST_CONFIG.SUCCESS_CAP_MIN) successChance = QUEST_CONFIG.SUCCESS_CAP_MIN;
+        const successChance = this.calculateSuccessChance(quest, party, modifiers);
 
         const roll = Math.random();
         let mainObjectiveSuccess = roll < successChance;
