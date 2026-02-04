@@ -353,8 +353,9 @@ export class QuestScreen {
         const currentCount = this.state.selectedAdventurerIds.length;
 
         panel.innerHTML += `
-            <div class="mb-sm">
-                必要人数: <b>${currentCount} / ${reqSize}</b>
+            <div class="mb-sm flex-row flex-between flex-center">
+                <span>必要人数: <b>${currentCount} / ${reqSize}</b></span>
+                <button id="btn-auto" class="btn btn-secondary btn-sm">おまかせ編成</button>
             </div>
             <div id="adv-select-list" class="adv-select-list">
                 <!-- List -->
@@ -374,6 +375,16 @@ export class QuestScreen {
             const sB = this.gameLoop.questService.calculateScore(quest, b);
             return sB - sA;
         });
+
+        // おまかせボタン実装
+        const btnAuto = panel.querySelector('#btn-auto');
+        if (btnAuto) {
+            btnAuto.onclick = () => {
+                // 上から順に必要人数分だけ選択
+                this.state.selectedAdventurerIds = avail.slice(0, reqSize).map(a => a.id);
+                this.render(panel.parentElement, guild, {});
+            };
+        }
 
         if (avail.length === 0) {
             listDiv.innerHTML = `<div class="p-md text-sub">${UI_CONSTANTS.MESSAGES.NO_ADVENTURERS}</div>`;
