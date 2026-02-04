@@ -262,4 +262,11 @@ export const ACHIEVEMENT_TITLE_DEFS = [
         kanjiTemplates: ["{targetKanji}を{traitVerb}もの", "{traitAdj}救出者", "{traitNoun}、王族を取り戻す者"],
         kataTemplates: ["{traitKata}・ロイヤルサーチ", "{traitKata}・セイヴィア"]
     },
+    {
+        id: "DEMON_GENERAL_SLAYER",
+        targetKanji: "魔王軍",
+        targetKata: "デーモン",
+        kanjiTemplates: ["{targetKanji}を{traitVerb}もの", "{traitAdj}魔将討伐者", "{traitNoun}、魔王を脅かす者"],
+        kataTemplates: ["{traitKata}・デーモンスレイヤー", "{traitKata}・ジェネラルキラー"]
+    }
 ];

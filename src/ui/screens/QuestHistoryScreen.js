@@ -168,7 +168,7 @@ export class QuestHistoryScreen {
             statusText = '期限切れ';
         }
 
-        const specialBadge = item.isSpecial ? '<span class="status-badge bg-dark-grey text-parchment">特務</span> ' : '';
+        const specialBadge = item.isSpecial ? '<span class="status-badge status-badge-special text-parchment">特務</span> ' : '';
 
         div.innerHTML = `
             <div class="list-item-header">

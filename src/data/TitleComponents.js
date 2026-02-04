@@ -80,6 +80,10 @@ export const FEAT_TITLES = {
         kana: { word: 'ワールド', pos: 'SUFFIX' },
         kanji: { word: '世界樹を', pos: 'PREFIX' }
     },
+    'DEMON_GENERAL_SLAYER': {
+        kana: { word: 'デーモン', pos: 'PREFIX' },
+        kanji: { word: '魔将', pos: 'PREFIX' }
+    },
 
     // デフォルトフォールバック
     'DEFAULT': {

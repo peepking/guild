@@ -805,6 +805,203 @@ export class QuestService {
     }
 
     /**
+     * 魔王軍侵攻クエストを生成します（単発・フェーズ・レイド含む）
+     * @param {number} day - 現在の日付
+     * @param {object} invasionState - 侵攻状態
+     * @param {number} reputation - ギルド評判
+     * @param {Array<Quest>} existingQuests - 既存クエスト
+     * @returns {Array<Quest>} 生成されたクエストリスト
+     */
+    generateDemonInvasionQuests(day, invasionState, reputation, existingQuests) {
+        const quests = [];
+        if (!invasionState) return quests;
+
+        // ランクチェック
+        const guildRankObj = GUILD_RANK_THRESHOLDS.find(r => reputation >= r.threshold) || GUILD_RANK_THRESHOLDS[GUILD_RANK_THRESHOLDS.length - 1];
+        const rankLabel = guildRankObj.label;
+        const rankVal = QUEST_RANK_VALUE[rankLabel] || 0;
+
+        // Helper
+        const hasQuest = (type) => existingQuests.some(q => q.type === type);
+
+        // 1. Single Occurrence (Rank C+: 200)
+        // 確率で発生 (20%)
+        if (rankVal >= QUEST_RANK_VALUE['C']) {
+            if (Math.random() < 0.2) {
+                const types = ['CULT_PURGE', 'SMALL_RAID', 'KIDNAP_INVESTIGATION', 'MARCH_RECON'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                if (!hasQuest(type)) {
+                    quests.push(this._createDemonQuest(day, type));
+                }
+            }
+        }
+
+        // 2. Phased Quests (Rank B+: 380)
+        if (rankVal >= QUEST_RANK_VALUE['B']) {
+            // Offense
+            let offType = null;
+            if (invasionState.offensePhase === 1) offType = 'OFFENSE_BREAKTHROUGH';
+            else if (invasionState.offensePhase === 2) offType = 'OFFENSE_CAMP_RAID';
+            else if (invasionState.offensePhase === 3) offType = 'OFFENSE_GENERAL_HUNT';
+
+            // フェーズ進行中は常に掲示（または高確率）
+            // ここでは常時掲示とするが、クリア済みではないかチェックが必要（GameLoopでクリア時にフェーズが進むので、既存リストになければ出して良い）
+            if (offType && !hasQuest(offType)) {
+                quests.push(this._createDemonQuest(day, offType, true));
+            }
+
+            // Defense
+            let defType = null;
+            if (invasionState.defensePhase === 1) defType = 'DEFENSE_FRONTLINE';
+            else if (invasionState.defensePhase === 2) defType = 'DEFENSE_SUPPLY';
+            else if (invasionState.defensePhase === 3) defType = 'DEFENSE_FORT';
+
+            if (defType && !hasQuest(defType)) {
+                quests.push(this._createDemonQuest(day, defType, true));
+            }
+        }
+
+        // 3. Raid (Rank A+: 640)
+        if (rankVal >= QUEST_RANK_VALUE['A'] && invasionState.raidAvailable) {
+            const raidType = 'RAID_GENERAL_SUBJUGATION';
+            if (!hasQuest(raidType)) {
+                quests.push(this._createDemonQuest(day, raidType, true, true));
+            }
+        }
+
+        return quests;
+    }
+
+
+
+
+    /**
+     * レイド（決戦）クエストのタイトルをフォーマットします。
+     * @param {string} title - 元のタイトル
+     * @returns {string} フォーマットされたタイトル
+     * @private
+     */
+    _formatRaidTitle(title) {
+        return `【決戦】${title}`;
+    }
+
+    /**
+     * 魔王軍クエストのタイトルをフォーマットします。
+     * @param {string} title - 元のタイトル
+     * @returns {string} フォーマットされたタイトル
+     * @private
+     */
+    _formatDemonArmyTitle(title) {
+        return `【魔王軍】${title}`;
+    }
+
+    /**
+     * 魔王軍クエストのインスタンスを生成します。
+     * @param {number} day - 現在の日付
+     * @param {string} typeKey - クエストタイプ
+     * @param {boolean} isDemonArmy - 魔王軍（重要）フラグ
+     * @param {boolean} isRaid - レイドフラグ
+     * @returns {Quest} クエスト
+     * @private
+     */
+    _createDemonQuest(day, typeKey, isDemonArmy = false, isRaid = false) {
+        this.questCounter++;
+        const spec = QUEST_SPECS[typeKey];
+        if (!spec) return null;
+
+        const rank = spec.ranks[spec.ranks.length - 1]; // 最高ランクを採用、または推奨ランク?
+        // 仕様書では C+, B+, A+ とあるので、推奨ランクを使用すべきだが、QUEST_SPECS.ranks配列の最初をとるか...
+        // QUEST_SPECS定義済みランクからランダム、あるいは固定。
+        // フェーズ系は固定ランクの方が良い。
+        // ここでは定義されているランクの中から選ぶ（既存ロジック準拠）
+        const selectedRank = spec.ranks[Math.floor(Math.random() * spec.ranks.length)];
+        const difficulty = QUEST_DIFFICULTY[selectedRank];
+
+        // タイトル生成
+        let title = spec.label;
+        if (isRaid) {
+            title = this._formatRaidTitle(title);
+        }
+        if (isDemonArmy) {
+            title = this._formatDemonArmyTitle(title);
+        }
+
+        // 報酬計算
+        let partySize = spec.partySize.max; // 推奨人数
+        let days = spec.duration.max;
+
+        // ランダム性を持たせる場合
+        if (spec.partySize) {
+            const min = spec.partySize.min;
+            const max = spec.partySize.max;
+            partySize = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        if (spec.duration) {
+            const min = spec.duration.min;
+            const max = spec.duration.max;
+            days = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        const q = new Quest(
+            `demon_${this.questCounter}`, title, typeKey, difficulty, spec.weights,
+            { money: Math.floor(difficulty.baseReward * partySize * days * 1.5), reputation: Math.floor((difficulty.baseRep || 1) * partySize * days * 1.5) },
+            { money: Math.floor(difficulty.baseReward * partySize * days), reputation: 50 },
+            partySize, days, 90,
+            { danger01: 0.8, rewardRate01: 1.2, prestige01: 1.2 }
+        );
+
+        q.createdDay = day;
+        q.expiresInDays = isDemonArmy ? 10 : 5;
+        if (isRaid) q.expiresInDays = 3;
+
+        q.isSpecial = true;
+        q.manualOnly = true;
+        q.region = 'CENTRAL'; // 魔王軍はどこから？ とりあえず中央か、ランダム
+        // regionをランダムに
+        const region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
+        q.region = region;
+
+        // ターゲット設定
+        let target = "魔王軍";
+        let bossTarget = null;
+
+        const logData = ADVENTURE_LOG_DATA.QUEST_LOGS[typeKey];
+        if (logData && logData.targets) {
+            target = logData.targets[Math.floor(Math.random() * logData.targets.length)];
+        }
+
+        // ボス設定
+        // OFFENSE_GENERAL_HUNT, DEFENSE_FORT -> Demon King General
+        // RAID_GENERAL_SUBJUGATION -> Demon King Lieutenant
+        if (typeKey === 'OFFENSE_GENERAL_HUNT' || typeKey === 'DEFENSE_FORT') {
+            bossTarget = "魔王軍将軍";
+        } else if (typeKey === 'RAID_GENERAL_SUBJUGATION') {
+            bossTarget = "魔王軍幹部";
+            // レイド補正
+            q.raidBoss = true;
+        } else if (spec.bossDays && spec.bossDays.includes('LAST')) {
+            // CULT_PURGE, SMALL_RAID etc.
+            // 既存のボス生成ロジックを流用するか、簡易生成
+            // ここでは簡易名前
+            const bosses = ["魔王軍小隊長", "邪教の司祭", "魔族の戦士長"];
+            bossTarget = bosses[Math.floor(Math.random() * bosses.length)];
+        }
+
+        q.target = target;
+        q.bossTarget = bossTarget;
+
+        let descTemplate = "魔王軍の脅威が迫っている。";
+        if (logData && logData.descriptions) {
+            descTemplate = logData.descriptions[Math.floor(Math.random() * logData.descriptions.length)];
+        }
+        q.description = descTemplate.replace(/{target}/g, target).replace(/{boss}/g, bossTarget || "敵");
+
+        q.logCategory = 'SPECIAL'; // or customized
+
+        return q;
+    }
+
+    /**
      * ステータス成長を適用します。
      * @param {Adventurer} adv - 対象冒険者
      * @param {Quest} quest - 実行クエスト

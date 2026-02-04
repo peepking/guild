@@ -48,6 +48,16 @@ export class GameLoop {
         if (!this.guild.tournament) {
             this.guild.tournament = { solo: 'E', team: 'E' };
         }
+
+        // 魔王軍侵攻状態の初期化
+        if (!this.guild.demonInvasion) {
+            this.guild.demonInvasion = {
+                status: 'QUIET', // QUIET, ACTIVE
+                offensePhase: 1, // 1-3
+                defensePhase: 1, // 1-3
+                raidAvailable: false
+            };
+        }
     }
 
     /**
@@ -242,6 +252,12 @@ export class GameLoop {
         const tourneyQuests = this.questService.generateTournamentQuests(this.guild.tournament, [...this.activeQuests, ...this.ongoingQuests.map(a => a.quest)]);
         newQuests.push(...tourneyQuests);
 
+        // 魔王軍侵攻クエスト生成
+        if (this.questService.generateDemonInvasionQuests) {
+            const demonQuests = this.questService.generateDemonInvasionQuests(this.guild.day, this.guild.demonInvasion, this.guild.reputation, [...this.activeQuests, ...this.ongoingQuests.map(a => a.quest), ...tourneyQuests]);
+            newQuests.push(...demonQuests);
+        }
+
         this.activeQuests.push(...newQuests);
 
         // クエスト数制限
@@ -429,6 +445,50 @@ export class GameLoop {
                             }
                         }
                     }
+                }
+            }
+
+            // 魔王軍侵攻進行処理
+            if (this.guild.demonInvasion) {
+                const type = result.quest.type;
+                const invasion = this.guild.demonInvasion;
+
+                // 攻勢フェーズ
+                if (type === 'OFFENSE_BREAKTHROUGH') {
+                    invasion.offensePhase = 2;
+                    this.uiManager.log('【魔王軍侵攻】攻勢フェーズが進みました！ 次は野営地奇襲です。', 'event');
+                } else if (type === 'OFFENSE_CAMP_RAID') {
+                    invasion.offensePhase = 3;
+                    this.uiManager.log('【魔王軍侵攻】攻勢フェーズが進みました！ 次は敵将討ち取りです。', 'event');
+                } else if (type === 'OFFENSE_GENERAL_HUNT') {
+                    invasion.offensePhase = 1;
+                    this.uiManager.log('【魔王軍侵攻】敵将を討ち取り、攻勢作戦が完了しました！', 'event');
+                    if (Math.random() < 0.3) {
+                        invasion.raidAvailable = true;
+                        this.uiManager.log('【魔王軍侵攻】敵幹部の動きを察知しました！ (レイド発生)', 'warning');
+                    }
+                }
+
+                // 防衛フェーズ
+                if (type === 'DEFENSE_FRONTLINE') {
+                    invasion.defensePhase = 2;
+                    this.uiManager.log('【魔王軍侵攻】防衛フェーズが進みました！ 次は補給路確保です。', 'event');
+                } else if (type === 'DEFENSE_SUPPLY') {
+                    invasion.defensePhase = 3;
+                    this.uiManager.log('【魔王軍侵攻】防衛フェーズが進みました！ 次は砦防衛戦です。', 'event');
+                } else if (type === 'DEFENSE_FORT') {
+                    invasion.defensePhase = 1;
+                    this.uiManager.log('【魔王軍侵攻】砦を守り抜き、防衛作戦が完了しました！', 'event');
+                    if (Math.random() < 0.3) {
+                        invasion.raidAvailable = true;
+                        this.uiManager.log('【魔王軍侵攻】敵幹部の動きを察知しました！ (レイド発生)', 'warning');
+                    }
+                }
+
+                // レイド
+                if (type === 'RAID_GENERAL_SUBJUGATION') {
+                    invasion.raidAvailable = false;
+                    this.uiManager.log('【魔王軍侵攻】魔王軍幹部を撃破！ 敵軍は一時撤退しました。', 'event');
                 }
             }
         } else {

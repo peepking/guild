@@ -334,6 +334,122 @@ export const QUEST_SPECS = {
         ranks: ['A', 'S'],
         duration: { min: 4, max: 7 },
         partySize: { min: 1, max: 3 }
+    },
+
+    // Special: Demon King Army Invasion
+    // Single Occurrence (Rank C+)
+    CULT_PURGE: {
+        label: '邪教徒の隠れ家殲滅',
+        category: 'SPECIAL',
+        rates: { battle: 2.0, gather: 0 },
+        bossDays: ['LAST'],
+        weights: { MAG: 2.0, INT: 2.0, VIT: 1.0, STR: 0.5, DEX: 0.5, CHA: 0.5 },
+        ranks: ['C', 'B', 'A'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 4, max: 4 }
+    },
+    SMALL_RAID: {
+        label: '魔王軍小隊の撃退',
+        category: 'SPECIAL',
+        rates: { battle: 2.0, gather: 0 },
+        bossDays: ['LAST'],
+        weights: { STR: 2.0, VIT: 2.0, DEX: 1.0, MAG: 0.5, INT: 0.5, CHA: 0.5 },
+        ranks: ['C', 'B', 'A'],
+        duration: { min: 2, max: 2 },
+        partySize: { min: 5, max: 5 }
+    },
+    KIDNAP_INVESTIGATION: {
+        label: '人攫い事件の調査',
+        category: 'SPECIAL',
+        rates: { battle: 0.5, gather: 0.5 },
+        bossDays: [],
+        weights: { DEX: 2.0, CHA: 2.0, INT: 1.5, VIT: 1.0, MAG: 0.5, STR: 0.5 },
+        ranks: ['C', 'B', 'A'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 2, max: 2 }
+    },
+    MARCH_RECON: {
+        label: '敵軍行軍の偵察',
+        category: 'SPECIAL',
+        rates: { battle: 0.2, gather: 0 },
+        bossDays: [],
+        weights: { DEX: 2.0, INT: 2.0, VIT: 1.0, STR: 0.5, MAG: 0.5, CHA: 0.5 },
+        ranks: ['C', 'B', 'A'],
+        duration: { min: 2, max: 2 },
+        partySize: { min: 2, max: 2 }
+    },
+    // Phased: Offensive (Rank B+)
+    OFFENSE_BREAKTHROUGH: {
+        label: '【攻勢】前線突破',
+        category: 'SPECIAL',
+        rates: { battle: 2.5, gather: 0 },
+        bossDays: ['LAST'],
+        weights: { STR: 2.0, MAG: 2.0, VIT: 1.5, DEX: 1.0, INT: 0.5, CHA: 0.5 },
+        ranks: ['B', 'A', 'S'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 5, max: 5 }
+    },
+    OFFENSE_CAMP_RAID: {
+        label: '【攻勢】野営地奇襲',
+        category: 'SPECIAL',
+        rates: { battle: 2.0, gather: 0 },
+        bossDays: ['LAST'],
+        weights: { STR: 2.0, DEX: 2.0, VIT: 1.5, MAG: 1.0, INT: 0.5, CHA: 0.5 },
+        ranks: ['B', 'A', 'S'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 5, max: 5 }
+    },
+    OFFENSE_GENERAL_HUNT: {
+        label: '【攻勢】敵将討ち取り',
+        category: 'SPECIAL',
+        rates: { battle: 3.0, gather: 0 },
+        bossDays: ['LAST'],
+        weights: { STR: 2.5, VIT: 2.5, DEX: 1.0, MAG: 0.5, INT: 0.5, CHA: 0.5 },
+        ranks: ['B', 'A', 'S'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 5, max: 5 }
+    },
+    // Phased: Defensive (Rank B+)
+    DEFENSE_FRONTLINE: {
+        label: '【防衛】前線死守',
+        category: 'SPECIAL',
+        rates: { battle: 2.5, gather: 0 },
+        bossDays: [], // Wave survival implied
+        weights: { VIT: 2.5, MAG: 2.0, STR: 1.5, DEX: 0.5, INT: 0.5, CHA: 0.5 },
+        ranks: ['B', 'A', 'S'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 5, max: 5 }
+    },
+    DEFENSE_SUPPLY: {
+        label: '【防衛】補給路確保',
+        category: 'SPECIAL',
+        rates: { battle: 2.0, gather: 0 },
+        bossDays: [],
+        weights: { STR: 2.0, VIT: 2.0, DEX: 1.5, INT: 0.5, MAG: 0.5, CHA: 0.5 },
+        ranks: ['B', 'A', 'S'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 5, max: 5 }
+    },
+    DEFENSE_FORT: {
+        label: '【防衛】砦防衛戦',
+        category: 'SPECIAL',
+        rates: { battle: 3.0, gather: 0 },
+        bossDays: ['LAST'],
+        weights: { VIT: 2.5, DEX: 2.0, STR: 1.5, MAG: 1.0, INT: 0.5, CHA: 0.5 },
+        ranks: ['B', 'A', 'S'],
+        duration: { min: 3, max: 3 },
+        partySize: { min: 5, max: 5 }
+    },
+    // Raid (Rank A+)
+    RAID_GENERAL_SUBJUGATION: {
+        label: '魔王軍幹部討伐作戦',
+        category: 'SPECIAL',
+        rates: { battle: 5.0, gather: 0 },
+        bossDays: ['LAST'],
+        weights: { STR: 2.5, MAG: 2.5, VIT: 2.0, DEX: 1.0, INT: 0.5, CHA: 0.5 },
+        ranks: ['A', 'S'],
+        duration: { min: 1, max: 1 },
+        partySize: { min: 20, max: 20 }
     }
 };
 
