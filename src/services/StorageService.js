@@ -65,7 +65,15 @@ export class StorageService {
             // UTF-8対応のエンコード (TextEncoder -> Uint8Array -> BinaryString -> Base64)
             const encoder = new TextEncoder();
             const uint8Array = encoder.encode(json);
-            const binaryString = String.fromCharCode.apply(null, uint8Array);
+
+            // Stack overflow対策: 大きな配列を一度に処理せず、チャンクごとに処理する
+            let binaryString = '';
+            const CHUNK_SIZE = 0x8000; // 32KB chunks
+            for (let i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
+                const chunk = uint8Array.subarray(i, i + CHUNK_SIZE);
+                binaryString += String.fromCharCode.apply(null, chunk);
+            }
+
             return btoa(binaryString);
         } catch (e) {
             console.error('[Storage] Export failed', e);
