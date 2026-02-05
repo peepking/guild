@@ -1,5 +1,5 @@
 
-import { POLICIES, ADVISOR_ROLES, RANDOM_EVENTS, FACILITIES } from '../data/ManagementData.js';
+import { POLICIES, ADVISOR_ROLES, RANDOM_EVENTS, FACILITIES, CAMPAIGNS } from '../data/ManagementData.js';
 import { CONSTANTS, ADVISOR_CONFIG, ADVENTURER_TYPES, ADVENTURER_JOB_NAMES, ADVENTURER_RANKS, MANAGEMENT_CONFIG } from '../data/constants.js';
 import { REGIONAL_NAMES } from '../data/Names.js';
 
@@ -150,8 +150,34 @@ export class ManagementService {
             const evt = guild.activeEvents[i];
             evt.remainingDays--;
             if (evt.remainingDays <= 0) {
-                guild.activeEvents.splice(i, 1);
-                this.uiManager.log(`イベント「${evt.name}」が終了しました。`, 'info');
+                // Auto-Repeat Logic
+                let renewalSuccess = false;
+                if (evt.autoRepeat && CAMPAIGNS[evt.id]) {
+                    const campaign = CAMPAIGNS[evt.id];
+                    if (guild.money >= campaign.cost) {
+                        guild.money -= campaign.cost;
+                        evt.remainingDays = campaign.duration;
+                        renewalSuccess = true;
+
+                        // Log Finance
+                        if (guild.todayFinance) {
+                            guild.todayFinance.expense += campaign.cost;
+                            guild.todayFinance.balance = guild.money;
+                            guild.todayFinance.details.push({
+                                reason: `広報活用: ${campaign.name} (自動継続)`,
+                                amount: -campaign.cost
+                            });
+                        }
+                        this.uiManager.log(`キャンペーン「${evt.name}」を自動継続しました。`, 'info');
+                    } else {
+                        this.uiManager.log(`資金不足のためキャンペーン「${evt.name}」を自動継続できませんでした。`, 'warning');
+                    }
+                }
+
+                if (!renewalSuccess) {
+                    guild.activeEvents.splice(i, 1);
+                    this.uiManager.log(`イベント「${evt.name}」が終了しました。`, 'info');
+                }
             }
         }
     }

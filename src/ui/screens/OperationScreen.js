@@ -937,7 +937,13 @@ export class OperationScreen {
                         <span class="status-badge bg-accent text-wood">実施中</span>
                     </div>
                     <div class="policy-desc">${activeCampaign.description}</div>
-                    <div class="text-right mt-md">残り ${activeCampaign.remainingDays} 日</div>
+                    <div class="flex-row flex-between flex-center mt-md">
+                        <label class="flex-row flex-center gap-sm cursor-pointer select-none">
+                            <input type="checkbox" id="chk-auto-repeat" ${activeCampaign.autoRepeat ? 'checked' : ''}>
+                            <span class="text-sm font-bold">自動継続</span>
+                        </label>
+                        <div class="text-right">残り ${activeCampaign.remainingDays} 日</div>
+                    </div>
                 </div>
             ` : `
                  <div class="operation-card mb-lg card-empty-dashed">
@@ -987,6 +993,17 @@ export class OperationScreen {
         });
 
         container.appendChild(list);
+
+        // 自動継続のイベントリスナー
+        const chkAuto = container.querySelector('#chk-auto-repeat');
+        if (chkAuto) {
+            chkAuto.addEventListener('change', (e) => {
+                if (activeCampaign) {
+                    activeCampaign.autoRepeat = e.target.checked;
+                    this.gameLoop.uiManager.log(`キャンペーンの自動継続を${activeCampaign.autoRepeat ? 'ON' : 'OFF'}にしました。`, 'info');
+                }
+            });
+        }
     }
 
     /**
@@ -1018,7 +1035,8 @@ export class OperationScreen {
             name: cmp.name,
             description: cmp.description,
             mod: cmp.mod,
-            remainingDays: cmp.duration
+            remainingDays: cmp.duration,
+            autoRepeat: false // Default to false
         });
 
         this.gameLoop.uiManager.log(`${cmp.name}を開始しました。(期間: ${cmp.duration}日)`, 'success');
