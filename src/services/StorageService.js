@@ -148,6 +148,9 @@ export class StorageService {
             quest: {
                 counter: gameLoop.questService.questCounter
             },
+            recruitment: {
+                counter: gameLoop.recruitmentService ? gameLoop.recruitmentService.counter : 1000
+            },
             loop: {
                 activeQuests: gameLoop.activeQuests,
                 ongoingQuests: gameLoop.ongoingQuests,
@@ -212,6 +215,14 @@ export class StorageService {
         if (data.quest) {
             gameLoop.questService.questCounter = data.quest.counter || STORAGE_CONFIG.DEFAULT_QUEST_COUNTER;
         }
+
+        // 3.5 Recruitment Service Restoration (Fix for duplicate IDs)
+        if (data.recruitment) {
+            if (gameLoop.recruitmentService) {
+                gameLoop.recruitmentService.counter = data.recruitment.counter || 1000;
+            }
+        }
+
 
         // 4. GameLoop Lists Restoration
         const loopData = data.loop;

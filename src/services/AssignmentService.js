@@ -83,11 +83,31 @@ export class AssignmentService {
             return { success: false, message: '人数が不足しています。' };
         }
 
+        // IDごとに有効な冒険者を抽出 (重複・ゴースト対策)
+        const adventurers = [];
+        for (const id of adventurerIds) {
+            // 同じIDを持つ冒険者を全て取得
+            const candidates = this.guild.adventurers.filter(a => a.id === id);
+
+            // 有効な(isAvailable)個体を優先して探す
+            const valid = candidates.find(a => a.isAvailable());
+
+            if (valid) {
+                adventurers.push(valid);
+            } else if (candidates.length > 0) {
+                // 有効な個体が見つからない場合（全てBusy）
+                return { success: false, message: `${candidates[0].name} は現在活動できません。` };
+            }
+            // IDが見つからない場合は単にスキップ (人数チェックで弾かれる)
+        }
+
+        /*
         const adventurers = this.guild.adventurers.filter(a => adventurerIds.includes(a.id));
 
         // 空き状況チェック
         const busy = adventurers.find(a => !a.isAvailable());
         if (busy) return { success: false, message: `${busy.name} は現在活動できません。` };
+        */
 
         // 計画作成
         const assignment = this._createAssignment(quest, adventurers, true);
